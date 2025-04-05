@@ -22,16 +22,16 @@ export default function Header() {
     <header className="bg-white shadow-sm sticky top-0 z-10">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <Link href="/">
-          <a className="text-xl font-bold text-primary">StagingPro</a>
+          <span className="text-xl font-bold text-primary cursor-pointer">StagingPro</span>
         </Link>
         <nav className="hidden md:block">
           <ul className="flex space-x-6">
             {navLinks.map((link) => (
               <li key={link.href}>
                 <Link href={link.href}>
-                  <a className={`${location === link.href ? 'text-primary' : 'text-gray-700'} hover:text-primary transition`}>
+                  <span className={`${location === link.href ? 'text-primary' : 'text-gray-700'} hover:text-primary transition cursor-pointer`}>
                     {link.label}
-                  </a>
+                  </span>
                 </Link>
               </li>
             ))}

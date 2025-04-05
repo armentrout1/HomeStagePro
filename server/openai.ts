@@ -22,8 +22,8 @@ export const generateStagedRoom = async (req: Request, res: Response) => {
     const prompt = `Transform this empty ${roomType.toLowerCase()} into a beautifully staged space with modern furniture, proper lighting, and decoration that enhances the space. Make it look like a professional home staging for real estate photography.`;
 
     // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+    // Note: For images.edit, we don't specify the model as it's determined automatically
     const response = await openai.images.edit({
-      model: "dall-e-3",
       image: imageBase64,
       prompt: prompt,
       n: 1,

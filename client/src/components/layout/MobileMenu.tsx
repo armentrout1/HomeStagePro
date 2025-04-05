@@ -15,9 +15,9 @@ export default function MobileMenu({ isOpen, navLinks, currentPath }: MobileMenu
         {navLinks.map((link) => (
           <li key={link.href}>
             <Link href={link.href}>
-              <a className={`block py-2 ${currentPath === link.href ? 'text-primary' : 'text-gray-700'} hover:text-primary transition`}>
+              <span className={`block py-2 ${currentPath === link.href ? 'text-primary' : 'text-gray-700'} hover:text-primary transition cursor-pointer`}>
                 {link.label}
-              </a>
+              </span>
             </Link>
           </li>
         ))}
