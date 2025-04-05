@@ -118,14 +118,23 @@ export default function ImageStager() {
     
     setIsSaving(true);
     try {
+      // Create a filename-safe timestamp for the image URLs
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      
+      // Create "URLs" that represent the images - for database storage
+      // In a real application, we'd upload these to a storage service like S3
+      // This approach stores the image URLs, not the full base64 images
+      const originalImageForStorage = `original-image-${timestamp}.jpg`;
+      const stagedImageForStorage = stagedImageUrl; // This is already a URL from OpenAI
+      
       const response = await fetch('/api/staged-images', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          originalImageUrl: originalImage,
-          stagedImageUrl: stagedImageUrl,
+          originalImageUrl: originalImageForStorage,
+          stagedImageUrl: stagedImageForStorage,
           roomType: roomTypes.find(rt => rt.value === roomType)?.label || "Unknown",
           // Note: userId is null here since we're not implementing user authentication in this version
         }),
