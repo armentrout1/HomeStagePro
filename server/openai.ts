@@ -17,8 +17,8 @@ export const generateStagedRoom = async (req: Request, res: Response) => {
     // Extract room type from request
     const roomType = req.body.roomType || "Unknown";
     
-    // Create a more detailed prompt for DALL-E 3
-    const prompt = `Create a professional real estate photo of a beautifully staged ${roomType.toLowerCase()} with modern furniture, proper lighting, and tasteful decor. Show a spacious, clean room with high-end staging that would appeal to potential home buyers. The staging should include appropriate furniture layout, accent pieces, and color palette for a ${roomType.toLowerCase()}. No people should be in the image. Ultra realistic, professional photography quality.`;
+    // Create a prompt that focuses on adding furniture without changing the structure
+    const prompt = `Add realistic, stylish furniture and home décor to this empty ${roomType.toLowerCase()}. Do not change the structure, lighting, floor, walls, or any part of the original photo. Only add furniture, wall art, rugs, lighting fixtures, and decorative objects as appropriate for a ${roomType.toLowerCase()}. The room should look naturally staged as if photographed in real life, matching the existing lighting and perspective.`;
 
     // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
     // We're using images.generate instead of images.edit as it's more reliable for this use case
