@@ -2,11 +2,33 @@ import { useState, useRef, ChangeEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { queryClient } from "@/lib/queryClient";
+
+// Define room types
+const roomTypes = [
+  { value: "living_room", label: "Living Room" },
+  { value: "bedroom", label: "Bedroom" },
+  { value: "kitchen", label: "Kitchen" },
+  { value: "bathroom", label: "Bathroom" },
+  { value: "dining_room", label: "Dining Room" },
+  { value: "office", label: "Home Office" },
+  { value: "outdoor", label: "Outdoor Space" },
+];
 
 export default function ImageStager() {
   const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [stagedImage, setStagedImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [roomType, setRoomType] = useState("living_room");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -50,12 +72,18 @@ export default function ImageStager() {
       // Remove the data URL prefix to get just the base64 data
       const base64Image = originalImage.split(',')[1];
 
+      // Get the selected room type label for the prompt
+      const selectedRoomTypeLabel = roomTypes.find(rt => rt.value === roomType)?.label || "Room";
+
       const response = await fetch('/api/generate-staged-room', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ image: base64Image }),
+        body: JSON.stringify({ 
+          image: base64Image,
+          roomType: selectedRoomTypeLabel 
+        }),
       });
 
       const data = await response.json();
@@ -65,6 +93,10 @@ export default function ImageStager() {
       }
 
       setStagedImage(data.imageUrl);
+      
+      // Save the staged image to the database
+      await saveImageToDatabase(data.imageUrl);
+      
       toast({
         title: "Success!",
         description: "Your staged room image is ready",
@@ -78,6 +110,40 @@ export default function ImageStager() {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+  
+  const saveImageToDatabase = async (stagedImageUrl: string) => {
+    if (!originalImage || !stagedImageUrl) return;
+    
+    setIsSaving(true);
+    try {
+      const response = await fetch('/api/staged-images', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          originalImageUrl: originalImage,
+          stagedImageUrl: stagedImageUrl,
+          roomType: roomTypes.find(rt => rt.value === roomType)?.label || "Unknown",
+          // Note: userId is null here since we're not implementing user authentication in this version
+        }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to save image to database');
+      }
+      
+      // Invalidate any queries that might display staged images
+      queryClient.invalidateQueries({ queryKey: ['/api/staged-images'] });
+      
+    } catch (error) {
+      console.error('Error saving image to database:', error);
+      // Don't show error toast since this is a background operation
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -103,6 +169,23 @@ export default function ImageStager() {
         <p className="text-gray-600 mb-6 text-center">
           Upload a photo of your empty room and our AI will transform it into a beautifully staged space in seconds!
         </p>
+        
+        {/* Room Type Selector */}
+        <div className="mb-6">
+          <Label htmlFor="room-type" className="block mb-2 text-center">Select Room Type</Label>
+          <Select value={roomType} onValueChange={setRoomType}>
+            <SelectTrigger id="room-type" className="max-w-xs mx-auto">
+              <SelectValue placeholder="Select Room Type" />
+            </SelectTrigger>
+            <SelectContent>
+              {roomTypes.map((type) => (
+                <SelectItem key={type.value} value={type.value}>
+                  {type.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Left side - Original image */}
@@ -266,6 +349,14 @@ export default function ImageStager() {
             </Button>
           )}
         </div>
+        
+        {/* Saving indicator */}
+        {isSaving && (
+          <div className="text-center mt-4 text-sm text-gray-500 flex items-center justify-center">
+            <div className="h-3 w-3 mr-2 animate-spin rounded-full border-2 border-gray-300 border-t-primary"></div>
+            Saving image to gallery...
+          </div>
+        )}
       </Card>
     </div>
   );
