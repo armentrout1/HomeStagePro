@@ -1,5 +1,6 @@
 import { Link } from "wouter";
 import { StarRating } from "@/components/ui/star-rating";
+import ImageStager from "@/components/ImageStager";
 
 export default function Home() {
   const features = [
@@ -111,6 +112,17 @@ export default function Home() {
               />
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Image Stager Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-8">Try Our AI Room Staging Tool</h2>
+          <p className="text-lg text-gray-600 text-center mb-12 max-w-3xl mx-auto">
+            Upload a photo of your empty room and watch as our AI transforms it into a beautifully staged space. See the potential of your property in seconds!
+          </p>
+          <ImageStager />
         </div>
       </section>
 
