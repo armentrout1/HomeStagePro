@@ -14,20 +14,21 @@ export const generateStagedRoom = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "No image provided" });
     }
 
-    // The image should be base64 encoded
-    const imageBase64 = req.body.image;
+    // Extract room type from request
     const roomType = req.body.roomType || "Unknown";
-
-    // Prompt for virtual staging
-    const prompt = `Transform this empty ${roomType.toLowerCase()} into a beautifully staged space with modern furniture, proper lighting, and decoration that enhances the space. Make it look like a professional home staging for real estate photography.`;
+    
+    // Create a more detailed prompt for DALL-E 3
+    const prompt = `Create a professional real estate photo of a beautifully staged ${roomType.toLowerCase()} with modern furniture, proper lighting, and tasteful decor. Show a spacious, clean room with high-end staging that would appeal to potential home buyers. The staging should include appropriate furniture layout, accent pieces, and color palette for a ${roomType.toLowerCase()}. No people should be in the image. Ultra realistic, professional photography quality.`;
 
     // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-    // Note: For images.edit, we don't specify the model as it's determined automatically
-    const response = await openai.images.edit({
-      image: imageBase64,
+    // We're using images.generate instead of images.edit as it's more reliable for this use case
+    // Also, we should use DALL-E 3 for image generation
+    const response = await openai.images.generate({
+      model: "dall-e-3",
       prompt: prompt,
       n: 1,
       size: "1024x1024",
+      quality: "standard",
     });
 
     const imageUrl = response.data[0].url;

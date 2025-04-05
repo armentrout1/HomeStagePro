@@ -91,14 +91,14 @@ export default function Home() {
               </p>
               <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
                 <Link href="/home-staging-tips">
-                  <a className="bg-primary hover:bg-blue-600 text-white font-medium py-3 px-6 rounded-lg transition shadow-sm inline-block text-center">
+                  <span className="bg-primary hover:bg-blue-600 text-white font-medium py-3 px-6 rounded-lg transition shadow-sm inline-block text-center cursor-pointer">
                     Staging Tips
-                  </a>
+                  </span>
                 </Link>
                 <Link href="/selling-tips">
-                  <a className="bg-white hover:bg-gray-100 text-gray-800 font-medium py-3 px-6 rounded-lg transition border border-gray-300 shadow-sm inline-block text-center">
+                  <span className="bg-white hover:bg-gray-100 text-gray-800 font-medium py-3 px-6 rounded-lg transition border border-gray-300 shadow-sm inline-block text-center cursor-pointer">
                     Selling Guide
-                  </a>
+                  </span>
                 </Link>
               </div>
             </div>
@@ -151,19 +151,19 @@ export default function Home() {
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-2xl md:text-3xl font-bold">Recent Articles</h2>
             <Link href="/home-staging-tips">
-              <a className="text-primary hover:text-blue-700 font-medium flex items-center">
+              <span className="text-primary hover:text-blue-700 font-medium flex items-center cursor-pointer">
                 View all
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-1" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
                 </svg>
-              </a>
+              </span>
             </Link>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {articles.map((article, index) => (
               <Link key={index} href={article.link}>
-                <a className="group">
+                <div className="group cursor-pointer">
                   <div className="bg-white rounded-lg overflow-hidden shadow-sm group-hover:shadow-md transition">
                     <img 
                       src={article.image} 
@@ -178,7 +178,7 @@ export default function Home() {
                       <span className="text-sm text-gray-500">{article.readTime}</span>
                     </div>
                   </div>
-                </a>
+                </div>
               </Link>
             ))}
           </div>
@@ -227,14 +227,14 @@ export default function Home() {
           </p>
           <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
             <Link href="/home-staging-tips">
-              <a className="bg-white text-blue-600 hover:bg-blue-50 font-medium py-3 px-8 rounded-lg transition shadow-sm inline-block">
+              <span className="bg-white text-blue-600 hover:bg-blue-50 font-medium py-3 px-8 rounded-lg transition shadow-sm inline-block cursor-pointer">
                 Get Started
-              </a>
+              </span>
             </Link>
             <Link href="/selling-tips">
-              <a className="bg-transparent hover:bg-blue-700 text-white font-medium py-3 px-8 rounded-lg transition border border-white inline-block">
+              <span className="bg-transparent hover:bg-blue-700 text-white font-medium py-3 px-8 rounded-lg transition border border-white inline-block cursor-pointer">
                 Learn More
-              </a>
+              </span>
             </Link>
           </div>
         </div>

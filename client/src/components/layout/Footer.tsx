@@ -39,22 +39,22 @@ export default function Footer() {
             <ul className="space-y-2">
               <li>
                 <Link href="/home-staging-tips">
-                  <a className="text-gray-300 hover:text-white transition">Home Staging Tips</a>
+                  <span className="text-gray-300 hover:text-white transition cursor-pointer">Home Staging Tips</span>
                 </Link>
               </li>
               <li>
                 <Link href="/real-estate-photos">
-                  <a className="text-gray-300 hover:text-white transition">Photography Guide</a>
+                  <span className="text-gray-300 hover:text-white transition cursor-pointer">Photography Guide</span>
                 </Link>
               </li>
               <li>
                 <Link href="/virtual-vs-traditional">
-                  <a className="text-gray-300 hover:text-white transition">Virtual vs Traditional</a>
+                  <span className="text-gray-300 hover:text-white transition cursor-pointer">Virtual vs Traditional</span>
                 </Link>
               </li>
               <li>
                 <Link href="/selling-tips">
-                  <a className="text-gray-300 hover:text-white transition">Selling Faster Tips</a>
+                  <span className="text-gray-300 hover:text-white transition cursor-pointer">Selling Faster Tips</span>
                 </Link>
               </li>
             </ul>

@@ -75,6 +75,9 @@ export default function ImageStager() {
       // Get the selected room type label for the prompt
       const selectedRoomTypeLabel = roomTypes.find(rt => rt.value === roomType)?.label || "Room";
 
+      // Log the staging process
+      console.log(`Starting staging process for ${selectedRoomTypeLabel}`);
+
       const response = await fetch('/api/generate-staged-room', {
         method: 'POST',
         headers: {
