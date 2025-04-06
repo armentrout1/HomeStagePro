@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { queryClient } from "@/lib/queryClient";
+import { Link, useLocation } from "wouter";
 
 // Define room types
 const roomTypes = [
@@ -256,7 +257,14 @@ export default function ImageStager() {
                 <span>
                   {usageStatus.remaining > 0 
                     ? `You have ${usageStatus.remaining} staging${usageStatus.remaining !== 1 ? 's' : ''} remaining` 
-                    : 'You have reached your free usage limit'}
+                    : (
+                      <>
+                        You have reached your free usage limit.{" "}
+                        <Link to="/upgrade">
+                          <span className="text-primary font-medium underline">Upgrade now</span>
+                        </Link>
+                      </>
+                    )}
                 </span>
               </div>
             </div>
@@ -387,38 +395,63 @@ export default function ImageStager() {
             </svg>
             Upload Photo
           </Button>
-          <Button 
-            onClick={handleStageImage}
-            variant="default"
-            className="flex-1 max-w-xs mx-auto"
-            disabled={!originalImage || isLoading || (usageStatus && usageStatus.remaining === 0)}
-            title={usageStatus && usageStatus.remaining === 0 ? "Free usage limit reached" : ""}
-          >
-            {isLoading ? (
-              <>
-                <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-gray-300 border-t-white"></div>
-                Processing...
-              </>
-            ) : (
-              <>
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  className="h-5 w-5 mr-2" 
-                  fill="none" 
-                  viewBox="0 0 24 24" 
+          {usageStatus && usageStatus.remaining === 0 ? (
+            <Link href="/upgrade">
+              <Button 
+                variant="default"
+                className="flex-1 max-w-xs mx-auto"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 mr-2"
+                  fill="none"
+                  viewBox="0 0 24 24"
                   stroke="currentColor"
                 >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M13 10V3L4 14h7v7l9-11h-7z" 
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"
                   />
                 </svg>
-                Stage Room
-              </>
-            )}
-          </Button>
+                Upgrade to Continue
+              </Button>
+            </Link>
+          ) : (
+            <Button 
+              onClick={handleStageImage}
+              variant="default"
+              className="flex-1 max-w-xs mx-auto"
+              disabled={!originalImage || isLoading}
+              title={!originalImage ? "Please upload a photo first" : ""}
+            >
+              {isLoading ? (
+                <>
+                  <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-gray-300 border-t-white"></div>
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    className="h-5 w-5 mr-2" 
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    stroke="currentColor"
+                  >
+                    <path 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      strokeWidth={2} 
+                      d="M13 10V3L4 14h7v7l9-11h-7z" 
+                    />
+                  </svg>
+                  Stage Room
+                </>
+              )}
+            </Button>
+          )}
           {(originalImage || stagedImage) && (
             <Button 
               onClick={handleReset}

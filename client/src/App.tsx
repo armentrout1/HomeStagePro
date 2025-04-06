@@ -11,6 +11,11 @@ import VirtualVsTraditional from "./pages/VirtualVsTraditional";
 import SellingTips from "./pages/SellingTips";
 import NotFound from "@/pages/not-found";
 
+// Import the new pages
+import Upgrade from "./pages/Upgrade";
+import ThankYou from "./pages/ThankYou";
+import Sales from "./pages/Sales";
+
 function Router() {
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -24,6 +29,9 @@ function Router() {
         <Route path="/real-estate-photos" component={RealEstatePhotos} />
         <Route path="/virtual-vs-traditional" component={VirtualVsTraditional} />
         <Route path="/selling-tips" component={SellingTips} />
+        <Route path="/sales" component={Sales} />
+        <Route path="/upgrade" component={Upgrade} />
+        <Route path="/thank-you" component={ThankYou} />
         <Route component={NotFound} />
       </Switch>
     </Layout>

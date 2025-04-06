@@ -16,6 +16,7 @@ export default function Header() {
     { href: "/real-estate-photos", label: "Photos" },
     { href: "/virtual-vs-traditional", label: "Virtual Staging" },
     { href: "/selling-tips", label: "Selling Tips" },
+    { href: "/sales", label: "Upgrade" },
   ];
 
   return (
