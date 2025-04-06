@@ -1,6 +1,7 @@
 import { Link } from "wouter";
 import { StarRating } from "@/components/ui/star-rating";
 import ImageStager from "@/components/ImageStager";
+import { AdUnit } from "@/components/ui/ad-unit";
 
 export default function Home() {
   const features = [
@@ -126,6 +127,15 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Ad Unit - Horizontal */}
+      <section className="py-8 bg-gray-50">
+        <div className="container mx-auto px-4 text-center">
+          <div className="mx-auto max-w-4xl overflow-hidden">
+            <AdUnit adSlot="1234567890" adFormat="horizontal" className="mx-auto" />
+          </div>
+        </div>
+      </section>
+
       {/* Features Section */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
@@ -236,6 +246,17 @@ export default function Home() {
                 Learn More
               </span>
             </Link>
+          </div>
+        </div>
+      </section>
+      
+      {/* Ad Unit - Rectangle */}
+      <section className="py-12 bg-white">
+        <div className="container mx-auto px-4 text-center">
+          <div className="flex justify-center">
+            <div className="mx-auto">
+              <AdUnit adSlot="9876543210" adFormat="rectangle" className="mx-auto" />
+            </div>
           </div>
         </div>
       </section>

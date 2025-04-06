@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { AdUnit } from "@/components/ui/ad-unit";
 import { useToast } from "@/hooks/use-toast";
 import { loadStripe } from "@stripe/stripe-js";
 import { apiRequest } from "@/lib/queryClient";
@@ -205,7 +206,7 @@ export default function Upgrade() {
           ))}
         </div>
 
-        <div className="bg-gray-50 p-6 rounded-lg">
+        <div className="bg-gray-50 p-6 rounded-lg mb-12">
           <div className="flex items-start">
             <div className="mr-4 text-blue-600">
               <svg
@@ -229,6 +230,11 @@ export default function Upgrade() {
               </p>
             </div>
           </div>
+        </div>
+        
+        {/* Ad Unit */}
+        <div className="flex justify-center my-8">
+          <AdUnit adSlot="5678901234" adFormat="horizontal" className="mx-auto" />
         </div>
       </div>
     </div>
