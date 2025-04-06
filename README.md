@@ -1,14 +1,3 @@
-# HomeStagePro
-
-A web application for real estate image staging, leveraging AI to help users transform and optimize property images for maximum visual appeal.
-
-## Features
-
-- Upload room photos and transform them into staged versions using OpenAI's DALL-E 3
-- Select room types (bedroom, living room, etc.) for more accurate staging results
-- View, download, and save staged images
-- Mobile-friendly responsive design
-- Information pages about home staging, real estate photography, and selling tips
 - ____________________________________________________________________________________________
 - # AI-Powered Room Staging Application
 
@@ -51,3 +40,34 @@ The current implementation using DALL-E has limitations when it comes to overlay
 
 ## Future Improvements
 We are actively working on implementing more advanced staging capabilities and improving the overlay accuracy of our AI-generated content.
+___________________________________________________________________________________________________
+
+# HomeStagePro
+
+A web application for real estate image staging, leveraging AI to help users transform and optimize property images for maximum visual appeal.
+
+## Features
+
+- Upload room photos and transform them into staged versions using OpenAI's DALL-E 3
+- Select room types (bedroom, living room, etc.) for more accurate staging results
+- View, download, and save staged images
+- Mobile-friendly responsive design
+- Information pages about home staging, real estate photography, and selling tips
+- Usage tracking with 2 free requests per IP address
+
+## Future Implementations
+
+### Payment System
+- Implement Stripe Checkout for payments
+- Offer tiered pricing plans:
+  - 1-day pass: $3
+  - 10 uses: $9
+  - Unlimited monthly: $19
+- Process payments with minimal friction (no user accounts required)
+
+### Email Capture
+- Add email capture form to homepage or upgrade page
+- Collect name (optional) and email (required)
+- Save emails in a simple .txt file, Google Sheet, or service like Formspree or EmailOctopus
+- Form label: "Get staging tips + occasional updates"
+- Style consistent with the rest of the site
