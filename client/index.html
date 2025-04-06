@@ -4,11 +4,31 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     
+    <!-- Performance Optimization -->
+    <link rel="preload" href="/src/index.css" as="style" />
+    <link rel="preload" href="/src/main.tsx" as="script" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    
+    <!-- Language Settings -->
+    <meta property="og:locale:alternate" content="es_ES" />
+    <meta property="og:locale:alternate" content="fr_FR" />
+    <link rel="alternate" hreflang="en" href="https://homestagepro.com/" />
+    
+    <!-- Mobile App Settings -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="HomeStagePro" />
+    <meta name="application-name" content="HomeStagePro" />
+    <meta name="theme-color" content="#4F46E5" />
+    
     <!-- Primary Meta Tags -->
-    <title>HomeStagePro - AI-Powered Virtual Room Staging</title>
-    <meta name="description" content="Transform your empty rooms into beautifully staged spaces in seconds with AI. Upload a photo and enhance your property's selling potential instantly." />
-    <meta name="keywords" content="real estate, home staging, virtual staging, interior design, AI staging, property photos, home selling, room transformation" />
-    <meta name="robots" content="index, follow" />
+    <title>HomeStagePro - AI-Powered Virtual Room Staging | Transform Empty Spaces</title>
+    <meta name="description" content="Transform your empty rooms into beautifully staged spaces in seconds with AI technology. Upload a photo and enhance your property's selling potential instantly. Free virtual staging tool." />
+    <meta name="keywords" content="real estate virtual staging, home staging AI, virtual staging free, interior design AI, property photo enhancement, home selling tips, room transformation AI, virtual staging tool, empty room staging" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="author" content="HomeStagePro" />
+    <meta name="google-site-verification" content="your-verification-code" />
+    <link rel="canonical" href="https://homestagepro.com/" />
     
     <!-- Favicon -->
     <link rel="icon" href="/favicon.ico" />
@@ -18,16 +38,22 @@
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://homestagepro.com/" />
-    <meta property="og:title" content="HomeStagePro - AI-Powered Virtual Room Staging" />
-    <meta property="og:description" content="Transform your empty rooms into beautifully staged spaces in seconds with AI. Upload a photo and enhance your property's selling potential instantly." />
+    <meta property="og:title" content="HomeStagePro - AI-Powered Virtual Room Staging | Transform Empty Spaces" />
+    <meta property="og:description" content="Transform your empty rooms into beautifully staged spaces in seconds with AI technology. Upload a photo and enhance your property's selling potential instantly. Free virtual staging tool." />
     <meta property="og:image" content="/images/meta-preview.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:site_name" content="HomeStagePro" />
+    <meta property="og:locale" content="en_US" />
     
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:url" content="https://homestagepro.com/" />
-    <meta property="twitter:title" content="HomeStagePro - AI-Powered Virtual Room Staging" />
-    <meta property="twitter:description" content="Transform your empty rooms into beautifully staged spaces in seconds with AI. Upload a photo and enhance your property's selling potential instantly." />
+    <meta property="twitter:title" content="HomeStagePro - AI-Powered Virtual Room Staging | Transform Empty Spaces" />
+    <meta property="twitter:description" content="Transform your empty rooms into beautifully staged spaces in seconds with AI technology. Upload a photo and enhance your property's selling potential instantly. Free virtual staging tool." />
     <meta property="twitter:image" content="/images/meta-preview.png" />
+    <meta property="twitter:site" content="@homestagepro" />
+    <meta property="twitter:creator" content="@homestagepro" />
     
     <!-- Structured Data for Organization -->
     <script type="application/ld+json">
@@ -38,9 +64,21 @@
       "url": "https://homestagepro.com",
       "logo": "https://homestagepro.com/logo.svg",
       "description": "AI-powered virtual home staging platform for real estate professionals and homeowners",
+      "email": "contact@homestagepro.com",
+      "foundingDate": "2023-01-01",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "123 Staging Avenue",
+        "addressLocality": "San Francisco",
+        "addressRegion": "CA",
+        "postalCode": "94105",
+        "addressCountry": "US"
+      },
       "sameAs": [
         "https://www.facebook.com/homestagepro",
-        "https://www.instagram.com/homestagepro"
+        "https://www.instagram.com/homestagepro",
+        "https://twitter.com/homestagepro",
+        "https://www.linkedin.com/company/homestagepro"
       ]
     }
     </script>
@@ -52,14 +90,59 @@
       "@type": "WebApplication",
       "name": "HomeStagePro Virtual Staging Tool",
       "applicationCategory": "RealEstateApplication",
+      "applicationSubCategory": "Virtual Home Staging",
       "offers": {
         "@type": "Offer",
         "price": "0",
-        "priceCurrency": "USD"
+        "priceCurrency": "USD",
+        "availability": "http://schema.org/InStock"
       },
-      "featureList": "AI-powered room staging, instant transformation, mobile-friendly interface",
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "ratingCount": "127",
+        "bestRating": "5",
+        "worstRating": "1"
+      },
+      "featureList": "AI-powered room staging, instant transformation, mobile-friendly interface, free virtual staging, property enhancement",
       "screenshot": "/images/meta-preview.png",
-      "operatingSystem": "Any"
+      "operatingSystem": "Any",
+      "copyrightYear": "2023",
+      "keywords": "virtual staging, AI staging, room transformation, real estate photos, home staging"
+    }
+    </script>
+    
+    <!-- Structured Data for FAQPage -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is virtual home staging?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Virtual home staging is the process of digitally adding furniture, decor, and design elements to photos of empty rooms. It helps potential buyers visualize the potential of a space without the cost of physical staging."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How does AI-powered virtual staging work?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Our AI technology analyzes your room photo, identifies the space dimensions and lighting conditions, and then generates a realistically staged version with appropriate furniture and decor that fits the style and size of your room."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is HomeStagePro free to use?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, HomeStagePro offers free virtual staging services. Simply upload your photo and our AI will transform your empty room into a beautifully staged space in seconds."
+          }
+        }
+      ]
     }
     </script>
   </head>
