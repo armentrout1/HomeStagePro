@@ -22,7 +22,8 @@ export default function Header() {
     <header className="bg-white shadow-sm sticky top-0 z-10">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <Link href="/">
-          <span className="text-xl font-bold text-primary cursor-pointer">StagingPro</span>
+          <img src="/logo.svg" alt="RoomStagerPro Logo" className="h-8 w-8" />
+          <span className="text-xl font-bold text-primary cursor-pointer">RoomStagerPro.com</span>
         </Link>
         <nav className="hidden md:block">
           <ul className="flex space-x-6">
