@@ -1,4 +1,4 @@
-import { useState, useRef, ChangeEvent } from "react";
+import { useState, useRef, ChangeEvent, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
@@ -23,14 +23,45 @@ const roomTypes = [
   { value: "outdoor", label: "Outdoor Space" },
 ];
 
+// Type definition for usage status
+type UsageStatus = {
+  usageCount: number;
+  limit: number;
+  remaining: number;
+  status: 'active' | 'exceeded';
+};
+
 export default function ImageStager() {
   const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [stagedImage, setStagedImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [roomType, setRoomType] = useState("living_room");
+  const [usageStatus, setUsageStatus] = useState<UsageStatus | null>(null);
+  const [isLoadingUsage, setIsLoadingUsage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  
+  // Fetch usage status on component mount
+  useEffect(() => {
+    fetchUsageStatus();
+  }, []);
+  
+  // Fetch usage status after each staging attempt
+  const fetchUsageStatus = async () => {
+    setIsLoadingUsage(true);
+    try {
+      const response = await fetch('/api/usage-status');
+      if (response.ok) {
+        const data = await response.json();
+        setUsageStatus(data);
+      }
+    } catch (error) {
+      console.error('Error fetching usage status:', error);
+    } finally {
+      setIsLoadingUsage(false);
+    }
+  };
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -103,7 +134,12 @@ export default function ImageStager() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to generate staged image');
+        // Check specifically for payment required (402) status
+        if (response.status === 402) {
+          throw new Error("Free usage limit reached. Please upgrade to continue staging rooms.");
+        } else {
+          throw new Error(data.error || 'Failed to generate staged image');
+        }
       }
 
       setStagedImage(data.imageUrl);
@@ -115,6 +151,9 @@ export default function ImageStager() {
         title: "Success!",
         description: "Your staged room image is ready",
       });
+      
+      // Refresh usage status after successful staging
+      fetchUsageStatus();
     } catch (error) {
       console.error('Error staging image:', error);
       toast({
@@ -122,6 +161,9 @@ export default function ImageStager() {
         description: error instanceof Error ? error.message : "Failed to generate staged image",
         variant: "destructive",
       });
+      
+      // Refresh usage status even after error (might be due to limit)
+      fetchUsageStatus();
     } finally {
       setIsLoading(false);
     }
@@ -189,9 +231,37 @@ export default function ImageStager() {
     <div className="w-full max-w-5xl mx-auto">
       <Card className="p-6 shadow-md bg-white">
         <h3 className="text-2xl font-bold mb-4 text-center">Transform Your Room with AI Staging</h3>
-        <p className="text-gray-600 mb-6 text-center">
+        <p className="text-gray-600 mb-3 text-center">
           Upload a photo of your empty room and our AI will transform it into a beautifully staged space in seconds!
         </p>
+        <div className="mb-6">
+          <p className="text-sm text-blue-600 text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Free usage: 2 room stagings per IP address
+          </p>
+          
+          {/* Usage status */}
+          {usageStatus && (
+            <div className={`mt-2 text-center text-sm ${usageStatus.remaining === 0 ? 'text-red-500' : 'text-gray-500'}`}>
+              <div className="flex items-center justify-center gap-1">
+                {isLoadingUsage ? (
+                  <div className="h-3 w-3 animate-spin rounded-full border-2 border-gray-300 border-t-primary mr-1"></div>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                )}
+                <span>
+                  {usageStatus.remaining > 0 
+                    ? `You have ${usageStatus.remaining} staging${usageStatus.remaining !== 1 ? 's' : ''} remaining` 
+                    : 'You have reached your free usage limit'}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
         
         {/* Room Type Selector */}
         <div className="mb-6">
@@ -321,7 +391,8 @@ export default function ImageStager() {
             onClick={handleStageImage}
             variant="default"
             className="flex-1 max-w-xs mx-auto"
-            disabled={!originalImage || isLoading}
+            disabled={!originalImage || isLoading || (usageStatus && usageStatus.remaining === 0)}
+            title={usageStatus && usageStatus.remaining === 0 ? "Free usage limit reached" : ""}
           >
             {isLoading ? (
               <>

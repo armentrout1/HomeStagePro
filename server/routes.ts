@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { generateStagedRoom, saveStagedImage, getUserStagedImages } from "./openai";
+import { ipLimiter, getIpUsageStatus } from "./ipLimiter";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Health check endpoint for custom domain validation
@@ -30,8 +31,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // put application routes here
   // prefix all routes with /api
 
-  // OpenAI image generation endpoint
-  app.post('/api/generate-staged-room', generateStagedRoom);
+  // IP usage status endpoint
+  app.get('/api/usage-status', getIpUsageStatus);
+  
+  // OpenAI image generation endpoint with IP-based usage limiting
+  app.post('/api/generate-staged-room', ipLimiter, generateStagedRoom);
   
   // Database routes for staged images
   app.post('/api/staged-images', saveStagedImage);
