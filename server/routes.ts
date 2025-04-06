@@ -4,6 +4,18 @@ import { storage } from "./storage";
 import { generateStagedRoom, saveStagedImage, getUserStagedImages } from "./openai";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Health check endpoint for custom domain validation
+  app.get('/api/health', (req, res) => {
+    res.json({ status: 'ok' });
+  });
+  
+  // Special no-op route for handling client-side routes on custom domains
+  // This helps ensure that client-side routes like /home-staging-tips work on custom domains
+  app.get('/home-staging-tips', (req, res, next) => next());
+  app.get('/real-estate-photos', (req, res, next) => next());
+  app.get('/virtual-vs-traditional', (req, res, next) => next());
+  app.get('/selling-tips', (req, res, next) => next());
+  
   // put application routes here
   // prefix all routes with /api
 
