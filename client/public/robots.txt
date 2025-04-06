@@ -1,5 +1,3 @@
 User-agent: *
 Allow: /
-
-# Sitemap
-Sitemap: https://homestagepro.com/sitemap.xml
+Sitemap: https://roomstagerpro.com/sitemap.xml

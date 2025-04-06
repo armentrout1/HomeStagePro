@@ -9,12 +9,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ status: 'ok' });
   });
   
-  // Special no-op route for handling client-side routes on custom domains
-  // This helps ensure that client-side routes like /home-staging-tips work on custom domains
-  app.get('/home-staging-tips', (req, res, next) => next());
-  app.get('/real-estate-photos', (req, res, next) => next());
-  app.get('/virtual-vs-traditional', (req, res, next) => next());
-  app.get('/selling-tips', (req, res, next) => next());
+  // Create a fallback route for client-side routing
+  const clientRoutes = [
+    '/home-staging-tips',
+    '/real-estate-photos',
+    '/virtual-vs-traditional',
+    '/selling-tips'
+  ];
+  
+  // Handle all client routes and send index.html
+  clientRoutes.forEach(route => {
+    app.get(route, (req, res, next) => {
+      if (req.headers.accept?.includes('text/html')) {
+        return res.redirect('/');
+      }
+      next();
+    });
+  });
   
   // put application routes here
   // prefix all routes with /api
