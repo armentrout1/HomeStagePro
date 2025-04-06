@@ -47,10 +47,8 @@ export default function ThankYou() {
           usageAllowed: data.usageAllowed
         });
         
-        // Store the access token in localStorage
-        if (data.accessToken) {
-          localStorage.setItem('stagingAccessToken', data.accessToken);
-        }
+        // The access token is stored in an HTTP-only cookie by the server
+        // No need to store it in localStorage
       } else if (data.status === 'canceled') {
         setPaymentStatus('canceled');
       } else {

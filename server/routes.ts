@@ -1,25 +1,11 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { generateStagedRoom, saveStagedImage, getUserStagedImages } from "./openai";
 import { ipLimiter, getIpUsageStatus, resetIpUsage } from "./ipLimiter";
 import Stripe from "stripe";
-import crypto from "crypto";
-
-// Initialize Stripe
-const stripe = process.env.STRIPE_SECRET_KEY 
-  ? new Stripe(process.env.STRIPE_SECRET_KEY)
-  : null;
-
-// Store access tokens temporarily (in production, this would be in a database)
-const accessTokens: Record<string, {
-  token: string;
-  expiresAt: Date;
-  planId: string;
-  planName: string;
-  usageAllowed?: number;
-  usageCount: number;
-}> = {};
+import cookieParser from "cookie-parser";
+import { generateToken, verifyToken, checkAccessToken, TokenType } from "./tokenManager";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Health check endpoint for custom domain validation
@@ -51,59 +37,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // IP usage status endpoint
   app.get('/api/usage-status', getIpUsageStatus);
   
-  // Check for access token in request headers
-  const checkAccessToken = (req: any, res: any, next: any) => {
-    // Get token from authorization header or query param
-    const authHeader = req.headers.authorization;
-    const token = authHeader && authHeader.split(' ')[1];
+  // Initialize Stripe
+  const stripe = process.env.STRIPE_SECRET_KEY 
+    ? new Stripe(process.env.STRIPE_SECRET_KEY)
+    : null;
     
-    if (!token) {
-      // If no token, pass to IP limiter
-      return next();
-    }
-    
-    // Check if token exists and is valid
-    const accessData = accessTokens[token];
-    if (!accessData) {
-      // Token doesn't exist, pass to IP limiter
-      return next();
-    }
-    
-    // Check if token is expired
-    if (new Date() > accessData.expiresAt) {
-      // Token expired, delete it and pass to IP limiter
-      delete accessTokens[token];
-      return next();
-    }
-    
-    // Check usage limits for usage-based plans
-    if (accessData.usageAllowed !== undefined) {
-      if (accessData.usageCount >= accessData.usageAllowed) {
-        // Usage limit reached
-        return res.status(402).json({
-          success: false,
-          error: "Usage limit reached for this plan"
-        });
-      }
-      
-      // Increment usage count
-      accessData.usageCount++;
-    }
-    
-    // Valid token, bypass IP limits
-    req.accessToken = token;
-    req.accessData = accessData;
-    
-    // Reset IP usage for this request to ensure they don't count against free tier
-    if (req.ip) {
-      resetIpUsage(req.ip);
-    }
-    
-    return next();
-  };
-  
+  // Use cookie-parser middleware
+  app.use(cookieParser());
+
   // OpenAI image generation endpoint with IP-based usage limiting
   app.post('/api/generate-staged-room', checkAccessToken, ipLimiter, generateStagedRoom);
+  
+  // Add a test endpoint to check token status
+  app.get('/api/check-token', (req, res) => {
+    if (req.cookies?.access_token) {
+      const payload = verifyToken(req.cookies.access_token);
+      if (payload) {
+        // Token is valid, return payload
+        return res.json({
+          valid: true,
+          type: payload.type,
+          expiresAt: new Date(payload.expiresAt * 1000).toISOString(),
+          usageLeft: payload.type === TokenType.PACK_10 ? payload.usageLeft : undefined
+        });
+      }
+    }
+    
+    return res.json({ valid: false });
+  });
   
   // Database routes for staged images
   app.post('/api/staged-images', saveStagedImage);
@@ -189,30 +150,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const session = event.data.object;
           
           if (session.payment_status === 'paid') {
-            // Payment was successful, create access token
-            const token = crypto.randomBytes(16).toString('hex');
-            const { planId, planName, expiresAt, usageAllowed } = session.metadata || {};
-            
-            // Set expiration date
-            let tokenExpires;
-            if (expiresAt) {
-              tokenExpires = new Date(expiresAt);
-            } else {
-              // Default: 10 years (for usage-based plans)
-              tokenExpires = new Date(Date.now() + 10 * 365 * 24 * 60 * 60 * 1000);
+            const { planId } = session.metadata || {};
+            // Generate JWT token based on the plan
+            if (planId) {
+              console.log(`Processing completed payment for plan: ${planId}`);
+              // Token will be set on session status check
             }
-            
-            // Store token
-            accessTokens[token] = {
-              token,
-              expiresAt: tokenExpires,
-              planId: planId || 'unknown',
-              planName: planName || 'Unknown Plan',
-              usageAllowed: usageAllowed ? parseInt(usageAllowed) : undefined,
-              usageCount: 0
-            };
-            
-            console.log(`Created access token for session ${session.id}: ${token}`);
           }
           break;
         }
@@ -228,7 +171,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Check checkout session status
+  // Check checkout session status and set token in cookie
   app.get('/api/checkout-status', async (req, res) => {
     if (!stripe) {
       return res.status(500).json({ error: "Stripe is not configured" });
@@ -244,48 +187,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const session = await stripe.checkout.sessions.retrieve(session_id as string);
       
       if (session.payment_status === 'paid') {
-        // Payment was successful, create access token
-        let tokenValue = crypto.randomBytes(16).toString('hex');
-        const { planId, planName, expiresAt, usageAllowed } = session.metadata || {};
+        // Payment was successful, create JWT token
+        const { planId, planName } = session.metadata || {};
         
-        // Set expiration date
-        let tokenExpires;
-        if (expiresAt) {
-          tokenExpires = new Date(expiresAt);
-        } else {
-          // Default: 10 years (for usage-based plans)
-          tokenExpires = new Date(Date.now() + 10 * 365 * 24 * 60 * 60 * 1000);
+        if (!planId) {
+          return res.status(400).json({ error: "Missing plan ID in session metadata" });
         }
+
+        // Generate JWT token based on the plan type
+        const token = generateToken(planId);
         
-        // Store token if it doesn't already exist
-        if (!Object.values(accessTokens).find(at => at.planId === planId && at.expiresAt.getTime() === tokenExpires.getTime())) {
-          accessTokens[tokenValue] = {
-            token: tokenValue,
-            expiresAt: tokenExpires,
-            planId: planId || 'unknown',
-            planName: planName || 'Unknown Plan',
-            usageAllowed: usageAllowed ? parseInt(usageAllowed) : undefined,
-            usageCount: 0
-          };
-          
-          console.log(`Created access token for session ${session.id}: ${tokenValue}`);
-        } else {
-          // Token already exists, find it
-          const existingToken = Object.entries(accessTokens).find(([_, at]) => 
-            at.planId === planId && at.expiresAt.getTime() === tokenExpires.getTime()
-          )?.[0];
-          
-          if (existingToken) {
-            tokenValue = existingToken;
-          }
-        }
+        // Set token as an HTTP-only cookie
+        res.cookie('access_token', token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days max
+          sameSite: 'lax'
+        });
+        
+        // Get token payload to return plan info to client
+        const payload = verifyToken(token);
+        
+        // Format expiration date for display
+        const expirationDate = payload ? new Date(payload.expiresAt * 1000) : null;
         
         return res.json({
           status: 'complete',
           planName,
-          accessUntil: expiresAt,
-          usageAllowed: usageAllowed ? parseInt(usageAllowed) : undefined,
-          accessToken: tokenValue
+          accessUntil: expirationDate ? expirationDate.toISOString() : null,
+          usageAllowed: payload?.type === TokenType.PACK_10 ? payload.usageLeft : null
         });
       } else if (session.status === 'open') {
         return res.json({ status: 'processing' });

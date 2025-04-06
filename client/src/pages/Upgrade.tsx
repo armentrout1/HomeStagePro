@@ -52,9 +52,10 @@ export default function Upgrade() {
       description: "24-hour access to unlimited stagings",
       features: [
         "Unlimited stagings for 24 hours",
+        "Secure token authentication",
+        "Instant access after payment",
         "Download all images in high resolution",
-        "Access to all room styles",
-        "No account required"
+        "Access to all room styles"
       ]
     },
     {
@@ -63,11 +64,11 @@ export default function Upgrade() {
       price: 9,
       description: "10 stagings to use anytime",
       features: [
-        "10 room stagings",
-        "Use anytime, no expiration",
+        "10 room stagings with no expiration",
+        "Secure token authentication",
+        "Automatic usage tracking",
         "Download all images in high resolution",
-        "Access to all room styles",
-        "No account required"
+        "Access to all room styles"
       ]
     },
     {
@@ -77,10 +78,10 @@ export default function Upgrade() {
       description: "Unlimited stagings for 30 days",
       features: [
         "Unlimited stagings for 30 days",
+        "Secure token authentication",
         "Priority processing",
         "Download all images in high resolution",
-        "Access to all room styles and future styles",
-        "No account required"
+        "Access to all room styles and future styles"
       ]
     }
   ];
@@ -224,7 +225,7 @@ export default function Upgrade() {
             <div>
               <h4 className="text-lg font-medium mb-2">Secure & Simple</h4>
               <p className="text-gray-600">
-                All payments are processed securely through Stripe. No account required and you'll receive a secure access token immediately after purchase. We don't store your payment details.
+                All payments are processed securely through Stripe. After purchase, a secure JWT token is automatically stored in your browser as an HTTP-only cookie. This token grants you immediate access to your plan benefits without requiring registration or login. We don't store your payment details.
               </p>
             </div>
           </div>

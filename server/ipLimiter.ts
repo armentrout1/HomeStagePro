@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { log } from './vite';
+import { hasValidAccess } from './tokenManager';
 
 // In-memory store to track IP usage
 const ipUsageStore: Record<string, number> = {};
@@ -9,8 +10,15 @@ const FREE_USAGE_LIMIT = 2;
 
 /**
  * Middleware to track and limit API requests by IP address
+ * Bypasses limits if user has a valid access token
  */
 export const ipLimiter = (req: Request, res: Response, next: NextFunction) => {
+  // If user has a valid access token, bypass IP limiting
+  if (hasValidAccess(req)) {
+    log(`Request has valid access token, bypassing IP limits`);
+    return next();
+  }
+  
   // Get the client IP address
   const clientIp = req.ip || 
                   (req.headers['x-forwarded-for'] as string)?.split(',')[0].trim() || 
@@ -31,7 +39,8 @@ export const ipLimiter = (req: Request, res: Response, next: NextFunction) => {
   if (ipUsageStore[clientIp] > FREE_USAGE_LIMIT) {
     return res.status(402).json({
       success: false,
-      error: "Limit reached. Upgrade to continue."
+      error: "Limit reached. Upgrade to continue.",
+      redirect: "/upgrade"
     });
   }
   
@@ -62,8 +71,54 @@ export const getAllIpUsage = (): Record<string, number> => {
 
 /**
  * Get the usage count and limit for a specific IP address
+ * Also includes information about any active access token
  */
 export const getIpUsageStatus = (req: Request, res: Response) => {
+  // Check for valid access token first
+  if (hasValidAccess(req)) {
+    // User has a valid access token
+    const payload = req.accessTokenPayload!;
+    const now = Math.floor(Date.now() / 1000);
+    const timeRemaining = payload.expiresAt - now;
+    
+    // Format expiration time
+    let expirationMessage = '';
+    
+    if (timeRemaining > 86400) {
+      // More than a day
+      expirationMessage = `${Math.floor(timeRemaining / 86400)} days remaining`;
+    } else if (timeRemaining > 3600) {
+      // Hours
+      expirationMessage = `${Math.floor(timeRemaining / 3600)} hours remaining`;
+    } else {
+      // Minutes
+      expirationMessage = `${Math.floor(timeRemaining / 60)} minutes remaining`;
+    }
+    
+    const response: any = {
+      // Basic status
+      usageCount: 0,
+      limit: 0,
+      remaining: 0,
+      status: 'premium',
+      
+      // Token info
+      accessToken: {
+        type: payload.type,
+        expiresAt: new Date(payload.expiresAt * 1000).toISOString(),
+        timeRemaining: expirationMessage
+      }
+    };
+    
+    // Add usage info for pack tokens
+    if (payload.type === 'pack-10' && typeof payload.usageLeft === 'number') {
+      response.accessToken.usageLeft = payload.usageLeft;
+    }
+    
+    return res.json(response);
+  }
+  
+  // If no token, use IP-based limiting
   // Get the client IP address
   const clientIp = req.ip || 
                   (req.headers['x-forwarded-for'] as string)?.split(',')[0].trim() || 

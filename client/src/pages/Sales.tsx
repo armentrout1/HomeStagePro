@@ -61,23 +61,24 @@ const pricingPlans: PricingPlan[] = [
     price: 3,
     description: "Perfect for a single property",
     features: [
-      "5 room stagings",
-      "24-hour access",
+      "Unlimited stagings for 24 hours",
+      "Secure token authentication",
       "High-resolution images",
+      "Instant access after payment",
       "Download all images"
     ]
   },
   {
-    id: "pro",
-    name: "Pro",
+    id: "pack-10",
+    name: "Staging Pack",
     price: 9,
     description: "Great for multiple properties",
     features: [
-      "15 room stagings",
-      "30-day access",
+      "10 room stagings",
+      "No time limit",
+      "Secure token authentication",
       "High-resolution images",
-      "Download all images",
-      "Priority processing"
+      "Download all images"
     ],
     highlight: true
   },
@@ -87,8 +88,8 @@ const pricingPlans: PricingPlan[] = [
     price: 19,
     description: "For real estate professionals",
     features: [
-      "Unlimited stagings",
-      "30-day access",
+      "Unlimited stagings for 30 days",
+      "Secure token authentication",
       "High-resolution images",
       "Download all images",
       "Priority processing",
