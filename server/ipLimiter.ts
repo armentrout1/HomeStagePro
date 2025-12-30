@@ -7,12 +7,18 @@ const ipUsageStore: Record<string, number> = {};
 
 // Free usage limit
 const FREE_USAGE_LIMIT = 2;
+const DISABLE_USAGE_LIMITS = process.env.DISABLE_USAGE_LIMITS === 'true';
 
 /**
  * Middleware to track and limit API requests by IP address
  * Bypasses limits if user has a valid access token
  */
 export const ipLimiter = (req: Request, res: Response, next: NextFunction) => {
+  if (DISABLE_USAGE_LIMITS) {
+    log(`Usage limits disabled via DISABLE_USAGE_LIMITS env var`);
+    return next();
+  }
+
   // If user has a valid access token, bypass IP limiting
   if (hasValidAccess(req)) {
     log(`Request has valid access token, bypassing IP limits`);
@@ -117,7 +123,16 @@ export const getIpUsageStatus = (req: Request, res: Response) => {
     
     return res.json(response);
   }
-  
+
+  if (DISABLE_USAGE_LIMITS) {
+    return res.json({
+      usageCount: 0,
+      limit: null,
+      remaining: null,
+      status: 'unlimited',
+    });
+  }
+
   // If no token, use IP-based limiting
   // Get the client IP address
   const clientIp = req.ip || 

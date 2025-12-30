@@ -4,13 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     
-    <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4627926361013694"
-     crossorigin="anonymous"></script>
+    <!-- Google AdSense - Only load in production -->
+    <script>
+      if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var script = document.createElement('script');
+        script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4627926361013694';
+        script.async = true;
+        script.crossOrigin = 'anonymous';
+        document.head.appendChild(script);
+      }
+    </script>
     
     <!-- Performance Optimization -->
-    <link rel="preload" href="/src/index.css" as="style" />
-    <link rel="preload" href="/src/main.tsx" as="script" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     
     <!-- Language Settings -->
@@ -19,7 +24,7 @@
     <link rel="alternate" hreflang="en" href="https://roomstagerpro.com/" />
     
     <!-- Mobile App Settings -->
-    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="RoomStagerPro" />
     <meta name="application-name" content="RoomStagerPro" />

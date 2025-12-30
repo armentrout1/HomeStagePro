@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import OpenAI, { toFile } from "openai";
 import { Request, Response } from "express";
 
@@ -8,17 +9,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-type DecodedImage = {
-  bytes: Uint8Array;
-  mime: string;
-  extension: string;
-};
-
-type ImageEditParamsWithFidelity = Parameters<typeof openai.images.edit>[0] & {
-  input_fidelity?: "low" | "medium" | "high";
-};
-
-const decodeBase64Image = (base64: string): DecodedImage => {
+const decodeBase64Image = (base64: string): Uint8Array => {
   const sanitized = base64.replace(/[\r\n\s]/g, "");
   if (sanitized.length % 4 !== 0) {
     throw new Error("Invalid base64 image data");
@@ -55,47 +46,7 @@ const decodeBase64Image = (base64: string): DecodedImage => {
     }
   }
 
-  const { mime, extension } = detectImageType(bytes);
-
-  return { bytes, mime, extension };
-};
-
-const detectImageType = (
-  bytes: Uint8Array
-): { mime: string; extension: string } => {
-  if (bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
-    return { mime: "image/jpeg", extension: "jpg" };
-  }
-
-  if (
-    bytes.length >= 8 &&
-    bytes[0] === 0x89 &&
-    bytes[1] === 0x50 &&
-    bytes[2] === 0x4e &&
-    bytes[3] === 0x47 &&
-    bytes[4] === 0x0d &&
-    bytes[5] === 0x0a &&
-    bytes[6] === 0x1a &&
-    bytes[7] === 0x0a
-  ) {
-    return { mime: "image/png", extension: "png" };
-  }
-
-  if (
-    bytes.length >= 12 &&
-    bytes[0] === 0x52 &&
-    bytes[1] === 0x49 &&
-    bytes[2] === 0x46 &&
-    bytes[3] === 0x46 &&
-    bytes[8] === 0x57 &&
-    bytes[9] === 0x45 &&
-    bytes[10] === 0x42 &&
-    bytes[11] === 0x50
-  ) {
-    return { mime: "image/webp", extension: "webp" };
-  }
-
-  return { mime: "image/png", extension: "png" };
+  return bytes;
 };
 
 export const generateStagedRoom = async (req: Request, res: Response) => {
@@ -110,31 +61,11 @@ export const generateStagedRoom = async (req: Request, res: Response) => {
     // Create a prompt that focuses on adding furniture without changing the structure
     const prompt = `Add realistic, stylish furniture and home décor to this empty ${roomType.toLowerCase()}. Do not change the structure, lighting, floor, walls, or any part of the original photo. Only add furniture, wall art, rugs, lighting fixtures, and decorative objects as appropriate for a ${roomType.toLowerCase()}. The room should look naturally staged as if photographed in real life, matching the existing lighting and perspective.`;
 
-    const decodedImage = decodeBase64Image(req.body.image);
-    const inputFile = await toFile(
-      Buffer.from(decodedImage.bytes),
-      `room.${decodedImage.extension}`,
-      { type: decodedImage.mime }
-    );
-
-    const response = await openai.images.edit({
-      model: "gpt-image-1",
-      image: inputFile,
-      prompt,
-      input_fidelity: "high",
-    } as ImageEditParamsWithFidelity);
-
-    const imageData = response.data?.[0] as (typeof response.data)[number] & {
-      mime_type?: string;
-    };
-
-    const b64 = imageData?.b64_json;
-    if (!b64) {
-      throw new Error("No image returned from OpenAI edits");
     }
+    if (sanitized[i + 3] !== "=") {
+      bytes[byteIndex++] = chunk & 0xff;
 
-    const outputMime = imageData?.mime_type || "image/png";
-    const imageUrl = `data:${outputMime};base64,${b64}`;
+    const imageUrl = `data:image/png;base64,${b64}`;
 
     return res.json({
       success: true,
