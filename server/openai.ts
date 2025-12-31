@@ -1,12 +1,11 @@
-import OpenAI, { toFile } from "openai";
+import { toFile } from "openai";
 import { Request, Response } from "express";
 
 import { log } from "./vite";
 import { storage } from "./storage";
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+import { buildStagingPrompt } from "./prompting/stagingPrompt";
+import { openai } from "./openaiClient";
+import { analyzeRoomLayout } from "./prompting/layoutAnalyzer";
 
 type DecodedImage = {
   bytes: Uint8Array;
@@ -99,18 +98,70 @@ const detectImageType = (
 };
 
 export const generateStagedRoom = async (req: Request, res: Response) => {
+  const reqId = `stage_${Date.now()}_${Math.random().toString(16).slice(2)}`;
   try {
     if (!req.body.image) {
       return res.status(400).json({ error: "No image provided" });
     }
 
-    // Extract room type from request
-    const roomType = req.body.roomType || "Unknown";
-    
-    // Create a prompt that focuses on adding furniture without changing the structure
-    const prompt = `Add realistic, stylish furniture and home décor to this empty ${roomType.toLowerCase()}. Do not change the structure, lighting, floor, walls, or any part of the original photo. Only add furniture, wall art, rugs, lighting fixtures, and decorative objects as appropriate for a ${roomType.toLowerCase()}. The room should look naturally staged as if photographed in real life, matching the existing lighting and perspective.`;
-
     const decodedImage = decodeBase64Image(req.body.image);
+
+    const layoutPrompt = await (async () => {
+      try {
+        const layout = await analyzeRoomLayout({
+          roomType: req.body.roomType || "Unknown",
+          imageBase64: req.body.image,
+          mime: decodedImage.mime,
+        });
+
+        if (process.env.NODE_ENV !== "production") {
+          log(
+            `[${reqId}] layout.noFurnitureZones=${
+              layout.noFurnitureZones?.join(" | ") || "None"
+            }`
+          );
+          log(
+            `[${reqId}] layout.preferredPlacements=${
+              layout.preferredPlacements?.join(" | ") || "None"
+            }`
+          );
+          log(
+            `[${reqId}] layout.notes=${layout.notes?.join(" | ") || "None"}`
+          );
+        }
+
+        const safeJoin = (items: string[]): string =>
+          items.length ? items.join("; ") : "None provided";
+
+        return `
+
+Layout constraints (MUST FOLLOW):
+- No-furniture zones: ${safeJoin(layout.noFurnitureZones)}
+- Preferred placements: ${safeJoin(layout.preferredPlacements)}
+- Notes: ${safeJoin(layout.notes)}
+`;
+      } catch (analysisError) {
+        const err = analysisError as Error;
+        log(`[${reqId}] layoutAnalyzerFailed: ${err.message}`);
+        log(
+          `Layout analyzer failed: ${err.message || "Unknown error"}. Proceeding without layout constraints.`
+        );
+        return "";
+      }
+    })();
+
+    const finalPrompt = `${buildStagingPrompt(
+      req.body.roomType || "Unknown"
+    )}${layoutPrompt}`;
+
+    if (process.env.NODE_ENV !== "production") {
+      const preview =
+        finalPrompt.length > 1200
+          ? finalPrompt.slice(0, 1200) + "…(truncated)"
+          : finalPrompt;
+      log(`[${reqId}] finalPromptPreview=${preview}`);
+    }
+
     const inputFile = await toFile(
       Buffer.from(decodedImage.bytes),
       `room.${decodedImage.extension}`,
@@ -120,7 +171,7 @@ export const generateStagedRoom = async (req: Request, res: Response) => {
     const response = await openai.images.edit({
       model: "gpt-image-1",
       image: inputFile,
-      prompt,
+      prompt: finalPrompt,
       input_fidelity: "high",
     } as ImageEditParamsWithFidelity);
 

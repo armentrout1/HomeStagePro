@@ -46,6 +46,8 @@ export default function ImageStager() {
   const [roomType, setRoomType] = useState("living_room");
   const [usageStatus, setUsageStatus] = useState<UsageStatus | null>(null);
   const [isLoadingUsage, setIsLoadingUsage] = useState(false);
+  const [progressPhase, setProgressPhase] = useState<string>("");
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   
@@ -118,6 +120,7 @@ export default function ImageStager() {
 
     setIsLoading(true);
     try {
+      setProgressPhase("Preparing image…");
       // Remove the data URL prefix to get just the base64 data
       const base64Image = originalImage.split(',')[1];
 
@@ -127,6 +130,7 @@ export default function ImageStager() {
       // Log the staging process
       console.log(`Starting staging process for ${selectedRoomTypeLabel}`);
 
+      setProgressPhase("Generating staged image…");
       const response = await fetch('/api/generate-staged-room', {
         method: 'POST',
         headers: {
@@ -149,9 +153,11 @@ export default function ImageStager() {
         }
       }
 
+      setProgressPhase("Finalizing…");
       setStagedImage(data.imageUrl);
       
       // Save the staged image to the database
+      setProgressPhase("Saving…");
       await saveImageToDatabase(data.imageUrl);
       
       toast({
@@ -171,8 +177,10 @@ export default function ImageStager() {
       
       // Refresh usage status even after error (might be due to limit)
       fetchUsageStatus();
+      setProgressPhase("");
     } finally {
       setIsLoading(false);
+      setProgressPhase("");
     }
   };
   
@@ -367,10 +375,13 @@ export default function ImageStager() {
             <p className="font-medium mb-2 text-center">Staged Room</p>
             <div className="border-2 border-gray-300 rounded-lg flex items-center justify-center bg-gray-50 h-64 mb-4 overflow-hidden">
               {isLoading ? (
-                <div className="text-center p-6">
-                  <div className="animate-spin rounded-full h-12 w-12 mx-auto border-b-2 border-primary mb-2"></div>
-                  <p className="text-gray-500">Generating staged room...</p>
+                <div className="text-center p-6 w-full">
+                  <div className="animate-spin rounded-full h-12 w-12 mx-auto border-b-2 border-primary mb-3"></div>
+                  <p className="text-gray-700 font-medium">{progressPhase || "Working…"}</p>
                   <p className="text-xs text-gray-400 mt-1">This may take a minute</p>
+                  <div className="mt-4 relative w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div className="absolute inset-y-0 left-0 w-1/3 bg-primary animate-[progress_1.2s_ease-in-out_infinite]"></div>
+                  </div>
                 </div>
               ) : stagedImage ? (
                 <img 
