@@ -10,6 +10,8 @@ export type RoomType = string;
 
 type LivingRoomProfile = "standard" | "large";
 type BedroomProfile = "standard" | "large";
+type KitchenProfile = "standard" | "large";
+type BathroomProfile = "standard" | "large";
 
 type BuildPromptOptions = {
   layoutConstraints?: LayoutConstraints | null;
@@ -39,11 +41,11 @@ const GLOBAL_GUARDRAILS = [
 
 const ROOM_SPECIFIC_GUARDRAILS: Record<string, string[]> = {
   bathroom: [
-    "Do not add new lighting fixtures—no pendants or chandeliers; keep existing lighting unchanged.",
-    "Do not add lights inside the shower.",
-    "Do not place any objects inside the shower or tub.",
-    "Only add a small bath mat or runner outside wet zones; do not place rugs inside the shower or overlapping drains.",
-    "Allowed decor: neatly arranged towels, a small plant, minimal countertop accessories, and tasteful wall art that does not cover mirrors.",
+    "Do not change or add fixtures—keep existing lighting, plumbing, and hardware exactly as-is.",
+    "Never place anything inside the tub or shower; leave all wet zones completely empty.",
+    "Countertop styling must stay minimal: create only one small clustered vignette and keep the sink/faucet zone mostly clear.",
+    "Flooring: at most one small bath mat outside wet zones; never add rugs, runners, or overlapping mats.",
+    "Keep every toilet, vanity, tub/shower, door, and window fully clear and unobstructed.",
   ],
   bedroom: [
     "Keep bed placement realistic and do not block closet doors.",
@@ -58,6 +60,12 @@ const ROOM_SPECIFIC_GUARDRAILS: Record<string, string[]> = {
     "Follow the STRICT FURNITURE SET block exactly—never exceed the allowed items or counts.",
     "Prefer placing the sofa or sectional against the longest uninterrupted wall that is NOT near doors/entry.",
     "Only add an accent chair when the STRICT block explicitly allows it and the placement leaves generous door and pathway clearance.",
+  ],
+  kitchen: [
+    "Keep countertops mostly visible; only add the minimal optional decor described in the STRICT block.",
+    "Never block appliances, cabinet doors, drawers, or their clearances—you must leave room to open everything fully.",
+    "Floor coverings: ONLY one small mat directly in front of the sink is allowed; no other rugs or runners.",
+    "Open shelving is optional only when a clearly empty wall segment between upper cabinets exists and is not a window; never create shelving on windows.",
   ],
 };
 
@@ -195,6 +203,128 @@ const BEDROOM_FORBIDDEN = [
   "kitchen items",
 ] as const;
 
+const KITCHEN_LARGE_KEYWORDS = [
+  "large",
+  "spacious",
+  "open",
+  "expansive",
+  "wide",
+  "big",
+] as const;
+
+const KITCHEN_SECONDARY_ZONE_KEYWORDS = [
+  "island",
+  "eat-in",
+  "breakfast nook",
+  "dining area",
+  "open floor",
+  "extra space",
+  "unused space",
+] as const;
+
+const KITCHEN_CONSTRAINED_KEYWORDS = [
+  "tight",
+  "narrow",
+  "small",
+  "limited space",
+  "cramped",
+  "compact",
+  "galley",
+  "multiple doors",
+  "many doors",
+  "door swing",
+  "keep path clear",
+  "minimal clearance",
+  "little floor space",
+  "limited wall space",
+  "no open wall",
+  "limited counter",
+  "minimal counter",
+] as const;
+
+const KITCHEN_OPTIONAL_DECOR = [
+  "fruit bowl",
+  "cutting board",
+  "coffee setup (mug + small tray)",
+  "small plant",
+  "dish towel",
+  "soap dispenser",
+] as const;
+
+const KITCHEN_FORBIDDEN = [
+  "sofas",
+  "beds",
+  "dining tables",
+  "dining chairs",
+  "office desks",
+  "bar stools",
+  "sectionals",
+  "new islands",
+  "large rugs",
+  "runners",
+  "wall remodeling",
+  "permanent fixture changes",
+] as const;
+
+const BATHROOM_LARGE_KEYWORDS = [
+  "large",
+  "spacious",
+  "open",
+  "expansive",
+  "wide",
+  "big",
+] as const;
+
+const BATHROOM_SECONDARY_ZONE_KEYWORDS = [
+  "double vanity",
+  "dual sinks",
+  "his and hers",
+  "separate tub and shower",
+  "soaking tub",
+  "walk-in shower",
+  "water closet",
+  "private toilet area",
+  "spa bath",
+  "ensuite",
+  "makeup vanity",
+  "dressing area",
+] as const;
+
+const BATHROOM_CONSTRAINED_KEYWORDS = [
+  "tight",
+  "narrow",
+  "small",
+  "limited space",
+  "cramped",
+  "compact",
+  "powder room",
+  "half bath",
+  "guest bath",
+  "multiple doors",
+  "many doors",
+  "door swing",
+  "keep path clear",
+  "minimal clearance",
+  "little floor space",
+  "limited wall space",
+  "no open wall",
+] as const;
+
+const BATHROOM_OPTIONAL_DECOR = [
+  "neatly folded towels (one set)",
+  "ONE soap dispenser + small tray (one vignette)",
+  "ONE small plant",
+  "ONE small bath mat near vanity/tub (outside wet zone)",
+] as const;
+
+const BATHROOM_FORBIDDEN = [
+  "any furniture (chairs, benches)",
+  "new fixtures (lighting or plumbing)",
+  "rugs or runners beyond one small mat",
+  "any objects inside tub or shower",
+  "anything that blocks fixtures, doors, or windows",
+] as const;
+
 type LivingRoomProfileResult = {
   profile: LivingRoomProfile;
   isConstrained: boolean;
@@ -307,6 +437,112 @@ const determineBedroomProfile = (
   return { profile: "standard", isConstrained: false };
 };
 
+type BathroomProfileResult = {
+  profile: BathroomProfile;
+  isConstrained: boolean;
+};
+
+const determineBathroomProfile = (
+  layoutConstraints?: LayoutConstraints | null
+): BathroomProfileResult => {
+  if (!layoutConstraints) {
+    return { profile: "standard", isConstrained: false };
+  }
+
+  const phrases = [
+    ...(layoutConstraints.preferredPlacements || []),
+    ...(layoutConstraints.notes || []),
+  ];
+
+  let largeKeywordHits = 0;
+  let hasSecondaryZone = false;
+  let isConstrained = false;
+
+  for (const phrase of phrases) {
+    const lower = phrase.toLowerCase();
+
+    if (
+      BATHROOM_CONSTRAINED_KEYWORDS.some((keyword) => lower.includes(keyword))
+    ) {
+      isConstrained = true;
+    }
+
+    if (BATHROOM_LARGE_KEYWORDS.some((keyword) => lower.includes(keyword))) {
+      largeKeywordHits += 1;
+    }
+
+    if (
+      BATHROOM_SECONDARY_ZONE_KEYWORDS.some((keyword) =>
+        lower.includes(keyword)
+      )
+    ) {
+      hasSecondaryZone = true;
+    }
+  }
+
+  if (isConstrained) {
+    return { profile: "standard", isConstrained: true };
+  }
+
+  if (largeKeywordHits >= 2 || hasSecondaryZone) {
+    return { profile: "large", isConstrained: false };
+  }
+
+  return { profile: "standard", isConstrained: false };
+};
+
+type KitchenProfileResult = {
+  profile: KitchenProfile;
+  isConstrained: boolean;
+};
+
+const determineKitchenProfile = (
+  layoutConstraints?: LayoutConstraints | null
+): KitchenProfileResult => {
+  if (!layoutConstraints) {
+    return { profile: "standard", isConstrained: false };
+  }
+
+  const phrases = [
+    ...(layoutConstraints.preferredPlacements || []),
+    ...(layoutConstraints.notes || []),
+  ];
+
+  let largeKeywordHits = 0;
+  let hasSecondaryZone = false;
+  let isConstrained = false;
+
+  for (const phrase of phrases) {
+    const lower = phrase.toLowerCase();
+
+    if (
+      KITCHEN_CONSTRAINED_KEYWORDS.some((keyword) => lower.includes(keyword))
+    ) {
+      isConstrained = true;
+    }
+
+    if (KITCHEN_LARGE_KEYWORDS.some((keyword) => lower.includes(keyword))) {
+      largeKeywordHits += 1;
+    }
+
+    if (
+      KITCHEN_SECONDARY_ZONE_KEYWORDS.some((keyword) => lower.includes(keyword))
+    ) {
+      hasSecondaryZone = true;
+    }
+  }
+
+  if (isConstrained) {
+    return { profile: "standard", isConstrained: true };
+  }
+
+  if (largeKeywordHits >= 2 || hasSecondaryZone) {
+    return { profile: "large", isConstrained: false };
+  }
+
+  return { profile: "standard", isConstrained: false };
+};
+
 const buildLivingRoomStrictBlocks = (
   profile: LivingRoomProfile,
   options?: { isConstrained?: boolean }
@@ -360,6 +596,164 @@ const buildLivingRoomStrictBlocks = (
   const forbiddenBlock = `DO NOT add: ${LIVING_ROOM_FORBIDDEN.join(
     ", "
   )}. If an item is not listed in the STRICT set above, leave it out entirely.`;
+
+  return {
+    prefix: prefixLines.join(" "),
+    suffix: suffixLines.join(" "),
+    forbidden: forbiddenBlock,
+  };
+};
+
+const buildKitchenStrictBlocks = (
+  profile: KitchenProfile,
+  options?: { isConstrained?: boolean }
+) => {
+  const isConstrained = Boolean(options?.isConstrained);
+  const optionalLimit = isConstrained
+    ? 1
+    : profile === "large"
+      ? 4
+      : 2;
+  const requiredLine =
+    "COUNTERTOP VISIBILITY RULE: Keep countertops mostly visible; add only minimal decor and never cover large counter areas.";
+  const optionalLine = `Optional decor (choose AT MOST ${optionalLimit} total): ${KITCHEN_OPTIONAL_DECOR.join(
+    ", "
+  )}.`;
+  const constrainedOptionalNote = isConstrained
+    ? "Constrained kitchens: limit to ONE optional decor item, and omit it entirely if doing so keeps clearances cleaner."
+    : "";
+  const floorLine =
+    "Floor rule: Allow AT MOST one small sink mat placed directly in front of the sink; no large rugs, runners, or mats across the tile.";
+  const shelvingLine =
+    profile === "large"
+      ? "Open shelving: Allowed ONLY if there is a clear empty wall segment between upper cabinets that is not a window; keep it minimal with 2–3 decorative items."
+      : "Open shelving: DO NOT add open shelving in standard kitchens.";
+  const clearanceLine =
+    "Clearances: Do not block sinks, stoves, refrigerators, dishwashers, or any cabinet doors/drawers. Keep decor away from door swings and appliance handles.";
+  const placementLine =
+    "Placement: Never add furniture except compact counter decor; do NOT introduce new islands or dining sets.";
+  const maxCountsLine =
+    profile === "large"
+      ? "Max counts: decor ≤ 4, sink mats ≤ 1, shelving ≤ 1 small section, rugs = 0, runners = 0."
+      : "Max counts: decor ≤ 2, sink mats ≤ 1, shelving = 0, rugs = 0, runners = 0.";
+  const sizeDefinitionLine =
+    profile === "large"
+      ? "SIZE DEFINITION (LARGE): Kitchen has clear extra zones (e.g., island seating, eat-in/breakfast nook, or multiple open areas). Requires ≥2 large-keyword hits or any secondary-zone keyword. If uncertain, treat as STANDARD."
+      : "SIZE DEFINITION (STANDARD): Not an open-plan kitchen with extra staging zones; if uncertain or cues conflict, treat as STANDARD.";
+  const constrainedDefinitionLine = isConstrained
+    ? "SIZE DEFINITION (CONSTRAINED): Photo shows limited counter/floor/wall space or crowded appliances/doors—stage extremely minimally and keep all clearances obvious."
+    : "";
+  const constrainedEdgeNote = isConstrained
+    ? "Constrained placement: Never place decor near counter edges where it could block cabinet doors or appliance clearance."
+    : "";
+
+  const prefixLines = [
+    `STRICT KITCHEN BLOCK (${profile.toUpperCase()}) — MUST FOLLOW:`,
+    requiredLine,
+    optionalLine,
+    constrainedOptionalNote,
+    "COUNTERTOP DECOR PLACEMENT: Place decor as ONE small clustered vignette along the backsplash, away from the sink basin/faucet area and away from the cooktop/stove area. Do not scatter items across multiple counters.",
+    isConstrained ? "If uncertain, omit countertop decor entirely." : "",
+    floorLine,
+    shelvingLine,
+    clearanceLine,
+    placementLine,
+    maxCountsLine,
+    sizeDefinitionLine,
+    constrainedDefinitionLine,
+    constrainedEdgeNote,
+  ].filter(Boolean);
+
+  const suffixLines = [
+    `STRICT KITCHEN BLOCK (${profile.toUpperCase()}) — FINAL CHECK:`,
+    "Allowed items: only countertop-safe decor from the optional list, plus one small sink mat; no other furniture.",
+    "If uncertain, err on the side of fewer items and keep every appliance and surface fully visible.",
+  ];
+
+  const forbiddenBlock = `DO NOT add: ${KITCHEN_FORBIDDEN.join(
+    ", "
+  )}. Never block the sink, stove, refrigerator, dishwasher, or cabinet doors.`;
+
+  return {
+    prefix: prefixLines.join(" "),
+    suffix: suffixLines.join(" "),
+    forbidden: forbiddenBlock,
+  };
+};
+
+const buildBathroomStrictBlocks = (
+  profile: BathroomProfile,
+  options?: { isConstrained?: boolean }
+) => {
+  const isConstrained = Boolean(options?.isConstrained);
+  const optionalLimitLabel = isConstrained
+    ? "ONE"
+    : profile === "large"
+      ? "THREE"
+      : "TWO";
+  const fixturesLine =
+    "Fixtures: NEVER block the toilet, vanity/sink, mirror, tub/shower, towel bars, or any doors/windows.";
+  const countertopLine =
+    "Countertop: keep the vanity counter mostly visible; add only minimal decor as ONE small clustered vignette near the backsplash and away from the sink faucet zone.";
+  const optionalLine = `Optional decor: choose AT MOST ${optionalLimitLabel} total from: ${BATHROOM_OPTIONAL_DECOR.join(
+    ", "
+  )}.`;
+  const constrainedOptionalNote = isConstrained
+    ? "Constrained bathrooms: optional decor AT MOST ONE total; if uncertain, omit decor entirely."
+    : "";
+  const floorLine = isConstrained
+    ? "Floor: allow at most one small bath mat ONLY if it does not reduce circulation; otherwise omit mats entirely. Never place mats or rugs inside the tub/shower."
+    : "Floor: allow at most one small bath mat; no large rugs or runners; never place anything inside the tub/shower.";
+  const wallsLine =
+    profile === "large"
+      ? "Walls: you may add at most ONE small framed art piece ONLY if there is a clear blank wall area that does not interfere with mirrors, windows, or doors."
+      : "Walls: do not cover mirrors; wall art is NOT allowed in STANDARD bathrooms.";
+  const lightingLine = "Lighting: do NOT add or change fixtures.";
+  const maxCountsLine =
+    profile === "large"
+      ? "Max counts: optional decor ≤3, plants ≤1, towels ≤1 set, mats ≤1, art ≤1."
+      : `Max counts: optional decor ≤${
+          isConstrained ? 1 : 2
+        }, plants ≤1, towels ≤1 set, mats ≤1, art = 0.`;
+  const constrainedArtLine = isConstrained
+    ? "Constrained bathrooms: NO wall art; leave walls bare except existing mirrors/windows."
+    : "";
+  const constrainedMatLine = isConstrained
+    ? "Constrained bathrooms: No mats if they reduce circulation—keep paths fully clear."
+    : "";
+  const sizeDefinitionLine =
+    profile === "large"
+      ? "SIZE DEFINITION (LARGE): Triggered by ≥2 bathroom large-keyword hits or any secondary-zone keyword (double vanity, separate tub + shower, soaking tub, dressing area/ensuite). If cues are weak, treat as STANDARD."
+      : "SIZE DEFINITION (STANDARD): Default bathroom size; stage minimally unless clear large cues exist.";
+  const constrainedDefinitionLine = isConstrained
+    ? "SIZE DEFINITION (CONSTRAINED): Limited visible floor/wall space or many doors/fixtures/cropped view—stage extremely minimally and keep circulation obvious."
+    : "";
+
+  const prefixLines = [
+    `STRICT BATHROOM BLOCK (${profile.toUpperCase()}) — MUST FOLLOW`,
+    fixturesLine,
+    countertopLine,
+    optionalLine,
+    constrainedOptionalNote,
+    floorLine,
+    wallsLine,
+    lightingLine,
+    maxCountsLine,
+    sizeDefinitionLine,
+    constrainedDefinitionLine,
+    constrainedMatLine,
+    constrainedArtLine,
+  ].filter(Boolean);
+
+  const suffixLines = [
+    `STRICT BATHROOM BLOCK (${profile.toUpperCase()}) — FINAL CHECK`,
+    "Allowed items: only a minimal countertop vignette plus the limited optional decor above; never add furniture or new fixtures.",
+    "Keep the tub and shower completely empty and leave every fixture, doorway, and window fully visible.",
+  ];
+
+  const forbiddenBlock = `DO NOT add: ${BATHROOM_FORBIDDEN.join(
+    ", "
+  )}. This applies to ALL bathroom sizes.`;
 
   return {
     prefix: prefixLines.join(" "),
@@ -487,6 +881,34 @@ export const buildStagingPrompt = (
     }
     const blocks = buildBedroomStrictBlocks(bedroomProfile.profile, {
       isConstrained: bedroomProfile.isConstrained,
+    });
+    prefixBlock = blocks.prefix;
+    suffixBlock = blocks.suffix;
+    forbiddenBlock = blocks.forbidden;
+  }
+
+  if (normalizedRoomType === "kitchen") {
+    const kitchenProfile = determineKitchenProfile(options.layoutConstraints);
+    log(`KitchenProfile=${kitchenProfile.profile}`);
+    if (kitchenProfile.isConstrained) {
+      log("KitchenConstrained=true");
+    }
+    const blocks = buildKitchenStrictBlocks(kitchenProfile.profile, {
+      isConstrained: kitchenProfile.isConstrained,
+    });
+    prefixBlock = blocks.prefix;
+    suffixBlock = blocks.suffix;
+    forbiddenBlock = blocks.forbidden;
+  }
+
+  if (normalizedRoomType === "bathroom") {
+    const bathroomProfile = determineBathroomProfile(options.layoutConstraints);
+    log(`BathroomProfile=${bathroomProfile.profile}`);
+    if (bathroomProfile.isConstrained) {
+      log("BathroomConstrained=true");
+    }
+    const blocks = buildBathroomStrictBlocks(bathroomProfile.profile, {
+      isConstrained: bathroomProfile.isConstrained,
     });
     prefixBlock = blocks.prefix;
     suffixBlock = blocks.suffix;
