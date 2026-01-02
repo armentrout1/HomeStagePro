@@ -1,3 +1,8 @@
+/**
+ * STAGING RULES SOURCE OF TRUTH:
+ * See docs/staging/staging-profiles.md
+ * If you change staging behavior, update the MD in the same change.
+ */
 import { useState, useRef, ChangeEvent, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";

@@ -16,18 +16,104 @@ const getStripe = () => {
   return stripePromise;
 };
 
+type FeatureKey =
+  | "high_res_downloads"
+  | "secure_token_auth"
+  | "usage_tracking"
+  | "priority_processing"
+  | "access_all_styles"
+  | "future_styles";
+
+interface FeatureDefinition {
+  key: FeatureKey;
+  label: string;
+}
+
 interface PricingPlan {
   id: string;
   name: string;
   price: number;
   description: string;
-  features: string[];
+  highlight?: boolean;
+  features: Record<FeatureKey, boolean>;
 }
+
+const featureDefinitions: FeatureDefinition[] = [
+  { key: "high_res_downloads", label: "High-resolution downloads" },
+  { key: "secure_token_auth", label: "Secure token authentication" },
+  { key: "usage_tracking", label: "Usage tracking" },
+  { key: "access_all_styles", label: "Access to all styles" },
+  { key: "priority_processing", label: "Priority processing" },
+  { key: "future_styles", label: "Upcoming style drops" },
+];
+
+const createFeatureSet = (overrides: Partial<Record<FeatureKey, boolean>> = {}) => ({
+  high_res_downloads: false,
+  secure_token_auth: false,
+  usage_tracking: false,
+  priority_processing: false,
+  access_all_styles: false,
+  future_styles: false,
+  ...overrides,
+});
+
+const planIdMapping: Record<string, string> = {
+  // TODO: remove mapping after backend plan ids updated
+  "quick-pack": "day-pass",
+  "value-pack": "pack-10",
+  "pro-monthly": "unlimited",
+};
 
 export default function Upgrade() {
   const [isLoading, setIsLoading] = useState<string | null>(null);
   const { toast } = useToast();
-  
+
+  const pricingPlans: PricingPlan[] = [
+    {
+      id: "quick-pack",
+      name: "Quick Pack",
+      price: 9,
+      description: "5 stagings to use anytime",
+      features: createFeatureSet({
+        high_res_downloads: true,
+        secure_token_auth: true,
+        usage_tracking: false,
+        priority_processing: false,
+        access_all_styles: false,
+        future_styles: false,
+      }),
+    },
+    {
+      id: "value-pack",
+      name: "Value Pack",
+      price: 25,
+      description: "20 stagings to use anytime",
+      highlight: true,
+      features: createFeatureSet({
+        high_res_downloads: true,
+        secure_token_auth: true,
+        usage_tracking: true,
+        priority_processing: false,
+        access_all_styles: true,
+        future_styles: false,
+      }),
+    },
+    {
+      id: "pro-monthly",
+      name: "Pro Monthly",
+      price: 49,
+      description: "50 stagings per month",
+      features: createFeatureSet({
+        high_res_downloads: true,
+        secure_token_auth: true,
+        usage_tracking: true,
+        priority_processing: true,
+        access_all_styles: true,
+        future_styles: true,
+      }),
+    },
+  ];
+
   // Check for plan parameter in URL
   useEffect(() => {
     // Parse the query parameters
@@ -36,7 +122,9 @@ export default function Upgrade() {
     
     if (planId) {
       // Find the plan with matching ID
-      const selectedPlan = pricingPlans.find(plan => plan.id === planId);
+      const selectedPlan = pricingPlans.find(
+        (plan) => plan.id === planId
+      );
       
       if (selectedPlan) {
         // Auto-select the plan from the URL parameter
@@ -44,48 +132,6 @@ export default function Upgrade() {
       }
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const pricingPlans: PricingPlan[] = [
-    {
-      id: "day-pass",
-      name: "1-Day Pass",
-      price: 3,
-      description: "24-hour access to unlimited stagings",
-      features: [
-        "Unlimited stagings for 24 hours",
-        "Secure token authentication",
-        "Instant access after payment",
-        "Download all images in high resolution",
-        "Access to all room styles"
-      ]
-    },
-    {
-      id: "pack-10",
-      name: "10 Stagings",
-      price: 9,
-      description: "10 stagings to use anytime",
-      features: [
-        "10 room stagings with no expiration",
-        "Secure token authentication",
-        "Automatic usage tracking",
-        "Download all images in high resolution",
-        "Access to all room styles"
-      ]
-    },
-    {
-      id: "unlimited",
-      name: "Unlimited Monthly",
-      price: 19,
-      description: "Unlimited stagings for 30 days",
-      features: [
-        "Unlimited stagings for 30 days",
-        "Secure token authentication",
-        "Priority processing",
-        "Download all images in high resolution",
-        "Access to all room styles and future styles"
-      ]
-    }
-  ];
 
   const handleCheckout = async (plan: PricingPlan) => {
     setIsLoading(plan.id);
@@ -103,7 +149,7 @@ export default function Upgrade() {
     try {
       // Create checkout session on the server
       const response = await apiRequest("POST", "/api/create-checkout-session", {
-        planId: plan.id,
+        planId: planIdMapping[plan.id],
         planName: plan.name,
         amount: plan.price,
       });
@@ -153,39 +199,66 @@ export default function Upgrade() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
           {pricingPlans.map((plan) => (
-            <Card key={plan.id} className="p-6 flex flex-col border-2 hover:border-primary hover:shadow-lg transition-all duration-300">
-              <div className="mb-4">
+            <Card
+              key={plan.id}
+              className={`relative p-6 flex flex-col border-2 rounded-2xl transition-transform duration-200 ease-out ${
+                plan.highlight
+                  ? "border-primary shadow-xl md:hover:scale-[1.05] md:hover:shadow-2xl md:hover:z-10"
+                  : "hover:border-primary hover:shadow-xl md:hover:scale-[1.03] md:hover:z-10"
+              }`}
+            >
+              <div className="mb-6">
                 <h3 className="text-2xl font-bold">{plan.name}</h3>
                 <div className="flex items-baseline mt-2">
                   <span className="text-4xl font-extrabold">${plan.price}</span>
-                  {plan.id === "day-pass" && <span className="ml-1 text-gray-500">/day</span>}
-                  {plan.id === "unlimited" && <span className="ml-1 text-gray-500">/month</span>}
                 </div>
                 <p className="text-gray-600 mt-2">{plan.description}</p>
               </div>
               
-              <ul className="space-y-2 mb-6 flex-grow">
-                {plan.features.map((feature, index) => (
-                  <li key={index} className="flex items-center">
-                    <svg
-                      className="h-5 w-5 text-green-500 mr-2"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
+              <ul className="space-y-3 mb-6 flex-grow">
+                {featureDefinitions.map((feature) => {
+                  const included = plan.features[feature.key];
+                  return (
+                    <li
+                      key={feature.key}
+                      className="flex items-center text-sm text-gray-900"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                    {feature}
-                  </li>
-                ))}
+                      {included ? (
+                        <svg
+                          className="h-5 w-5 text-green-500 mr-2"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                      ) : (
+                        <svg
+                          className="h-5 w-5 text-gray-500 mr-2"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M6 12h12"
+                          />
+                        </svg>
+                      )}
+                      {feature.label}
+                    </li>
+                  );
+                })}
               </ul>
               
-              <Button 
+              <Button
                 onClick={() => handleCheckout(plan)}
                 className="w-full"
                 disabled={isLoading === plan.id}

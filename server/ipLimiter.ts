@@ -1,35 +1,47 @@
-import { Request, Response, NextFunction } from 'express';
-import { log } from './vite';
-import { hasValidAccess } from './tokenManager';
+import { Request, Response, NextFunction } from "express";
+import { log } from "./vite";
+import { FREE_QUALITY } from "./plans";
+import { hasValidAccess } from "./tokenManager";
+
 
 // In-memory store to track IP usage
 const ipUsageStore: Record<string, number> = {};
 
 // Free usage limit
 const FREE_USAGE_LIMIT = 2;
-const DISABLE_USAGE_LIMITS = process.env.DISABLE_USAGE_LIMITS === 'true';
+export const DISABLE_USAGE_LIMITS = process.env.DISABLE_USAGE_LIMITS === "true";
+const UNLIMITED_USAGE_LIMIT = 999_999;
+
+/**
+ * Get the client IP address from the request
+ */
+const getClientIp = (req: Request): string =>
+  req.ip ||
+  (req.headers["x-forwarded-for"] as string)?.split(",")[0].trim() ||
+  "0.0.0.0";
 
 /**
  * Middleware to track and limit API requests by IP address
  * Bypasses limits if user has a valid access token
  */
-export const ipLimiter = (req: Request, res: Response, next: NextFunction) => {
+export const ipLimiter = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   if (DISABLE_USAGE_LIMITS) {
-    log(`Usage limits disabled via DISABLE_USAGE_LIMITS env var`);
     return next();
   }
 
   // If user has a valid access token, bypass IP limiting
   if (hasValidAccess(req)) {
-    log(`Request has valid access token, bypassing IP limits`);
+    log("Request has valid access token, bypassing IP limits");
     return next();
   }
   
   // Get the client IP address
-  const clientIp = req.ip || 
-                  (req.headers['x-forwarded-for'] as string)?.split(',')[0].trim() || 
-                  '0.0.0.0';
-  
+  const clientIp = getClientIp(req);
+
   // Initialize count if it doesn't exist
   if (!ipUsageStore[clientIp]) {
     ipUsageStore[clientIp] = 0;
@@ -37,7 +49,7 @@ export const ipLimiter = (req: Request, res: Response, next: NextFunction) => {
   
   // Increment the usage count
   ipUsageStore[clientIp]++;
-  
+
   // Log the usage for debugging
   log(`IP ${clientIp} made request ${ipUsageStore[clientIp]} of ${FREE_USAGE_LIMIT}`);
   
@@ -81,63 +93,40 @@ export const getAllIpUsage = (): Record<string, number> => {
  */
 export const getIpUsageStatus = (req: Request, res: Response) => {
   // Check for valid access token first
-  if (hasValidAccess(req)) {
+  if (hasValidAccess(req) && req.accessTokenPayload) {
     // User has a valid access token
-    const payload = req.accessTokenPayload!;
+    const payload = req.accessTokenPayload;
     const now = Math.floor(Date.now() / 1000);
-    const timeRemaining = payload.expiresAt - now;
-    
-    // Format expiration time
-    let expirationMessage = '';
-    
-    if (timeRemaining > 86400) {
-      // More than a day
-      expirationMessage = `${Math.floor(timeRemaining / 86400)} days remaining`;
-    } else if (timeRemaining > 3600) {
-      // Hours
-      expirationMessage = `${Math.floor(timeRemaining / 3600)} hours remaining`;
-    } else {
-      // Minutes
-      expirationMessage = `${Math.floor(timeRemaining / 60)} minutes remaining`;
-    }
-    
-    const response: any = {
+    const timeRemaining = Math.max(payload.expiresAt - now, 0);
+
+    const response = {
       // Basic status
-      usageCount: 0,
-      limit: 0,
-      remaining: 0,
-      status: 'premium',
-      
-      // Token info
-      accessToken: {
-        type: payload.type,
-        expiresAt: new Date(payload.expiresAt * 1000).toISOString(),
-        timeRemaining: expirationMessage
-      }
+      usageCount: payload.totalUses - payload.usesLeft,
+      limit: payload.totalUses,
+      remaining: payload.usesLeft,
+      status: "premium" as const,
+      planId: payload.planId,
+      quality: payload.quality,
+      expiresAt: new Date(payload.expiresAt * 1000).toISOString(),
+      timeRemainingSeconds: timeRemaining,
     };
-    
-    // Add usage info for pack tokens
-    if (payload.type === 'pack-10' && typeof payload.usageLeft === 'number') {
-      response.accessToken.usageLeft = payload.usageLeft;
-    }
-    
+
     return res.json(response);
   }
 
   if (DISABLE_USAGE_LIMITS) {
     return res.json({
       usageCount: 0,
-      limit: null,
-      remaining: null,
-      status: 'unlimited',
+      limit: UNLIMITED_USAGE_LIMIT,
+      remaining: UNLIMITED_USAGE_LIMIT,
+      status: "unlimited",
+      quality: FREE_QUALITY,
     });
   }
 
   // If no token, use IP-based limiting
   // Get the client IP address
-  const clientIp = req.ip || 
-                  (req.headers['x-forwarded-for'] as string)?.split(',')[0].trim() || 
-                  '0.0.0.0';
+  const clientIp = getClientIp(req);
   
   // Get the usage count (0 if the IP isn't in the store yet)
   const usageCount = ipUsageStore[clientIp] || 0;
@@ -146,6 +135,7 @@ export const getIpUsageStatus = (req: Request, res: Response) => {
     usageCount,
     limit: FREE_USAGE_LIMIT,
     remaining: Math.max(0, FREE_USAGE_LIMIT - usageCount),
-    status: usageCount > FREE_USAGE_LIMIT ? 'exceeded' : 'active'
+    status: usageCount >= FREE_USAGE_LIMIT ? "exceeded" : "active",
+    quality: FREE_QUALITY,
   });
 };

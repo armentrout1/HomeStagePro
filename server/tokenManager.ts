@@ -1,171 +1,211 @@
-import jwt from 'jsonwebtoken';
-import { Request, Response, NextFunction } from 'express';
+import jwt from "jsonwebtoken";
+import { Request, Response, NextFunction } from "express";
+import {
+  PlanConfig,
+  PlanId,
+  getExpirationTimestamp,
+  getPlanConfig,
+  resolvePlanId,
+} from "./plans";
+import { log } from "./vite";
 
-// Secret for signing tokens - should be in env variables in production
-const TOKEN_SECRET = process.env.JWT_SECRET || 'staging-app-secret-key-change-in-production';
+const TOKEN_SECRET =
+  process.env.JWT_SECRET || "staging-app-secret-key-change-in-production";
 
-// Token types
-export enum TokenType {
-  DAY_PASS = 'day-pass',    // 24-hour unlimited access
-  PACK_10 = 'pack-10',      // 10 stagings
-  UNLIMITED = 'unlimited',  // 30-day unlimited access
-}
-
-// Token payload interface
 export interface TokenPayload {
-  type: TokenType;
-  usageLeft?: number;       // For pack-10 type
-  expiresAt: number;        // Unix timestamp
+  planId: PlanId;
+  tokenType: PlanConfig["tokenType"];
+  usesLeft: number;
+  totalUses: number;
+  expiresAt: number;
+  quality: PlanConfig["quality"];
 }
 
-/**
- * Generate a JWT token based on the purchased plan
- */
-export function generateToken(planId: string): string {
-  let payload: TokenPayload;
-  const now = Math.floor(Date.now() / 1000); // Current time in seconds
-  
-  switch (planId) {
-    case 'day-pass':
-      // 24 hours unlimited
-      payload = {
-        type: TokenType.DAY_PASS,
-        expiresAt: now + 24 * 60 * 60, // 24 hours from now
-      };
-      break;
-    
-    case 'pack-10':
-      // 10 stagings with no expiration
-      payload = {
-        type: TokenType.PACK_10,
-        usageLeft: 10,
-        expiresAt: now + 365 * 24 * 60 * 60, // 1 year from now (practically no expiration)
-      };
-      break;
-      
-    case 'unlimited':
-      // 30 days unlimited
-      payload = {
-        type: TokenType.UNLIMITED,
-        expiresAt: now + 30 * 24 * 60 * 60, // 30 days from now
-      };
-      break;
-      
-    default:
-      throw new Error(`Invalid plan ID: ${planId}`);
+export interface TokenResult {
+  token: string;
+  payload: TokenPayload;
+}
+
+export const ACCESS_TOKEN_COOKIE_NAME = "access_token";
+
+export function generateToken(planIdRaw: string): TokenResult {
+  const planId = resolvePlanId(planIdRaw);
+
+  if (!planId) {
+    throw new Error(`Invalid plan ID: ${planIdRaw}`);
   }
-  
-  return jwt.sign(payload, TOKEN_SECRET, { expiresIn: payload.expiresAt - now });
+
+  const config = getPlanConfig(planId);
+  if (!config) {
+    throw new Error(`No config found for plan: ${planId}`);
+  }
+
+  const now = Math.floor(Date.now() / 1000);
+  const payload: TokenPayload = {
+    planId,
+    tokenType: config.tokenType,
+    usesLeft: config.uses,
+    totalUses: config.uses,
+    expiresAt: getExpirationTimestamp(config.durationDays, now),
+    quality: config.quality,
+  };
+
+  return {
+    token: jwt.sign(payload, TOKEN_SECRET, {
+      expiresIn: payload.expiresAt - now,
+    }),
+    payload,
+  };
 }
 
-/**
- * Verify and decode a token
- */
+export function setAccessTokenCookie(res: Response, result: TokenResult) {
+  const expiresAt = new Date(result.payload.expiresAt * 1000);
+  const diffMs = expiresAt.getTime() - Date.now();
+
+  if (diffMs <= 0) {
+    clearAccessToken(res);
+    return;
+  }
+
+  res.cookie(ACCESS_TOKEN_COOKIE_NAME, result.token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax" as const,
+    maxAge: diffMs,
+    expires: expiresAt,
+  });
+}
+
+export function clearAccessToken(res: Response) {
+  res.clearCookie(ACCESS_TOKEN_COOKIE_NAME);
+}
+
 export function verifyToken(token: string): TokenPayload | null {
   try {
     return jwt.verify(token, TOKEN_SECRET) as TokenPayload;
   } catch (error) {
-    console.error('Token verification failed:', error);
+    console.error("Token verification failed:", error);
     return null;
   }
 }
 
-/**
- * Update token usage (for pack-10 type)
- */
-export function updateTokenUsage(payload: TokenPayload): string | null {
-  if (payload.type !== TokenType.PACK_10 || typeof payload.usageLeft !== 'number') {
+export function decrementTokenUsage(
+  payload: TokenPayload,
+): TokenResult | null {
+  if (payload.usesLeft <= 0) {
     return null;
   }
-  
-  // Decrement usage
-  payload.usageLeft -= 1;
-  
-  // If no more uses left, return null
-  if (payload.usageLeft <= 0) {
-    return null;
-  }
-  
-  // Generate a new token with updated usage
-  return jwt.sign(payload, TOKEN_SECRET, { expiresIn: payload.expiresAt - Math.floor(Date.now() / 1000) });
-}
 
-/**
- * Middleware to check token validity
- */
-export function checkAccessToken(req: Request, res: Response, next: NextFunction) {
-  // Get token from cookies
-  const token = req.cookies?.access_token;
-  
-  if (!token) {
-    // No token, proceed to IP limiting
-    return next();
+  const updated: TokenPayload = {
+    ...payload,
+    usesLeft: payload.usesLeft - 1,
+  };
+
+  if (updated.usesLeft < 0) {
+    return null;
   }
-  
-  // Verify token
-  const payload = verifyToken(token);
-  
-  if (!payload) {
-    // Invalid token, clear it and proceed to IP limiting
-    res.clearCookie('access_token');
-    return next();
-  }
-  
-  // Check if token is expired
+
   const now = Math.floor(Date.now() / 1000);
-  if (payload.expiresAt < now) {
-    // Token expired, clear it and proceed to IP limiting
-    res.clearCookie('access_token');
+  return {
+    token: jwt.sign(updated, TOKEN_SECRET, {
+      expiresIn: updated.expiresAt - now,
+    }),
+    payload: updated,
+  };
+}
+
+export function checkAccessToken(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const token = req.cookies?.[ACCESS_TOKEN_COOKIE_NAME];
+
+  if (!token) {
     return next();
   }
-  
-  // Token is valid
-  req.accessTokenPayload = payload;
-  
-  // If it's a pack-10 token, check and update usage
-  if (payload.type === TokenType.PACK_10 && typeof payload.usageLeft === 'number') {
-    // Only update usage for generation requests
-    if (req.path === '/api/generate-staged-room') {
-      const updatedToken = updateTokenUsage(payload);
-      
-      if (updatedToken) {
-        // Set the updated token
-        res.cookie('access_token', updatedToken, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          maxAge: (payload.expiresAt - now) * 1000, // Convert to milliseconds
-        });
-      } else {
-        // No more uses left, clear the token
-        res.clearCookie('access_token');
-        
-        // Redirect to upgrade page
-        return res.status(402).json({
-          error: 'Token usage exhausted',
-          message: 'You have used all of your staging credits',
-          redirect: '/upgrade'
-        });
-      }
-    }
+
+  const payload = verifyToken(token);
+
+  if (!payload) {
+    clearAccessToken(res);
+    return next();
   }
-  
-  // Allow the request to proceed with a valid token
+
+  const now = Math.floor(Date.now() / 1000);
+  if (payload.expiresAt < now || payload.usesLeft <= 0) {
+    clearAccessToken(res);
+    return next();
+  }
+
+  req.accessTokenPayload = payload;
+
   next();
 }
 
-/**
- * Check if user has valid access (either via token or IP limit)
- */
-export function hasValidAccess(req: Request): boolean {
-  // If there's a valid token payload, user has access
-  return !!req.accessTokenPayload;
+export function ensureTokenUsageOnSuccess(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  if (!req.accessTokenPayload) {
+    return next();
+  }
+
+  const originalJson = res.json.bind(res);
+  res.json = (body: any) => {
+    if (body?.success && req.accessTokenPayload) {
+      const updated = decrementTokenUsage(req.accessTokenPayload);
+
+      if (!updated) {
+        clearAccessToken(res);
+      } else {
+        req.accessTokenPayload = updated.payload;
+        setAccessTokenCookie(res, updated);
+        log(
+          `paid token used :: plan=${updated.payload.planId} remaining=${updated.payload.usesLeft}`,
+        );
+      }
+    }
+
+    return originalJson(body);
+  };
+
+  next();
 }
 
-// Add token payload to Express Request interface
+export function attachEntitlement(
+  req: Request,
+  _res: Response,
+  next: NextFunction,
+) {
+  if (req.accessTokenPayload) {
+    req.stagingEntitlement = {
+      planId: req.accessTokenPayload.planId,
+      quality: req.accessTokenPayload.quality,
+      totalUses: req.accessTokenPayload.totalUses,
+      usesLeft: req.accessTokenPayload.usesLeft,
+      expiresAt: req.accessTokenPayload.expiresAt,
+    };
+  }
+  next();
+}
+
+export function hasValidAccess(req: Request): boolean {
+  return !!(req.accessTokenPayload && req.accessTokenPayload.usesLeft > 0);
+}
+
 declare global {
   namespace Express {
     interface Request {
       accessTokenPayload?: TokenPayload;
+      stagingEntitlement?: {
+        planId: PlanId;
+        quality: PlanConfig["quality"];
+        totalUses: number;
+        usesLeft: number;
+        expiresAt: number;
+      };
     }
   }
 }

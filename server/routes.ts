@@ -1,11 +1,23 @@
-import type { Express, Request, Response, NextFunction } from "express";
+import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { generateStagedRoom, saveStagedImage, getUserStagedImages } from "./openai";
-import { ipLimiter, getIpUsageStatus, resetIpUsage } from "./ipLimiter";
+import {
+  generateStagedRoom,
+  saveStagedImage,
+  getUserStagedImages,
+} from "./openai";
+import { ipLimiter, getIpUsageStatus } from "./ipLimiter";
 import Stripe from "stripe";
 import cookieParser from "cookie-parser";
-import { generateToken, verifyToken, checkAccessToken, TokenType } from "./tokenManager";
+import {
+  generateToken,
+  verifyToken,
+  checkAccessToken,
+  setAccessTokenCookie,
+  attachEntitlement,
+  ensureTokenUsageOnSuccess,
+} from "./tokenManager";
+import { getPlanConfig, resolvePlanId } from "./plans";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Health check endpoint for custom domain validation
@@ -35,7 +47,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // prefix all routes with /api
 
   // IP usage status endpoint
-  app.get('/api/usage-status', getIpUsageStatus);
+  app.get('/api/usage-status', checkAccessToken, getIpUsageStatus);
   
   // Initialize Stripe
   const stripe = process.env.STRIPE_SECRET_KEY 
@@ -46,7 +58,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use(cookieParser());
 
   // OpenAI image generation endpoint with IP-based usage limiting
-  app.post('/api/generate-staged-room', checkAccessToken, ipLimiter, generateStagedRoom);
+  app.post(
+    "/api/generate-staged-room",
+    checkAccessToken,
+    attachEntitlement,
+    ipLimiter,
+    ensureTokenUsageOnSuccess,
+    generateStagedRoom,
+  );
   
   // Add a test endpoint to check token status
   app.get('/api/check-token', (req, res) => {
@@ -56,9 +75,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Token is valid, return payload
         return res.json({
           valid: true,
-          type: payload.type,
+          planId: payload.planId,
           expiresAt: new Date(payload.expiresAt * 1000).toISOString(),
-          usageLeft: payload.type === TokenType.PACK_10 ? payload.usageLeft : undefined
+          usageLeft: payload.usesLeft,
+          totalUses: payload.totalUses,
+          quality: payload.quality,
         });
       }
     }
@@ -77,35 +98,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     try {
-      const { planId, planName, amount } = req.body;
-      
-      if (!planId || !amount) {
+      const { planId, planName } = req.body;
+      if (!planId) {
         return res.status(400).json({ error: "Missing required parameters" });
+      }
+
+      if (!resolvePlanId(planId)) {
+        return res.status(400).json({
+          error: "Unknown plan ID",
+          allowedPlanIds: ["quick-pack", "value-pack", "pro-monthly"],
+        });
+      }
+
+      const planConfig = getPlanConfig(planId);
+      if (!planConfig) {
+        return res.status(400).json({ error: "Unsupported plan" });
       }
       
       let successUrl = `${req.protocol}://${req.get('host')}/thank-you?session_id={CHECKOUT_SESSION_ID}`;
       let cancelUrl = `${req.protocol}://${req.get('host')}/upgrade`;
       
-      // Handle plans differently based on ID
-      let metadata: any = {
+      const planLabel = planName ?? `HomeStagePro ${planId}`;
+      const expiresAt =
+        planConfig.durationDays === 365
+          ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
+          : new Date(
+              Date.now() + planConfig.durationDays * 24 * 60 * 60 * 1000,
+            );
+
+      const metadata: Stripe.Checkout.SessionCreateParams["metadata"] = {
         planId,
-        planName
+        planLabel,
+        usesAllowed: String(planConfig.uses),
+        quality: planConfig.quality,
       };
-      
-      let expiresAt;
-      if (planId === 'day-pass') {
-        // 1-day pass: Set expiration to 24 hours from now
-        expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-        metadata.expiresAt = expiresAt.toISOString();
-      } else if (planId === 'pack-10') {
-        // 10 stagings: Set usage limit to 10
-        metadata.usageAllowed = 10;
-      } else if (planId === 'unlimited') {
-        // Unlimited monthly: Set expiration to 30 days from now
-        expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+      if (planConfig.durationDays) {
         metadata.expiresAt = expiresAt.toISOString();
       }
-      
+
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
         line_items: [
@@ -116,7 +147,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 name: planName,
                 description: `AI Room Staging - ${planName}`,
               },
-              unit_amount: amount * 100, // convert dollars to cents
+              unit_amount: planConfig.price * 100,
             },
             quantity: 1,
           },
@@ -124,7 +155,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         mode: 'payment',
         success_url: successUrl,
         cancel_url: cancelUrl,
-        metadata
+        metadata,
       });
       
       res.json({ id: session.id });
@@ -186,36 +217,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const session = await stripe.checkout.sessions.retrieve(session_id as string);
       
-      if (session.payment_status === 'paid') {
-        // Payment was successful, create JWT token
-        const { planId, planName } = session.metadata || {};
-        
+      if (session.payment_status === "paid") {
+        const { planId, planLabel } = session.metadata || {};
+
         if (!planId) {
-          return res.status(400).json({ error: "Missing plan ID in session metadata" });
+          return res
+            .status(400)
+            .json({ error: "Missing plan ID in session metadata" });
         }
 
-        // Generate JWT token based on the plan type
-        const token = generateToken(planId);
-        
-        // Set token as an HTTP-only cookie
-        res.cookie('access_token', token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days max
-          sameSite: 'lax'
-        });
-        
-        // Get token payload to return plan info to client
-        const payload = verifyToken(token);
-        
-        // Format expiration date for display
-        const expirationDate = payload ? new Date(payload.expiresAt * 1000) : null;
-        
+        const tokenResult = generateToken(planId);
+        setAccessTokenCookie(res, tokenResult);
+
+        const payload = tokenResult.payload;
+        const expirationDate = new Date(payload.expiresAt * 1000);
+
         return res.json({
-          status: 'complete',
-          planName,
-          accessUntil: expirationDate ? expirationDate.toISOString() : null,
-          usageAllowed: payload?.type === TokenType.PACK_10 ? payload.usageLeft : null
+          status: "complete",
+          planName: planLabel ?? planId,
+          accessUntil: expirationDate.toISOString(),
+          usageAllowed: payload.totalUses,
+          usesLeft: payload.usesLeft,
+          planId: payload.planId,
+          quality: payload.quality,
         });
       } else if (session.status === 'open') {
         return res.json({ status: 'processing' });

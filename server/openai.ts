@@ -1,11 +1,20 @@
+/**
+ * STAGING RULES SOURCE OF TRUTH:
+ * See docs/staging/staging-profiles.md
+ * If you change staging behavior, update the MD in the same change.
+ */
 import { toFile } from "openai";
-import { Request, Response } from "express";
+import {
+  type Request,
+  type Response,
+} from "express";
 
 import { log } from "./vite";
 import { storage } from "./storage";
 import { buildStagingPrompt } from "./prompting/stagingPrompt";
 import { openai } from "./openaiClient";
 import { analyzeRoomLayout } from "./prompting/layoutAnalyzer";
+import { FREE_QUALITY, ImageQuality } from "./plans";
 
 type DecodedImage = {
   bytes: Uint8Array;
@@ -104,9 +113,15 @@ export const generateStagedRoom = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "No image provided" });
     }
 
+    const requestedQuality: ImageQuality =
+      req.stagingEntitlement?.quality ?? FREE_QUALITY;
+    if (process.env.NODE_ENV !== "production") {
+      log(`[${reqId}] quality=${requestedQuality}`);
+    }
+
     const decodedImage = decodeBase64Image(req.body.image);
 
-    const layoutPrompt = await (async () => {
+    const { layoutPrompt, layoutConstraints } = await (async () => {
       try {
         const layout = await analyzeRoomLayout({
           roomType: req.body.roomType || "Unknown",
@@ -133,26 +148,32 @@ export const generateStagedRoom = async (req: Request, res: Response) => {
         const safeJoin = (items: string[]): string =>
           items.length ? items.join("; ") : "None provided";
 
-        return `
+        return {
+          layoutConstraints: layout,
+          layoutPrompt: `
 
 Layout constraints (MUST FOLLOW):
 - No-furniture zones: ${safeJoin(layout.noFurnitureZones)}
 - Preferred placements: ${safeJoin(layout.preferredPlacements)}
 - Notes: ${safeJoin(layout.notes)}
-`;
+`,
+        };
       } catch (analysisError) {
         const err = analysisError as Error;
         log(`[${reqId}] layoutAnalyzerFailed: ${err.message}`);
         log(
           `Layout analyzer failed: ${err.message || "Unknown error"}. Proceeding without layout constraints.`
         );
-        return "";
+        return {
+          layoutConstraints: null,
+          layoutPrompt: "",
+        };
       }
     })();
 
-    const finalPrompt = `${buildStagingPrompt(
-      req.body.roomType || "Unknown"
-    )}${layoutPrompt}`;
+    const finalPrompt = `${buildStagingPrompt(req.body.roomType || "Unknown", {
+      layoutConstraints,
+    })}${layoutPrompt}`;
 
     if (process.env.NODE_ENV !== "production") {
       const preview =
@@ -172,7 +193,7 @@ Layout constraints (MUST FOLLOW):
       model: "gpt-image-1",
       image: inputFile,
       prompt: finalPrompt,
-      input_fidelity: "high",
+      input_fidelity: requestedQuality,
     } as ImageEditParamsWithFidelity);
 
     const imageData = response.data?.[0] as (typeof response.data)[number] & {
