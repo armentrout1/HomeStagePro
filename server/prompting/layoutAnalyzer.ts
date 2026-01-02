@@ -88,6 +88,29 @@ const normalizeConstraints = (raw: unknown): LayoutConstraints => {
   };
 };
 
+const FALLBACK_CONSTRAINTS: LayoutConstraints = {
+  noFurnitureZones: [],
+  preferredPlacements: [],
+  notes: [],
+};
+
+const tryParseConstraintsFromText = (
+  text: string,
+  source: string
+): LayoutConstraints | null => {
+  try {
+    const parsed = JSON.parse(text);
+    return normalizeConstraints(parsed);
+  } catch (error) {
+    console.error(
+      `[layoutAnalyzer] Failed to parse analyzer JSON from ${source}: ${
+        (error as Error).message
+      }`
+    );
+    return null;
+  }
+};
+
 const extractConstraintsFromResponse = (
   response: ResponsesJSONResult
 ): LayoutConstraints => {
@@ -103,11 +126,12 @@ const extractConstraintsFromResponse = (
         (part.type === "output_text" || part.type === "text") &&
         typeof part.text === "string"
       ) {
-        try {
-          const parsed = JSON.parse(part.text);
-          return normalizeConstraints(parsed);
-        } catch {
-          // Ignore parse failures and continue searching for valid JSON.
+        const parsed = tryParseConstraintsFromText(
+          part.text,
+          `response.output message part`
+        );
+        if (parsed) {
+          return parsed;
         }
       }
     }
@@ -115,15 +139,19 @@ const extractConstraintsFromResponse = (
 
   const fallback = response.output_text?.[0];
   if (fallback) {
-    try {
-      const parsed = JSON.parse(fallback);
-      return normalizeConstraints(parsed);
-    } catch {
-      // Ignore parse failures
+    const parsed = tryParseConstraintsFromText(
+      fallback,
+      "response.output_text[0]"
+    );
+    if (parsed) {
+      return parsed;
     }
   }
 
-  throw new Error("Layout analyzer did not return structured JSON output");
+  console.error(
+    "[layoutAnalyzer] Falling back to empty constraints because no structured JSON was returned."
+  );
+  return FALLBACK_CONSTRAINTS;
 };
 
 export const analyzeRoomLayout = async ({
@@ -168,9 +196,9 @@ export const analyzeRoomLayout = async ({
         ],
       },
     ],
-    response_format: {
-      type: "json_schema",
-      json_schema: {
+    text: {
+      format: {
+        type: "json_schema",
         name: "layout_constraints",
         schema: layoutSchema,
         strict: true,
