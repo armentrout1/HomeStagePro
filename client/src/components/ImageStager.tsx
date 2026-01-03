@@ -83,11 +83,10 @@ export default function ImageStager() {
     if (!file) return;
 
     if (!file.type.includes('image/')) {
-      toast({
-        title: "Invalid file type",
-        description: "Please upload an image file (JPG, PNG, etc.)",
-        variant: "destructive",
-      });
+      toast.error(
+        "Invalid file type",
+        "Please upload an image file (JPG, PNG, etc.)"
+      );
       return;
     }
 
@@ -108,19 +107,15 @@ export default function ImageStager() {
     setStagedImage(null);
     setRoomType("living_room");
     
-    toast({
-      title: "Reset complete",
-      description: "All images have been cleared",
-    });
+    toast.success("Reset complete", "All images have been cleared");
   };
   
   const handleStageImage = async () => {
     if (!originalImage) {
-      toast({
-        title: "No image selected",
-        description: "Please upload an image before staging",
-        variant: "destructive",
-      });
+      toast.error(
+        "No image selected",
+        "Please upload an image before staging"
+      );
       return;
     }
 
@@ -173,20 +168,16 @@ export default function ImageStager() {
         stagedImageUrl: data.stagedSignedUrl ?? data.imageUrl ?? null,
       });
       
-      toast({
-        title: "Success!",
-        description: "Your staged room image is ready",
-      });
+      toast.success("Success!", "Your staged room image is ready");
       
       // Refresh usage status after successful staging
       fetchUsageStatus();
     } catch (error) {
       console.error('Error staging image:', error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to generate staged image",
-        variant: "destructive",
-      });
+      toast.error(
+        "Error",
+        error instanceof Error ? error.message : "Failed to generate staged image"
+      );
       
       // Refresh usage status even after error (might be due to limit)
       fetchUsageStatus();

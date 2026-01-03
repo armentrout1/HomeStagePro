@@ -137,11 +137,11 @@ export default function Upgrade() {
     setIsLoading(plan.id);
     
     if (!getStripe()) {
-      toast({
-        title: "Error",
-        description: "Payment system is not available. Please try again later.",
-        variant: "destructive",
-      });
+      toast.error(
+        "Error",
+        "Payment system is not available. Please try again later.",
+      );
+
       setIsLoading(null);
       return;
     }
@@ -175,11 +175,11 @@ export default function Upgrade() {
       }
     } catch (error) {
       console.error("Error during checkout:", error);
-      toast({
-        title: "Checkout Failed",
-        description: error instanceof Error ? error.message : "Failed to initiate checkout",
-        variant: "destructive",
-      });
+      toast.error(
+        "Checkout Failed",
+        error instanceof Error ? error.message : "Failed to initiate checkout",
+      );
+
     }
     
     setIsLoading(null);
