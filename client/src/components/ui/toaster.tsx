@@ -1,4 +1,8 @@
-import { useToast } from "@/hooks/use-toast"
+import {
+  TOAST_LIMIT,
+  TOAST_REMOVE_DELAY,
+  useToast,
+} from "@/hooks/use-toast"
 import {
   Toast,
   ToastClose,
@@ -12,11 +16,11 @@ export function Toaster() {
   const { toasts } = useToast()
 
   return (
-    <ToastProvider>
+    <ToastProvider swipeDirection="right" duration={TOAST_REMOVE_DELAY}>
       {toasts.map(function ({ id, title, description, action, ...props }) {
         return (
           <Toast key={id} {...props}>
-            <div className="grid gap-1">
+            <div className="flex min-w-0 flex-1 flex-col gap-1">
               {title && <ToastTitle>{title}</ToastTitle>}
               {description && (
                 <ToastDescription>{description}</ToastDescription>

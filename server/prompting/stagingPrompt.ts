@@ -14,10 +14,18 @@ import { buildLivingRoomStrictBlocks } from "./stagingPrompt/blocks/livingRoomSt
 import { buildBedroomStrictBlocks } from "./stagingPrompt/blocks/bedroomStrictBlocks";
 import { buildKitchenStrictBlocks } from "./stagingPrompt/blocks/kitchenStrictBlocks";
 import { buildBathroomStrictBlocks } from "./stagingPrompt/blocks/bathroomStrictBlocks";
+import { buildDiningRoomStrictBlocks } from "./stagingPrompt/blocks/diningRoomStrictBlocks";
+import { buildOfficeStrictBlocks } from "./stagingPrompt/blocks/officeStrictBlocks";
+import { buildOutdoorStrictBlocks } from "./stagingPrompt/blocks/outdoorStrictBlocks";
+import { buildEntryStrictBlocks } from "./stagingPrompt/blocks/entryStrictBlocks";
 import { determineLivingRoomProfile } from "./stagingPrompt/profiles/livingRoomProfile";
 import { determineBedroomProfile } from "./stagingPrompt/profiles/bedroomProfile";
 import { determineKitchenProfile } from "./stagingPrompt/profiles/kitchenProfile";
 import { determineBathroomProfile } from "./stagingPrompt/profiles/bathroomProfile";
+import { determineDiningRoomProfile } from "./stagingPrompt/profiles/diningRoomProfile";
+import { determineOfficeProfile } from "./stagingPrompt/profiles/officeProfile";
+import { determineOutdoorProfile } from "./stagingPrompt/profiles/outdoorProfile";
+import { determineEntryProfile } from "./stagingPrompt/profiles/entryProfile";
 
 export type RoomType = string;
 
@@ -60,6 +68,50 @@ export const buildStagingPrompt = (
     forbiddenBlock = blocks.forbidden;
   }
 
+  if (normalizedRoomType === "entry") {
+    const entryProfile = determineEntryProfile(options.layoutConstraints);
+    log(`EntryProfile=${entryProfile.profile}`);
+    if (entryProfile.isConstrained) {
+      log("EntryConstrained=true");
+    }
+    const blocks = buildEntryStrictBlocks(entryProfile.profile, {
+      isConstrained: entryProfile.isConstrained,
+    });
+    prefixBlock = blocks.prefix;
+    suffixBlock = blocks.suffix;
+    forbiddenBlock = blocks.forbidden;
+  }
+
+  if (normalizedRoomType === "outdoor space") {
+    const outdoorProfile = determineOutdoorProfile(options.layoutConstraints);
+    log(`OutdoorProfile=${outdoorProfile.profile}`);
+    if (outdoorProfile.isConstrained) {
+      log("OutdoorConstrained=true");
+    }
+    const blocks = buildOutdoorStrictBlocks(outdoorProfile.profile, {
+      isConstrained: outdoorProfile.isConstrained,
+    });
+    prefixBlock = blocks.prefix;
+    suffixBlock = blocks.suffix;
+    forbiddenBlock = blocks.forbidden;
+  }
+
+  if (normalizedRoomType === "dining room") {
+    const diningRoomProfile = determineDiningRoomProfile(
+      options.layoutConstraints
+    );
+    log(`DiningRoomProfile=${diningRoomProfile.profile}`);
+    if (diningRoomProfile.isConstrained) {
+      log("DiningRoomConstrained=true");
+    }
+    const blocks = buildDiningRoomStrictBlocks(diningRoomProfile.profile, {
+      isConstrained: diningRoomProfile.isConstrained,
+    });
+    prefixBlock = blocks.prefix;
+    suffixBlock = blocks.suffix;
+    forbiddenBlock = blocks.forbidden;
+  }
+
   if (normalizedRoomType === "bedroom") {
     const bedroomProfile = determineBedroomProfile(options.layoutConstraints);
     log(`BedroomProfile=${bedroomProfile.profile}`);
@@ -96,6 +148,20 @@ export const buildStagingPrompt = (
     }
     const blocks = buildBathroomStrictBlocks(bathroomProfile.profile, {
       isConstrained: bathroomProfile.isConstrained,
+    });
+    prefixBlock = blocks.prefix;
+    suffixBlock = blocks.suffix;
+    forbiddenBlock = blocks.forbidden;
+  }
+
+  if (normalizedRoomType === "office") {
+    const officeProfile = determineOfficeProfile(options.layoutConstraints);
+    log(`OfficeProfile=${officeProfile.profile}`);
+    if (officeProfile.isConstrained) {
+      log("OfficeConstrained=true");
+    }
+    const blocks = buildOfficeStrictBlocks(officeProfile.profile, {
+      isConstrained: officeProfile.isConstrained,
     });
     prefixBlock = blocks.prefix;
     suffixBlock = blocks.suffix;

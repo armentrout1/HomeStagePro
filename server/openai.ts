@@ -15,6 +15,10 @@ import { buildStagingPrompt } from "./prompting/stagingPrompt";
 import { openai } from "./openaiClient";
 import { analyzeRoomLayout } from "./prompting/layoutAnalyzer";
 import { FREE_QUALITY, ImageQuality } from "./plans";
+import { supabase, getSignedImageUrl } from "./supabase";
+
+const STORAGE_BUCKET = "roomstager-images";
+const SIGNED_URL_EXPIRATION_SECONDS = 60 * 60 * 24 * 7;
 
 type DecodedImage = {
   bytes: Uint8Array;
@@ -24,6 +28,92 @@ type DecodedImage = {
 
 type ImageEditParamsWithFidelity = Parameters<typeof openai.images.edit>[0] & {
   input_fidelity?: "low" | "medium" | "high";
+};
+
+const sanitizeOpenAiQuality = (
+  quality: ImageQuality | undefined,
+  reqId: string,
+): "low" | "high" => {
+  if (quality === "high" || quality === "low") {
+    return quality;
+  }
+
+  if (quality !== undefined) {
+    log(
+      `[${reqId}] Invalid quality "${quality}" requested; defaulting to "low" for OpenAI`,
+    );
+  }
+  return "low";
+};
+
+const formatYearMonth = (date = new Date()): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  return `${year}-${month}`;
+};
+
+const buildStoragePath = (
+  reqId: string,
+  variant: "original" | "staged",
+  extension: string,
+  date = new Date(),
+): string => {
+  return `roomstager/${formatYearMonth(date)}/${reqId}/${variant}.${extension}`;
+};
+
+const mimeToExtension = (mime: string): string => {
+  switch (mime) {
+    case "image/jpeg":
+      return "jpg";
+    case "image/png":
+      return "png";
+    case "image/webp":
+      return "webp";
+    default:
+      return "png";
+  }
+};
+
+const uploadToStorage = async (
+  path: string,
+  file: Uint8Array | Buffer,
+  contentType: string,
+) => {
+  const payload = file instanceof Buffer ? file : Buffer.from(file);
+  const { error } = await supabase.storage
+    .from(STORAGE_BUCKET)
+    .upload(path, payload, {
+      contentType,
+      upsert: true,
+    });
+
+  if (error) {
+    throw new Error(
+      `Failed to upload ${path} to bucket ${STORAGE_BUCKET}: ${error.message}`,
+    );
+  }
+};
+
+const tryCreateSignedUrl = async (
+  bucket: string,
+  path?: string | null,
+  fallback?: string | null,
+) => {
+  if (!path) {
+    return fallback ?? null;
+  }
+
+  try {
+    return await getSignedImageUrl(bucket, path, SIGNED_URL_EXPIRATION_SECONDS);
+  } catch (error) {
+    const err = error as Error;
+    log(
+      `Failed to create signed URL for ${bucket}/${path}: ${
+        err.message || "Unknown error"
+      }`,
+    );
+    return fallback ?? null;
+  }
 };
 
 const decodeBase64Image = (base64: string): DecodedImage => {
@@ -115,11 +205,24 @@ export const generateStagedRoom = async (req: Request, res: Response) => {
 
     const requestedQuality: ImageQuality =
       req.stagingEntitlement?.quality ?? FREE_QUALITY;
+    const openAiQuality = sanitizeOpenAiQuality(requestedQuality, reqId);
     if (process.env.NODE_ENV !== "production") {
-      log(`[${reqId}] quality=${requestedQuality}`);
+      log(`[${reqId}] quality=${openAiQuality}`);
     }
 
     const decodedImage = decodeBase64Image(req.body.image);
+    const originalBase64 = Buffer.from(decodedImage.bytes).toString("base64");
+    const originalStoragePath = buildStoragePath(
+      reqId,
+      "original",
+      decodedImage.extension,
+    );
+
+    await uploadToStorage(
+      originalStoragePath,
+      decodedImage.bytes,
+      decodedImage.mime,
+    );
 
     const { layoutPrompt, layoutConstraints } = await (async () => {
       try {
@@ -193,7 +296,7 @@ Layout constraints (MUST FOLLOW):
       model: "gpt-image-1",
       image: inputFile,
       prompt: finalPrompt,
-      input_fidelity: requestedQuality,
+      input_fidelity: openAiQuality,
     } as ImageEditParamsWithFidelity);
 
     const imageData = response.data?.[0] as (typeof response.data)[number] & {
@@ -206,11 +309,32 @@ Layout constraints (MUST FOLLOW):
     }
 
     const outputMime = imageData?.mime_type || "image/png";
-    const imageUrl = `data:${outputMime};base64,${b64}`;
+    const stagedExtension = mimeToExtension(outputMime);
+    const stagedBytes = Buffer.from(b64, "base64");
+
+    const stagedStoragePath = buildStoragePath(reqId, "staged", stagedExtension);
+    await uploadToStorage(stagedStoragePath, stagedBytes, outputMime);
+
+    const originalDataUrl = `data:${decodedImage.mime};base64,${originalBase64}`;
+    const stagedDataUrl = `data:${outputMime};base64,${b64}`;
+
+    const [originalSignedUrl, stagedSignedUrl] = await Promise.all([
+      tryCreateSignedUrl(
+        STORAGE_BUCKET,
+        originalStoragePath,
+        originalDataUrl,
+      ),
+      tryCreateSignedUrl(STORAGE_BUCKET, stagedStoragePath, stagedDataUrl),
+    ]);
 
     return res.json({
       success: true,
-      imageUrl: imageUrl,
+      imageUrl: stagedSignedUrl ?? stagedDataUrl,
+      originalSignedUrl,
+      stagedSignedUrl: stagedSignedUrl ?? stagedDataUrl,
+      originalStoragePath,
+      stagedStoragePath,
+      storageBucket: STORAGE_BUCKET,
     });
   } catch (err) {
     const error = err as Error;
@@ -224,29 +348,42 @@ Layout constraints (MUST FOLLOW):
 
 export const saveStagedImage = async (req: Request, res: Response) => {
   try {
-    const { userId, originalImageUrl, stagedImageUrl, roomType } = req.body;
-    
-    if (!originalImageUrl || !stagedImageUrl) {
-      return res.status(400).json({ error: "Both original and staged image URLs are required" });
-    }
-    
-    const stagedImage = await storage.createStagedImage({
-      userId: userId || null, // Make userId optional for guest users
+    const {
+      userId,
       originalImageUrl,
       stagedImageUrl,
+      originalStoragePath,
+      stagedStoragePath,
+      storageBucket,
+      roomType,
+    } = req.body;
+
+    if (!originalStoragePath || !stagedStoragePath) {
+      return res.status(400).json({
+        error: "originalStoragePath and stagedStoragePath are required",
+      });
+    }
+
+    const stagedImage = await storage.createStagedImage({
+      userId: userId || null,
+      originalImageUrl: originalImageUrl ?? null,
+      stagedImageUrl: stagedImageUrl ?? null,
+      originalStoragePath,
+      stagedStoragePath,
+      storageBucket: storageBucket || STORAGE_BUCKET,
       roomType: roomType || "Unknown",
     });
-    
+
     return res.json({
       success: true,
       stagedImage,
     });
   } catch (err) {
     const error = err as Error;
-    log(`Database error: ${error.message || 'Unknown error'}`);
+    log(`Database error: ${error.message || "Unknown error"}`);
     return res.status(500).json({
       success: false,
-      error: `Error saving staged image: ${error.message || 'Unknown error'}`,
+      error: `Error saving staged image: ${error.message || "Unknown error"}`,
     });
   }
 };

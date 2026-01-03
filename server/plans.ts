@@ -1,7 +1,7 @@
 export type PlanId = "quick-pack" | "value-pack" | "pro-monthly";
 
 export type TokenAccessType = "pack" | "subscription";
-export type ImageQuality = "medium" | "high";
+export type ImageQuality = "low" | "medium" | "high";
 
 export interface PlanConfig {
   id: PlanId;
@@ -14,7 +14,7 @@ export interface PlanConfig {
 
 const YEAR_IN_DAYS = 365;
 
-export const FREE_QUALITY: ImageQuality = "medium";
+export const FREE_QUALITY: ImageQuality = "low";
 export const freeQuality = FREE_QUALITY;
 
 export const PLAN_CONFIGS: Record<PlanId, PlanConfig> = {

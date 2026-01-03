@@ -29,6 +29,12 @@ export const ROOM_SPECIFIC_GUARDRAILS: Record<string, readonly string[]> =
       "Flooring: at most one small bath mat outside wet zones; never add rugs, runners, or overlapping mats.",
       "Keep every toilet, vanity, tub/shower, door, and window fully clear and unobstructed.",
     ],
+    entry: [
+      "Keep the main door, sidelight, stairs, and walk paths completely clear—omit furniture if it risks blocking egress.",
+      "Never place furniture within door swings or the first 3–4 feet of any stair landing; preserve sight lines to steps.",
+      "Prioritize minimal decor; avoid clutter, bulky items, or anything that narrows the walkway.",
+      "If uncertain about clearance, default to leaving the entry empty.",
+    ],
     bedroom: [
       "Keep bed placement realistic and do not block closet doors.",
       "Add nightstands or lamps only if space allows, and do not add extra ceiling fixtures.",
@@ -48,5 +54,24 @@ export const ROOM_SPECIFIC_GUARDRAILS: Record<string, readonly string[]> =
       "Never block appliances, cabinet doors, drawers, or their clearances—you must leave room to open everything fully.",
       "Floor coverings: ONLY one small mat directly in front of the sink is allowed; no other rugs or runners.",
       "Open shelving is optional only when a clearly empty wall segment between upper cabinets exists and is not a window; never create shelving on windows.",
+    ],
+    "dining room": [
+      "Stage exactly ONE dining table; do not add multiple tables, credenzas, or makeshift islands.",
+      "Keep chair counts conservative (2–4 chairs for standard rooms, 6–8 only when clearly large) and leave sides open if space is tight.",
+      "Tabletop styling must stay minimal: one simple centerpiece plus at most one runner OR one set of placemats—never full place settings.",
+      "Never block any doors, windows, or walk paths; leave chair pull-out clearance obvious and remove pieces if uncertain.",
+      "Only add a rug when the dining area is clearly large and the rug fits fully beneath the table and chairs without cutting off circulation paths.",
+    ],
+    office: [
+      "Stage exactly ONE desk plus ONE office chair—never add additional desks or seating clusters.",
+      "Keep accessories modern and minimal; at most one rug and one subtle desk accessory per the STRICT block.",
+      "Never block doors, door swings, windows, vents, or the main walk path; if uncertain, remove optional items.",
+      "Forbidden categories: beds, sofas/sectionals, dining furniture, kitchen pieces, bulky storage like filing cabinets or large hutches.",
+    ],
+    "outdoor space": [
+      "Keep all doors, gates, walk paths, and steps completely clear; omit furniture if there is any doubt.",
+      "Use outdoor-rated furniture only; if a piece might read as indoor furniture, leave it out.",
+      "Default to minimal staging; if uncertain whether furniture fits, omit it entirely.",
+      "Maintain generous safety clearance around grills, fire pits, or outdoor heaters—never place seating near heat sources.",
     ],
   } as const;

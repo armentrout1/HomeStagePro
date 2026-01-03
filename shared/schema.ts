@@ -31,8 +31,11 @@ export const usersRelations = relations(users, ({ many }) => ({
 export const stagedImages = pgTable("staged_images", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => users.id),
-  originalImageUrl: text("original_image_url").notNull(),
-  stagedImageUrl: text("staged_image_url").notNull(),
+  originalImageUrl: text("original_image_url"),
+  stagedImageUrl: text("staged_image_url"),
+  originalStoragePath: text("original_storage_path"),
+  stagedStoragePath: text("staged_storage_path"),
+  storageBucket: text("storage_bucket").default("roomstager-images"),
   roomType: varchar("room_type", { length: 50 }),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -41,6 +44,9 @@ export const insertStagedImageSchema = createInsertSchema(stagedImages).pick({
   userId: true,
   originalImageUrl: true,
   stagedImageUrl: true,
+  originalStoragePath: true,
+  stagedStoragePath: true,
+  storageBucket: true,
   roomType: true,
 });
 

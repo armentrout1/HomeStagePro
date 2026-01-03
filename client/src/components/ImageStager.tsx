@@ -26,6 +26,7 @@ const roomTypes = [
   { value: "bathroom", label: "Bathroom" },
   { value: "dining_room", label: "Dining Room" },
   { value: "office", label: "Home Office" },
+  { value: "entry", label: "Entry / Foyer" },
   { value: "outdoor", label: "Outdoor Space" },
 ];
 
@@ -159,11 +160,18 @@ export default function ImageStager() {
       }
 
       setProgressPhase("Finalizing…");
-      setStagedImage(data.imageUrl);
+      const stagedPreviewUrl = data.stagedSignedUrl ?? data.imageUrl;
+      setStagedImage(stagedPreviewUrl);
       
       // Save the staged image to the database
       setProgressPhase("Saving…");
-      await saveImageToDatabase(data.imageUrl);
+      await saveImageToDatabase({
+        storageBucket: data.storageBucket,
+        originalStoragePath: data.originalStoragePath,
+        stagedStoragePath: data.stagedStoragePath,
+        originalImageUrl: data.originalSignedUrl ?? null,
+        stagedImageUrl: data.stagedSignedUrl ?? data.imageUrl ?? null,
+      });
       
       toast({
         title: "Success!",
@@ -189,28 +197,30 @@ export default function ImageStager() {
     }
   };
   
-  const saveImageToDatabase = async (stagedImageUrl: string) => {
-    if (!originalImage || !stagedImageUrl) return;
+  type SaveImagePayload = {
+    storageBucket?: string | null;
+    originalStoragePath?: string | null;
+    stagedStoragePath?: string | null;
+    originalImageUrl?: string | null;
+    stagedImageUrl?: string | null;
+  };
+
+  const saveImageToDatabase = async (payload: SaveImagePayload) => {
+    if (!originalImage || !payload?.stagedStoragePath || !payload?.originalStoragePath) return;
     
     setIsSaving(true);
     try {
-      // Create a filename-safe timestamp for the image URLs
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      
-      // Create "URLs" that represent the images - for database storage
-      // In a real application, we'd upload these to a storage service like S3
-      // This approach stores the image URLs, not the full base64 images
-      const originalImageForStorage = `original-image-${timestamp}.jpg`;
-      const stagedImageForStorage = stagedImageUrl; // This is already a URL from OpenAI
-      
       const response = await fetch('/api/staged-images', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          originalImageUrl: originalImageForStorage,
-          stagedImageUrl: stagedImageForStorage,
+          storageBucket: payload.storageBucket,
+          originalStoragePath: payload.originalStoragePath,
+          stagedStoragePath: payload.stagedStoragePath,
+          originalImageUrl: payload.originalImageUrl,
+          stagedImageUrl: payload.stagedImageUrl,
           roomType: roomTypes.find(rt => rt.value === roomType)?.label || "Unknown",
           // Note: userId is null here since we're not implementing user authentication in this version
         }),

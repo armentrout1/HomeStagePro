@@ -64,6 +64,40 @@
 - Staging history gallery with before/after cards and quick re-download.
 - Batch staging queue plus ZIP export for multi-room projects.
 
+## H) User Feedback Inbox (No Redos)
+
+### Goals
+- Capture unhappy results for learning loops, prompt tuning, and profile iteration without promising instant fixes.
+- Make it explicit that there is **no automatic redo or credit issuance — free or paid** — tied to feedback submissions.
+- Allow owners to optionally contact the reporting user manually when warranted (opt-in only).
+
+### Proposed UX (future)
+- Post-generation surface a “Report an issue” button near the staged output.
+- Clicking opens a modal with:
+  - **Required** category dropdown: blocked door, wrong furniture, scale, realism, clutter, changed architecture, other.
+  - **Optional** short comment field (≤300 characters).
+  - **Optional** “OK to contact me” toggle that reveals an email input when enabled.
+
+### Proposed DB schema (future)
+- `staging_feedback` table:
+  - `id` (PK), `created_at` timestamps.
+  - `staged_image_id` FK → staged image record.
+  - `room_type` snapshot for quicker filtering.
+  - `issue_types` array/JSON capturing selected categories.
+  - `comment` text (nullable, ≤300 chars).
+  - `contact_email` (nullable) populated only when user opts in.
+  - `prompt_version` and `profile_decisions` (e.g., BedroomProfile, Constrained flags) for debugging context.
+  - `request_id`/`trace_id` to cross-link telemetry.
+  - `status` enum: `new`, `reviewed`, `fixed`.
+
+### Image reproducibility note
+- Accurate follow-up requires storing both original uploads and staged outputs in object storage (e.g., Supabase bucket) so reviewers can reproduce the render.
+- MVP may start with URLs or metadata only, but later we must attach bucket storage paths to `staged_images` so each feedback item can open the exact assets reliably.
+
+### Anti-abuse
+- Rate-limit feedback submissions per token/IP to avoid spam or automated abuse.
+- Feedback flow must never trigger a redo attempt or credit reimbursement; the inbox is strictly for learning loops and manual follow-up.
+
 ## H) Measurement & Validation
 - Metrics: doorway violations, window obstruction rate, clutter density, room-appropriate item checks.
 - Logging/telemetry: persist vision-scene-map confidences, placement risk scores, retry counts.
