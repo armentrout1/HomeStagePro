@@ -20,7 +20,7 @@ export default function Header() {
   ];
 
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-10">
+    <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <Link href="/">
           <img src="/logo.svg" alt="RoomStagerPro Logo" className="h-8 w-8" />

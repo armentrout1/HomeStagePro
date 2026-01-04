@@ -80,7 +80,7 @@ export default function Home() {
   return (
     <>
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-50 to-indigo-50">
+      <section className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-slate-200/70">
         <div className="container mx-auto px-4 py-16 md:py-24">
           <div className="flex flex-col md:flex-row items-center">
             <div className="md:w-1/2 mb-8 md:mb-0 md:pr-8">
@@ -117,7 +117,7 @@ export default function Home() {
       </section>
 
       {/* Image Stager Section */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-slate-50 border-t border-slate-200/70">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-8">Try Our AI Room Staging Tool</h2>
           <p className="text-lg text-gray-600 text-center mb-12 max-w-3xl mx-auto">
@@ -128,7 +128,7 @@ export default function Home() {
       </section>
 
       {/* Ad Unit - Horizontal */}
-      <section className="py-8 bg-gray-50">
+      <section className="py-8 bg-white border-t border-slate-200/70">
         <div className="container mx-auto px-4 text-center">
           <div className="mx-auto max-w-4xl overflow-hidden">
             <AdUnit adSlot="1234567890" adFormat="horizontal" className="mx-auto" />
@@ -137,13 +137,16 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-slate-50 border-t border-slate-200/70">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">Why Staging Matters</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {features.map((feature, index) => (
-              <div key={index} className="bg-gray-50 rounded-lg p-6 shadow-sm hover:shadow-md transition">
+              <div
+                key={index}
+                className="pp-card border border-slate-300 shadow-md rounded-2xl p-6 md:p-8 transition hover:shadow-lg"
+              >
                 <div className={`${feature.color} mb-4`}>
                   {feature.icon}
                 </div>
@@ -156,7 +159,7 @@ export default function Home() {
       </section>
 
       {/* Recent Articles */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-slate-50 border-t border-slate-200/70">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-2xl md:text-3xl font-bold">Recent Articles</h2>
@@ -174,7 +177,7 @@ export default function Home() {
             {articles.map((article, index) => (
               <Link key={index} href={article.link}>
                 <div className="group cursor-pointer">
-                  <div className="bg-white rounded-lg overflow-hidden shadow-sm group-hover:shadow-md transition">
+                  <div className="pp-card border border-slate-300 shadow-md rounded-2xl overflow-hidden transition group-hover:shadow-lg">
                     <img 
                       src={article.image} 
                       alt={article.title} 
@@ -182,7 +185,7 @@ export default function Home() {
                       width="400" 
                       height="192"
                     />
-                    <div className="p-6">
+                    <div className="p-6 md:p-8">
                       <h3 className="text-xl font-semibold mb-2 group-hover:text-primary transition">{article.title}</h3>
                       <p className="text-gray-700 mb-4">{article.description}</p>
                       <span className="text-sm text-gray-500">{article.readTime}</span>
@@ -196,13 +199,16 @@ export default function Home() {
       </section>
 
       {/* Testimonials */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-white border-t border-slate-200/70">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">What Our Clients Say</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {testimonials.map((testimonial, index) => (
-              <div key={index} className="bg-gray-50 p-6 rounded-lg shadow-sm">
+              <div
+                key={index}
+                className="pp-card border border-slate-300 shadow-md rounded-2xl p-6 md:p-8"
+              >
                 <div className="flex items-center mb-4">
                   <StarRating rating={5} />
                 </div>
@@ -229,7 +235,7 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+      <section className="py-16 bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-t border-slate-200/70 border-b border-slate-200/70">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to Transform Your Property?</h2>
           <p className="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
@@ -251,7 +257,7 @@ export default function Home() {
       </section>
       
       {/* Ad Unit - Rectangle */}
-      <section className="py-12 bg-white">
+      <section className="py-12 bg-white border-t border-slate-200/70">
         <div className="container mx-auto px-4 text-center">
           <div className="flex justify-center">
             <div className="mx-auto">
