@@ -4,9 +4,12 @@ export default function Footer() {
   return (
     <footer className="bg-gray-800 text-white py-12">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
           <div className="md:col-span-2">
-            <h2 className="text-2xl font-bold mb-4">StagingPro</h2>
+            <div className="mb-4 flex items-center gap-3">
+              <img src="/logo.svg" alt="RoomStagerPro logo" className="h-8 w-8" />
+              <h2 className="text-2xl font-semibold">RoomStagerPro</h2>
+            </div>
             <p className="text-gray-300 mb-4">
               Expert resources to help property owners showcase their homes at their best and achieve faster sales at better prices.
             </p>
@@ -94,8 +97,8 @@ export default function Footer() {
           </div>
         </div>
         
-        <div className="mt-12 pt-8 border-t border-gray-700 text-center text-gray-400 text-sm">
-          <p>&copy; {new Date().getFullYear()} StagingPro. All rights reserved.</p>
+        <div className="mt-12 border-t border-gray-700 pt-8 text-center text-sm text-gray-400">
+          <p>&copy; {new Date().getFullYear()} RoomStagerPro. All rights reserved.</p>
         </div>
       </div>
     </footer>

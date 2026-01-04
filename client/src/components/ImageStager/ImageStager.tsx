@@ -85,16 +85,16 @@ export default function ImageStager() {
 
 
   return (
-    <div className="w-full max-w-5xl mx-auto">
-      <Card className="p-6 shadow-md bg-white pp-card">
-        <div className="space-y-6 pb-36 md:pb-0">
-          <div className="text-center space-y-3">
-            <h3 className="text-2xl font-bold">Transform Your Room with AI Staging</h3>
-            <p className="text-gray-600">
+    <div className="w-full max-w-4xl mx-auto px-2 md:px-0">
+      <Card className="p-6 md:px-8 shadow-md bg-white pp-card">
+        <div className="space-y-6 md:space-y-5 pb-36 md:pb-0">
+          <div className="text-center space-y-3 md:space-y-4">
+            <h3 className="text-2xl md:text-3xl font-bold">Transform Your Room with AI Staging</h3>
+            <p className="text-gray-600 md:text-lg">
               Upload a photo of your empty room and our AI will transform it into a beautifully staged space in seconds!
             </p>
             <div>
-              <p className="text-sm text-blue-600">
+              <p className="text-sm md:text-base text-blue-600">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -106,7 +106,7 @@ export default function ImageStager() {
 
           <RoomTypeSelect roomType={roomType} onRoomTypeChange={setRoomType} />
 
-          <div className="w-full space-y-4 md:space-y-6 md:max-w-4xl md:mx-auto">
+          <div className="w-full space-y-4 md:space-y-5 md:max-w-4xl md:mx-auto">
             <div className="md:hidden space-y-4">
               <div
                 className="pp-panel w-full rounded-2xl border border-slate-300/90 bg-slate-200/70 p-1.5 shadow-inner flex gap-1.5"
@@ -177,7 +177,7 @@ export default function ImageStager() {
               </div>
             </div>
 
-            <div className="hidden md:grid gap-6 md:grid-cols-2 items-stretch">
+            <div className="hidden md:grid gap-5 md:grid-cols-2 items-stretch">
               <ImageUploadPanel
                 originalImage={originalImage}
                 onTriggerFileInput={triggerFileInput}

@@ -117,10 +117,10 @@ export default function Home() {
       </section>
 
       {/* Image Stager Section */}
-      <section className="py-16 bg-slate-50 border-t border-slate-200/70">
+      <section id="ai-stager" className="py-16 md:py-12 bg-slate-50 border-t border-slate-200/70">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-8">Try Our AI Room Staging Tool</h2>
-          <p className="text-lg text-gray-600 text-center mb-12 max-w-3xl mx-auto">
+          <h2 className="text-3xl md:text-[2.65rem] font-bold text-center mb-8 md:mb-6">Try Our AI Room Staging Tool</h2>
+          <p className="text-lg md:text-xl text-gray-600 text-center mb-12 md:mb-9 max-w-3xl mx-auto">
             Upload a photo of your empty room and watch as our AI transforms it into a beautifully staged space. See the potential of your property in seconds!
           </p>
           <ImageStager />
