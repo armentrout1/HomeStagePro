@@ -3,17 +3,14 @@
  * See docs/staging/staging-profiles.md
  * If you change staging behavior, update the MD in the same change.
  */
-import { useState, useRef, ChangeEvent, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { queryClient } from "@/lib/queryClient";
 
-import { roomTypes } from "./constants";
-import { SaveImagePayload } from "./types";
 import { fetchUsageStatus as fetchUsageStatusApi } from "./api/usageStatusApi";
-import { generateStagedRoom } from "./api/stagingApi";
-import { saveStagedImage } from "./api/stagedImagesApi";
 import { useUsageStatus } from "./hooks/useUsageStatus";
+import { useImageUpload } from "./hooks/useImageUpload";
+import { useStageRoom } from "./hooks/useStageRoom";
 import { UsageStatusBanner } from "./components/UsageStatusBanner";
 import { RoomTypeSelect } from "./components/RoomTypeSelect";
 import { ImageUploadPanel } from "./components/ImageUploadPanel";
@@ -29,140 +26,37 @@ export default function ImageStager() {
   const [roomType, setRoomType] = useState("living_room");
   const [progressPhase, setProgressPhase] = useState<string>("");
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   
   const { usageStatus, isLoadingUsage, refreshUsageStatus } = useUsageStatus();
 
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const { fileInputRef, triggerFileInput, handleFileChange } = useImageUpload({
+    toast,
+    setOriginalImage,
+    resetStagedImage: () => setStagedImage(null),
+    // maxBytes omitted to use default 10MB
+  });
 
-    if (!file.type.includes('image/')) {
-      toast.error(
-        "Invalid file type",
-        "Please upload an image file (JPG, PNG, etc.)"
-      );
-      return;
-    }
-
-    // Reset the staged image when a new file is uploaded
-    setStagedImage(null);
-    
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      if (event.target?.result) {
-        setOriginalImage(event.target.result as string);
-      }
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     setOriginalImage(null);
     setStagedImage(null);
     setRoomType("living_room");
     
     toast.success("Reset complete", "All images have been cleared");
-  };
+  }, [toast, setOriginalImage, setStagedImage, setRoomType]);
   
-  const handleStageImage = async () => {
-    if (!originalImage) {
-      toast.error(
-        "No image selected",
-        "Please upload an image before staging"
-      );
-      return;
-    }
+  const { stageRoom } = useStageRoom({
+    originalImage,
+    roomType,
+    setStagedImage,
+    setIsLoading,
+    setIsSaving,
+    setProgressPhase,
+    toast,
+    refreshUsageStatus,
+  });
 
-    setIsLoading(true);
-    try {
-      setProgressPhase("Preparing image…");
-      // Remove the data URL prefix to get just the base64 data
-      const base64Image = originalImage.split(',')[1];
-
-      // Get the selected room type label for the prompt
-      const selectedRoomTypeLabel = roomTypes.find(rt => rt.value === roomType)?.label || "Room";
-
-      // Log the staging process
-      console.log(`Starting staging process for ${selectedRoomTypeLabel}`);
-
-      setProgressPhase("Generating staged image…");
-      const result = await generateStagedRoom({
-        imageBase64: base64Image,
-        roomTypeLabel: selectedRoomTypeLabel
-      });
-
-      if (!result.ok) {
-        throw new Error(result.errorMessage);
-      }
-
-      const data = result.data;
-
-      setProgressPhase("Finalizing…");
-      const stagedPreviewUrl = data.stagedSignedUrl ?? data.imageUrl ?? null;
-      setStagedImage(stagedPreviewUrl);
-      
-      // Save the staged image to the database
-      setProgressPhase("Saving…");
-      await saveImageToDatabase({
-        storageBucket: data.storageBucket,
-        originalStoragePath: data.originalStoragePath,
-        stagedStoragePath: data.stagedStoragePath,
-        originalImageUrl: data.originalSignedUrl ?? null,
-        stagedImageUrl: data.stagedSignedUrl ?? data.imageUrl ?? null,
-      });
-      
-      toast.success("Success!", "Your staged room image is ready");
-      
-      // Refresh usage status after successful staging
-      refreshUsageStatus();
-    } catch (error) {
-      console.error('Error staging image:', error);
-      toast.error(
-        "Error",
-        error instanceof Error ? error.message : "Failed to generate staged image"
-      );
-      
-      // Refresh usage status even after error (might be due to limit)
-      refreshUsageStatus();
-      setProgressPhase("");
-    } finally {
-      setIsLoading(false);
-      setProgressPhase("");
-    }
-  };
-  
-  const saveImageToDatabase = async (payload: SaveImagePayload) => {
-    if (!originalImage || !payload?.stagedStoragePath || !payload?.originalStoragePath) return;
-    
-    setIsSaving(true);
-    try {
-      const result = await saveStagedImage({
-        storageBucket: payload.storageBucket,
-        originalStoragePath: payload.originalStoragePath,
-        stagedStoragePath: payload.stagedStoragePath,
-        originalImageUrl: payload.originalImageUrl,
-        stagedImageUrl: payload.stagedImageUrl,
-        roomType: roomTypes.find(rt => rt.value === roomType)?.label || "Unknown",
-      });
-      
-      if (!result.ok) {
-        throw new Error(result.errorMessage);
-      }
-      
-      // Invalidate any queries that might display staged images
-      queryClient.invalidateQueries({ queryKey: ['/api/staged-images'] });
-      
-    } catch (error) {
-      console.error('Error saving image to database:', error);
-      // Don't show error toast since this is a background operation
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleDownload = () => {
+  const handleDownload = useCallback(() => {
     if (!stagedImage) return;
     
     const link = document.createElement('a');
@@ -171,11 +65,8 @@ export default function ImageStager() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  };
+  }, [stagedImage]);
 
-  const triggerFileInput = () => {
-    fileInputRef.current?.click();
-  };
 
   return (
     <div className="w-full max-w-5xl mx-auto">
@@ -220,7 +111,7 @@ export default function ImageStager() {
           isLoading={isLoading}
           usageStatus={usageStatus}
           onUploadClick={triggerFileInput}
-          onStageClick={handleStageImage}
+          onStageClick={stageRoom}
           onResetClick={handleReset}
           onDownloadClick={handleDownload}
         />
