@@ -1,0 +1,23 @@
+# Dependency directories
+node_modules
+npm-debug.log
+
+# Git and VCS
+.git
+.gitignore
+
+# Build artifacts
+dist
+.turbo
+.next
+
+# Environment & local config
+.env
+.env.*
+.DS_Store
+
+# Logs & temp files
+logs
+*.log
+tmp
+*.tmp
