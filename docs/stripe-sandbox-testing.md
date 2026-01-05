@@ -25,6 +25,8 @@ Install the Stripe CLI using the appropriate `brew`, `choco`, `scoop`, or `npm` 
 - `400 signature missing/misconfigured` — `STRIPE_WEBHOOK_SECRET` is not set.
 - `signature verification failed` — wrong `whsec` value for this environment.
 - `404 on /api/webhook` — incorrect `--forward-to` path or port.
+- `mode: live` on `GET /api/stripe/status` — you are using `sk_live_...` on the server.  
+  Fix: replace `STRIPE_SECRET_KEY` with `sk_test_...` (sandbox/test), update `VITE_STRIPE_PUBLIC_KEY` to `pk_test_...`, then restart server + Vite.
 
 ## Verify Current Environment
 - Call `GET /api/stripe/status` and confirm:
