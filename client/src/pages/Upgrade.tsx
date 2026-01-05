@@ -3,16 +3,49 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { AdUnit } from "@/components/ui/ad-unit";
 import { useToast } from "@/hooks/use-toast";
-import { loadStripe } from "@stripe/stripe-js";
+import { loadStripe, type Stripe } from "@stripe/stripe-js";
 import { apiRequest } from "@/lib/queryClient";
 
 // Make sure to call `loadStripe` outside of a component's render to avoid
 // recreating the `Stripe` object on every render.
-let stripePromise: Promise<any> | null = null;
-const getStripe = () => {
-  if (!stripePromise && import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
-    stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+let stripePromise: Promise<Stripe | null> | null = null;
+let runtimeStripePublicKey: string | null | undefined = undefined;
+
+const getStripePublicKey = async (): Promise<string | null> => {
+  if (import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
+    return import.meta.env.VITE_STRIPE_PUBLIC_KEY;
   }
+
+  if (runtimeStripePublicKey !== undefined) {
+    return runtimeStripePublicKey;
+  }
+
+  try {
+    const response = await fetch("/api/public-config");
+    if (!response.ok) {
+      runtimeStripePublicKey = null;
+      return runtimeStripePublicKey;
+    }
+
+    const { stripePublicKey } = await response.json();
+    runtimeStripePublicKey = stripePublicKey ?? null;
+  } catch {
+    runtimeStripePublicKey = null;
+  }
+
+  return runtimeStripePublicKey ?? null;
+};
+
+const getStripeAsync = async (): Promise<Stripe | null> => {
+  const key = await getStripePublicKey();
+  if (!key) {
+    return null;
+  }
+
+  if (!stripePromise) {
+    stripePromise = loadStripe(key);
+  }
+
   return stripePromise;
 };
 
@@ -135,16 +168,6 @@ export default function Upgrade() {
 
   const handleCheckout = async (plan: PricingPlan) => {
     setIsLoading(plan.id);
-    
-    if (!getStripe()) {
-      toast.error(
-        "Error",
-        "Payment system is not available. Please try again later.",
-      );
-
-      setIsLoading(null);
-      return;
-    }
 
     try {
       // Create checkout session on the server
@@ -160,12 +183,23 @@ export default function Upgrade() {
 
       const session = await response.json();
 
-      // Redirect to Stripe Checkout
-      const stripe = await getStripe();
-      if (!stripe) {
-        throw new Error("Stripe failed to initialize");
+      if (session?.url) {
+        window.location.href = session.url;
+        return;
       }
 
+      const stripe = await getStripeAsync();
+      if (!stripe) {
+        toast.error(
+          "Error",
+          "Payment system is not available. Please try again later.",
+        );
+
+        setIsLoading(null);
+        return;
+      }
+
+      // Redirect to Stripe Checkout
       const { error } = await stripe.redirectToCheckout({
         sessionId: session.id,
       });
