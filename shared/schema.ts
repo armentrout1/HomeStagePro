@@ -1,4 +1,14 @@
-import { pgTable, text, serial, integer, boolean, timestamp, varchar, json } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  serial,
+  integer,
+  boolean,
+  timestamp,
+  varchar,
+  jsonb,
+  bigserial,
+} from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from "drizzle-orm";
@@ -109,3 +119,28 @@ export const propertiesRelations = relations(properties, ({ one, many }) => ({
     references: [stagedImages.id],
   }),
 }));
+
+// Stripe purchases table
+export const stripePurchases = pgTable("stripe_purchases", {
+  id: bigserial("id", { mode: "number" }).primaryKey(),
+  stripeEventId: text("stripe_event_id").notNull(),
+  checkoutSessionId: text("checkout_session_id").notNull(),
+  paymentIntentId: text("payment_intent_id"),
+  planId: text("plan_id").notNull(),
+  planLabel: text("plan_label"),
+  amountTotalCents: integer("amount_total_cents").notNull(),
+  currency: text("currency").notNull(),
+  paymentStatus: text("payment_status").notNull(),
+  livemode: boolean("livemode").notNull().default(false),
+  environment: text("environment").notNull().default("test"),
+  customerEmail: text("customer_email"),
+  cardBrand: text("card_brand"),
+  cardLast4: text("card_last4"),
+  receiptUrl: text("receipt_url"),
+  stripeEvent: jsonb("stripe_event"),
+  stripeSession: jsonb("stripe_session"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export type StripePurchase = typeof stripePurchases.$inferSelect;
+export type InsertStripePurchase = typeof stripePurchases.$inferInsert;

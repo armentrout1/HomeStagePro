@@ -1,13 +1,16 @@
-import { 
-  users, 
-  type User, 
-  type InsertUser, 
-  stagedImages, 
-  type StagedImage, 
+import {
+  users,
+  type User,
+  type InsertUser,
+  stagedImages,
+  type StagedImage,
   type InsertStagedImage,
   properties,
   type Property,
-  type InsertProperty
+  type InsertProperty,
+  stripePurchases,
+  type StripePurchase,
+  type InsertStripePurchase,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
@@ -28,6 +31,9 @@ export interface IStorage {
   getPropertiesByUserId(userId: number): Promise<Property[]>;
   createProperty(property: InsertProperty): Promise<Property>;
   updateProperty(id: number, property: Partial<InsertProperty>): Promise<Property | undefined>;
+
+  // Stripe purchase operations
+  createStripePurchase(purchase: InsertStripePurchase): Promise<StripePurchase>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -93,6 +99,12 @@ export class DatabaseStorage implements IStorage {
       .where(eq(properties.id, id))
       .returning();
     return updatedProperty || undefined;
+  }
+
+  // Stripe purchase operations
+  async createStripePurchase(purchase: InsertStripePurchase): Promise<StripePurchase> {
+    const [row] = await db.insert(stripePurchases).values(purchase).returning();
+    return row;
   }
 }
 

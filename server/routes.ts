@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import type { InsertStripePurchase } from "@shared/schema";
 import {
   generateStagedRoom,
   saveStagedImage,
@@ -224,13 +225,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
         case "checkout.session.completed": {
           const session = event.data.object as Stripe.Checkout.Session;
 
-          if (session.payment_status === "paid") {
-            const { planId } = session.metadata || {};
-            // Generate JWT token based on the plan
-            if (planId) {
-              console.log(`Processing completed payment for plan: ${planId}`);
-              // Token will be set on session status check
+          if (session.payment_status !== "paid") {
+            break;
+          }
+
+          const purchase: InsertStripePurchase = {
+            stripeEventId: event.id,
+            checkoutSessionId: session.id,
+            paymentIntentId:
+              typeof session.payment_intent === "string"
+                ? session.payment_intent
+                : null,
+            planId: session.metadata?.planId ?? "unknown",
+            planLabel: session.metadata?.planLabel ?? null,
+            amountTotalCents: session.amount_total ?? 0,
+            currency: session.currency ?? "usd",
+            paymentStatus: session.payment_status ?? "unknown",
+            livemode: Boolean(event.livemode),
+            environment: event.livemode ? "live" : "test",
+            customerEmail:
+              session.customer_details?.email ??
+              session.customer_email ??
+              null,
+            cardBrand: null,
+            cardLast4: null,
+            receiptUrl: null,
+            stripeEvent: event as any,
+            stripeSession: session as any,
+          };
+
+          try {
+            await storage.createStripePurchase(purchase);
+          } catch (err) {
+            const dbError = err as { code?: string };
+            if (dbError?.code === "23505") {
+              console.warn(
+                `Stripe purchase already recorded for event ${event.id}`,
+              );
+            } else {
+              throw err;
             }
+          }
+
+          const { planId } = session.metadata || {};
+          // Generate JWT token based on the plan
+          if (planId) {
+            console.log(`Processing completed payment for plan: ${planId}`);
+            // Token will be set on session status check
           }
           break;
         }
