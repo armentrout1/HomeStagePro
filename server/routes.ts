@@ -49,6 +49,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // IP usage status endpoint
   app.get('/api/usage-status', checkAccessToken, getIpUsageStatus);
   
+  app.get('/api/public-config', (req, res) => {
+    const stripePublicKey = process.env.VITE_STRIPE_PUBLIC_KEY ?? null;
+    res.json({ stripePublicKey });
+  });
+  
   // Initialize Stripe
   const stripe = process.env.STRIPE_SECRET_KEY 
     ? new Stripe(process.env.STRIPE_SECRET_KEY)
