@@ -67,6 +67,11 @@ const logMessage =
     : "DB: using local config";
 
 log(logMessage);
+log(
+  `DB target: mode=${dbMode} host=${PGHOST ?? "n/a"} db=${
+    PGDATABASE ?? "n/a"
+  } databaseUrlSet=${Boolean(DATABASE_URL)}`
+);
 
 const logNamespace = "db";
 

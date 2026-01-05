@@ -1,7 +1,9 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import type { InsertStripePurchase } from "@shared/schema";
+import { stripePurchases, type InsertStripePurchase } from "@shared/schema";
+import { db } from "./db";
+import { sql } from "drizzle-orm";
 import {
   generateStagedRoom,
   saveStagedImage,
@@ -24,6 +26,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Health check endpoint for custom domain validation
   app.get('/api/health', (req, res) => {
     res.json({ status: 'ok' });
+  });
+
+  // TODO: DEBUG ROUTE - REMOVE BEFORE PRODUCTION
+  app.get("/api/stripe-purchases/count", async (req, res) => {
+    const debugHeader = req.header("X-Debug-Key");
+    const expectedKey = process.env.DEBUG_KEY;
+
+    if (!expectedKey || debugHeader !== expectedKey) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+
+    const [result] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(stripePurchases);
+
+    res.json({ count: Number(result?.count ?? 0) });
   });
   
   // Create a fallback route for client-side routing
@@ -256,6 +274,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           try {
             await storage.createStripePurchase(purchase);
+            console.log(
+              `[stripe_purchases] inserted event=${event.id} session=${session.id} plan=${purchase.planId} amount=${purchase.amountTotalCents}`,
+            );
           } catch (err) {
             const dbError = err as { code?: string };
             if (dbError?.code === "23505") {
