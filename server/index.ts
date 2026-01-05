@@ -4,8 +4,15 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
-// Increase the JSON payload size limit to 50MB
-app.use(express.json({ limit: '50mb' }));
+// Increase the JSON payload size limit to 50MB and capture raw body for Stripe webhooks
+app.use(
+  express.json({
+    limit: '50mb',
+    verify: (req, _res, buf) => {
+      (req as any).rawBody = buf;
+    },
+  }),
+);
 app.use(express.urlencoded({ extended: false, limit: '50mb' }));
 
 app.use((req, res, next) => {

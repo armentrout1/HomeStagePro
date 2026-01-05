@@ -53,6 +53,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const stripe = process.env.STRIPE_SECRET_KEY 
     ? new Stripe(process.env.STRIPE_SECRET_KEY)
     : null;
+  
+  app.get('/api/stripe/status', (req, res) => {
+    const secretKey = process.env.STRIPE_SECRET_KEY;
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+    let mode: "test" | "live" | "unknown" = "unknown";
+
+    if (secretKey?.startsWith("sk_test_")) {
+      mode = "test";
+    } else if (secretKey?.startsWith("sk_live_")) {
+      mode = "live";
+    }
+
+    res.json({
+      stripeConfigured: Boolean(secretKey && stripe),
+      webhookConfigured: Boolean(webhookSecret),
+      mode,
+      host: req.get("host") ?? null,
+      protocol: req.protocol,
+      webhookPath: "/api/webhook",
+    });
+  });
     
   // Use cookie-parser middleware
   app.use(cookieParser());
@@ -170,17 +191,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!stripe) {
       return res.status(500).json({ error: "Stripe is not configured" });
     }
-    
-    const payload = req.body;
-    
+
+    const signature = req.headers["stripe-signature"];
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+    if (!signature || !webhookSecret) {
+      return res
+        .status(400)
+        .json({ error: "Webhook signature missing or misconfigured" });
+    }
+
+    let event: Stripe.Event;
+
     try {
-      const event = payload;
-      
+      event = stripe.webhooks.constructEvent(
+        (req as any).rawBody,
+        signature as string,
+        webhookSecret,
+      );
+    } catch (err) {
+      console.error("Webhook signature verification failed:", err);
+      return res.status(400).send("Webhook signature verification failed");
+    }
+
+    try {
       switch (event.type) {
-        case 'checkout.session.completed': {
-          const session = event.data.object;
-          
-          if (session.payment_status === 'paid') {
+        case "checkout.session.completed": {
+          const session = event.data.object as Stripe.Checkout.Session;
+
+          if (session.payment_status === "paid") {
             const { planId } = session.metadata || {};
             // Generate JWT token based on the plan
             if (planId) {
@@ -193,11 +232,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         default:
           console.log(`Unhandled event type: ${event.type}`);
       }
-      
+
       res.json({ received: true });
     } catch (err) {
       const error = err as Error;
-      console.error('Webhook error:', error);
+      console.error("Webhook error:", error);
       res.status(400).send(`Webhook Error: ${error.message}`);
     }
   });
