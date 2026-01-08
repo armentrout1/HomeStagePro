@@ -66,6 +66,21 @@ const client = (() => {
   return postgres(config);
 })();
 
+void (async () => {
+  try {
+    const [info] =
+      await client`select current_database() as db, current_schema() as schema, inet_server_addr() as server, inet_server_port() as port`;
+    const dbName = info?.db ?? "unknown";
+    const schemaName = info?.schema ?? "unknown";
+    const serverAddr = info?.server ?? "unknown";
+    const serverPort = info?.port ?? "unknown";
+    log(`[db] connected db=${dbName} schema=${schemaName} server=${serverAddr}:${serverPort}`);
+  } catch (error) {
+    const message = (error as Error).message || "Unknown error";
+    log(`[db] connection_probe_failed ${message}`);
+  }
+})();
+
 export const db = drizzle(client);
 
 const modeLabel = dbMode === "database_url" ? "DATABASE_URL" : "PG*";
