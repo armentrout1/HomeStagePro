@@ -388,47 +388,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .where(eq(stripePurchases.checkoutSessionId, session_id as string))
           .limit(1);
 
-        let tokenId: string;
         let creditsGranted = false;
+        const existingTokenId = existingPurchase?.tokenId;
 
-        if (existingPurchase?.tokenId) {
-          // Credits already granted, reuse existing tokenId
-          tokenId = existingPurchase.tokenId;
-        } else {
-          // First time: generate new token, grant credits
-          const tokenResult = generateToken(planId);
-          tokenId = tokenResult.payload.jti!;
+        const tokenResult = existingTokenId
+          ? generateToken(planId, existingTokenId)
+          : generateToken(planId);
 
-          // Create/get usage entitlement row
-          await getOrCreateUsageEntitlement(tokenId);
+        const { token, payload } = tokenResult;
+        const tokenId = payload?.jti ?? payload?.sub ?? null;
 
-          // Grant paid credits based on plan
-          await grantPaidCredits(tokenId, planConfig.uses);
+        if (!tokenId) {
+          console.warn(`[checkout-status] tokenId_missing session=${session.id} plan=${planId}`);
+          setAccessTokenCookie(res, tokenResult);
 
-          // Link stripe_purchases row to tokenId (for idempotency tracking)
-          const updateResult = await db
-            .update(stripePurchases)
-            .set({ tokenId })
-            .where(eq(stripePurchases.checkoutSessionId, session_id as string));
-
-          const rowsUpdated = (updateResult as any).rowCount ?? (updateResult as any).changes ?? 0;
-          if (rowsUpdated === 0) {
-            console.warn(
-              `[entitlements] purchase_row_missing session=${session_id} tokenId=${tokenId.slice(0, 8)}`,
-            );
-          }
-
-          creditsGranted = true;
-          console.log(
-            `[entitlements] granted plan=${planId} credits=${planConfig.uses} tokenId=${tokenId.slice(0, 8)} session=${session_id}`,
-          );
+          const expirationDate = new Date(payload.expiresAt * 1000);
+          return res.json({
+            status: "complete",
+            planName: planLabel ?? planId,
+            accessUntil: expirationDate.toISOString(),
+            usageAllowed: payload.totalUses,
+            usesLeft: payload.usesLeft,
+            planId: payload.planId,
+            quality: payload.quality,
+            creditsGranted,
+          });
         }
 
-        // Generate token (reuse tokenId for consistency)
-        const tokenResult = generateToken(planId, tokenId);
-        setAccessTokenCookie(res, tokenResult);
+        if (!existingTokenId) {
+          try {
+            await getOrCreateUsageEntitlement(tokenId);
+            await grantPaidCredits(tokenId, planConfig.uses);
 
-        const payload = tokenResult.payload;
+            const updated = await db
+              .update(stripePurchases)
+              .set({ tokenId })
+              .where(eq(stripePurchases.checkoutSessionId, session.id))
+              .returning();
+
+            if (!updated?.length) {
+              console.warn("[entitlements] purchase_row_missing", {
+                session: session.id,
+                tokenId: tokenId.slice(0, 8),
+              });
+            }
+
+            console.log("[entitlements] granted", {
+              plan: planId,
+              credits: planConfig.uses,
+              session: session.id,
+              tokenId: tokenId.slice(0, 8),
+            });
+            creditsGranted = true;
+          } catch (err) {
+            console.error("[checkout-status] entitlement_grant_failed", {
+              session: session.id,
+              tokenId: tokenId.slice(0, 8),
+              error: err,
+            });
+          }
+        }
+
+        setAccessTokenCookie(res, tokenResult);
         const expirationDate = new Date(payload.expiresAt * 1000);
 
         return res.json({
