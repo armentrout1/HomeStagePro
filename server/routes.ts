@@ -396,7 +396,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           : generateToken(planId);
 
         const { token, payload } = tokenResult;
-        const tokenId = payload?.jti ?? payload?.sub ?? null;
+        const decoded = verifyToken(token);
+        const tokenId = decoded?.jti ?? decoded?.sub ?? null;
 
         if (!tokenId) {
           console.warn(`[checkout-status] tokenId_missing session=${session.id} plan=${planId}`);
