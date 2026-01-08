@@ -92,11 +92,21 @@ export const getAllIpUsage = (): Record<string, number> => {
  * Also includes information about any active access token
  */
 export const getIpUsageStatus = (req: Request, res: Response) => {
+  const clientIp = getClientIp(req);
+  const freeUsed = ipUsageStore[clientIp] || 0;
+  const freeRemaining = Math.max(0, FREE_USAGE_LIMIT - freeUsed);
+  const freeUsageSummary = {
+    freeLimit: FREE_USAGE_LIMIT,
+    freeUsed,
+    freeRemaining,
+  };
+
   // Check for valid access token first
   if (hasValidAccess(req) && req.accessTokenPayload) {
     // User has a valid access token
     const payload = req.accessTokenPayload;
     const now = Math.floor(Date.now() / 1000);
+
     const timeRemaining = Math.max(payload.expiresAt - now, 0);
 
     const response = {
@@ -109,6 +119,7 @@ export const getIpUsageStatus = (req: Request, res: Response) => {
       quality: payload.quality,
       expiresAt: new Date(payload.expiresAt * 1000).toISOString(),
       timeRemainingSeconds: timeRemaining,
+      ...freeUsageSummary,
     };
 
     return res.json(response);
@@ -121,21 +132,17 @@ export const getIpUsageStatus = (req: Request, res: Response) => {
       remaining: UNLIMITED_USAGE_LIMIT,
       status: "unlimited",
       quality: FREE_QUALITY,
+      ...freeUsageSummary,
     });
   }
 
   // If no token, use IP-based limiting
-  // Get the client IP address
-  const clientIp = getClientIp(req);
-  
-  // Get the usage count (0 if the IP isn't in the store yet)
-  const usageCount = ipUsageStore[clientIp] || 0;
-  
   return res.json({
-    usageCount,
+    usageCount: freeUsed,
     limit: FREE_USAGE_LIMIT,
-    remaining: Math.max(0, FREE_USAGE_LIMIT - usageCount),
-    status: usageCount >= FREE_USAGE_LIMIT ? "exceeded" : "active",
+    remaining: freeRemaining,
+    status: freeRemaining === 0 ? "exceeded" : "active",
     quality: FREE_QUALITY,
+    ...freeUsageSummary,
   });
 };

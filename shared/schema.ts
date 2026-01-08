@@ -151,3 +151,24 @@ export const stripePurchases = pgTable("stripe_purchases", {
 
 export type StripePurchase = typeof stripePurchases.$inferSelect;
 export type InsertStripePurchase = typeof stripePurchases.$inferInsert;
+
+export const usageEntitlements = pgTable(
+  "usage_entitlements",
+  {
+    tokenId: text("token_id").notNull(),
+    freeGranted: integer("free_granted").notNull().default(2),
+    freeUsed: integer("free_used").notNull().default(0),
+    paidGranted: integer("paid_granted").notNull().default(0),
+    paidUsed: integer("paid_used").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => ({
+    uxUsageEntitlementsToken: uniqueIndex("ux_usage_entitlements_token").on(
+      table.tokenId,
+    ),
+  }),
+);
+
+export type UsageEntitlement = typeof usageEntitlements.$inferSelect;
+export type InsertUsageEntitlement = typeof usageEntitlements.$inferInsert;

@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { stripePurchases, type InsertStripePurchase } from "@shared/schema";
 import { db } from "./db";
+import { getOrCreateUsageEntitlement, ensureDbUsageOnSuccess } from "./usageEntitlements";
 import { sql } from "drizzle-orm";
 import {
   generateStagedRoom,
@@ -18,7 +19,7 @@ import {
   checkAccessToken,
   setAccessTokenCookie,
   attachEntitlement,
-  ensureTokenUsageOnSuccess,
+  getTokenIdFromRequest,
 } from "./tokenManager";
 import { getPlanConfig, resolvePlanId } from "./plans";
 
@@ -65,8 +66,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // put application routes here
   // prefix all routes with /api
 
-  // IP usage status endpoint
-  app.get('/api/usage-status', checkAccessToken, getIpUsageStatus);
+  // IP / token usage status endpoint
+  app.get('/api/usage-status', checkAccessToken, async (req, res) => {
+    const tokenId = getTokenIdFromRequest(req);
+
+    if (!tokenId) {
+      return getIpUsageStatus(req, res);
+    }
+
+    try {
+      const entitlement = await getOrCreateUsageEntitlement(tokenId);
+      const freeRemaining = Math.max(0, entitlement.freeGranted - entitlement.freeUsed);
+      const paidRemaining = Math.max(0, entitlement.paidGranted - entitlement.paidUsed);
+      const totalRemaining = freeRemaining + paidRemaining;
+
+      return res.json({
+        freeLimit: entitlement.freeGranted,
+        freeUsed: entitlement.freeUsed,
+        freeRemaining,
+        paidGranted: entitlement.paidGranted,
+        paidUsed: entitlement.paidUsed,
+        paidRemaining,
+        totalRemaining,
+      });
+    } catch (error) {
+      console.error("Failed to load usage entitlement", error);
+      return res.status(500).json({ error: "Failed to load usage entitlement" });
+    }
+  });
   
   app.get('/api/public-config', (req, res) => {
     const stripePublicKey = process.env.VITE_STRIPE_PUBLIC_KEY ?? null;
@@ -108,7 +135,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     checkAccessToken,
     attachEntitlement,
     ipLimiter,
-    ensureTokenUsageOnSuccess,
+    ensureDbUsageOnSuccess,
     generateStagedRoom,
   );
   

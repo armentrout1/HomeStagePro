@@ -1,5 +1,7 @@
+import { randomUUID } from "crypto";
 import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
+
 import {
   PlanConfig,
   PlanId,
@@ -19,6 +21,8 @@ export interface TokenPayload {
   totalUses: number;
   expiresAt: number;
   quality: PlanConfig["quality"];
+  jti?: string;
+  sub?: string;
 }
 
 export interface TokenResult {
@@ -29,6 +33,7 @@ export interface TokenResult {
 export const ACCESS_TOKEN_COOKIE_NAME = "access_token";
 
 export function generateToken(planIdRaw: string): TokenResult {
+
   const planId = resolvePlanId(planIdRaw);
 
   if (!planId) {
@@ -52,6 +57,7 @@ export function generateToken(planIdRaw: string): TokenResult {
 
   return {
     token: jwt.sign(payload, TOKEN_SECRET, {
+      jwtid: randomUUID(),
       expiresIn: payload.expiresAt - now,
     }),
     payload,
@@ -193,6 +199,29 @@ export function attachEntitlement(
 
 export function hasValidAccess(req: Request): boolean {
   return !!(req.accessTokenPayload && req.accessTokenPayload.usesLeft > 0);
+}
+
+export function getTokenIdFromRequest(req: Request): string | null {
+  const payload =
+    req.accessTokenPayload ??
+    (() => {
+      const token = req.cookies?.[ACCESS_TOKEN_COOKIE_NAME];
+      return token ? verifyToken(token) : null;
+    })();
+
+  if (!payload) {
+    return null;
+  }
+
+  if (payload.jti && typeof payload.jti === "string") {
+    return payload.jti;
+  }
+
+  if (payload.sub && typeof payload.sub === "string") {
+    return payload.sub;
+  }
+
+  return null;
 }
 
 declare global {

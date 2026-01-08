@@ -1,7 +1,9 @@
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { useMemo, useEffect, useState } from "react";
 import { AdUnit } from "@/components/ui/ad-unit";
+import {
+  PricingPlans,
+  type PricingPlan as SharedPricingPlan,
+} from "@/components/billing/PricingPlans";
 import { useToast } from "@/hooks/use-toast";
 import { loadStripe, type Stripe } from "@stripe/stripe-js";
 import { apiRequest } from "@/lib/queryClient";
@@ -62,11 +64,12 @@ interface FeatureDefinition {
   label: string;
 }
 
-interface PricingPlan {
+interface UpgradePricingPlan {
   id: string;
   name: string;
   price: number;
   description: string;
+
   highlight?: boolean;
   features: Record<FeatureKey, boolean>;
 }
@@ -101,72 +104,91 @@ export default function Upgrade() {
   const [isLoading, setIsLoading] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const pricingPlans: PricingPlan[] = [
-    {
-      id: "quick-pack",
-      name: "Quick Pack",
-      price: 9,
-      description: "5 stagings to use anytime",
-      features: createFeatureSet({
-        high_res_downloads: true,
-        secure_token_auth: true,
-        usage_tracking: false,
-        priority_processing: false,
-        access_all_styles: false,
-        future_styles: false,
-      }),
-    },
-    {
-      id: "value-pack",
-      name: "Value Pack",
-      price: 25,
-      description: "20 stagings to use anytime",
-      highlight: true,
-      features: createFeatureSet({
-        high_res_downloads: true,
-        secure_token_auth: true,
-        usage_tracking: true,
-        priority_processing: false,
-        access_all_styles: true,
-        future_styles: false,
-      }),
-    },
-    {
-      id: "pro-monthly",
-      name: "Pro Monthly",
-      price: 49,
-      description: "50 stagings per month",
-      features: createFeatureSet({
-        high_res_downloads: true,
-        secure_token_auth: true,
-        usage_tracking: true,
-        priority_processing: true,
-        access_all_styles: true,
-        future_styles: true,
-      }),
-    },
-  ];
+  const pricingPlans = useMemo<UpgradePricingPlan[]>(
+    () => [
+      {
+        id: "quick-pack",
+        name: "Quick Pack",
+        price: 9,
+        description: "5 stagings to use anytime",
+        features: createFeatureSet({
+          high_res_downloads: true,
+          secure_token_auth: true,
+          usage_tracking: false,
+          priority_processing: false,
+          access_all_styles: false,
+          future_styles: false,
+        }),
+      },
+      {
+        id: "value-pack",
+        name: "Value Pack",
+        price: 25,
+        description: "20 stagings to use anytime",
+        highlight: true,
+        features: createFeatureSet({
+          high_res_downloads: true,
+          secure_token_auth: true,
+          usage_tracking: true,
+          priority_processing: false,
+          access_all_styles: true,
+          future_styles: false,
+        }),
+      },
+      {
+        id: "pro-monthly",
+        name: "Pro Monthly",
+        price: 49,
+        description: "50 stagings per month",
+        features: createFeatureSet({
+          high_res_downloads: true,
+          secure_token_auth: true,
+          usage_tracking: true,
+          priority_processing: true,
+          access_all_styles: true,
+          future_styles: true,
+        }),
+      },
+    ],
+    [],
+  );
+
+  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(() => {
+    const highlightedPlan = pricingPlans.find((plan) => plan.highlight);
+    return highlightedPlan?.id ?? pricingPlans[0]?.id ?? null;
+  });
+
+  const pricingPlanCards: SharedPricingPlan[] = pricingPlans.map((plan) => ({
+    id: plan.id,
+    name: plan.name,
+    price: `$${plan.price}`,
+    subtitle: plan.description,
+    features: featureDefinitions
+      .filter((feature) => plan.features[feature.key])
+      .map((feature) => feature.label),
+    ctaLabel: isLoading === plan.id ? "Processing..." : "Get Started",
+  }));
 
   // Check for plan parameter in URL
   useEffect(() => {
-    // Parse the query parameters
     const searchParams = new URLSearchParams(window.location.search);
-    const planId = searchParams.get('plan');
-    
+    const planId = searchParams.get("plan");
+
     if (planId) {
-      // Find the plan with matching ID
-      const selectedPlan = pricingPlans.find(
-        (plan) => plan.id === planId
-      );
-      
+      const selectedPlan = pricingPlans.find((plan) => plan.id === planId);
       if (selectedPlan) {
-        // Auto-select the plan from the URL parameter
-        handleCheckout(selectedPlan);
+        setSelectedPlanId(selectedPlan.id);
+        handleCheckout(selectedPlan.id);
       }
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleCheckout = async (plan: PricingPlan) => {
+  const handleCheckout = async (planId: string) => {
+    const plan = pricingPlans.find((pricingPlan) => pricingPlan.id === planId);
+    if (!plan) {
+      return;
+    }
+
     setIsLoading(plan.id);
 
     try {
@@ -213,9 +235,8 @@ export default function Upgrade() {
         "Checkout Failed",
         error instanceof Error ? error.message : "Failed to initiate checkout",
       );
-
     }
-    
+
     setIsLoading(null);
   };
 
@@ -231,87 +252,12 @@ export default function Upgrade() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-          {pricingPlans.map((plan) => (
-            <Card
-              key={plan.id}
-              className={`relative p-6 flex flex-col border-2 rounded-2xl transition-transform duration-200 ease-out ${
-                plan.highlight
-                  ? "border-primary shadow-xl md:hover:scale-[1.05] md:hover:shadow-2xl md:hover:z-10"
-                  : "hover:border-primary hover:shadow-xl md:hover:scale-[1.03] md:hover:z-10"
-              }`}
-            >
-              <div className="mb-6">
-                <h3 className="text-2xl font-bold">{plan.name}</h3>
-                <div className="flex items-baseline mt-2">
-                  <span className="text-4xl font-extrabold">${plan.price}</span>
-                </div>
-                <p className="text-gray-600 mt-2">{plan.description}</p>
-              </div>
-              
-              <ul className="space-y-3 mb-6 flex-grow">
-                {featureDefinitions.map((feature) => {
-                  const included = plan.features[feature.key];
-                  return (
-                    <li
-                      key={feature.key}
-                      className="flex items-center text-sm text-gray-900"
-                    >
-                      {included ? (
-                        <svg
-                          className="h-5 w-5 text-green-500 mr-2"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M5 13l4 4L19 7"
-                          />
-                        </svg>
-                      ) : (
-                        <svg
-                          className="h-5 w-5 text-gray-500 mr-2"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M6 12h12"
-                          />
-                        </svg>
-                      )}
-                      {feature.label}
-                    </li>
-                  );
-                })}
-              </ul>
-              
-              <Button
-                onClick={() => handleCheckout(plan)}
-                className="w-full"
-                disabled={isLoading === plan.id}
-              >
-                {isLoading === plan.id ? (
-                  <span className="flex items-center">
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Processing...
-                  </span>
-                ) : (
-                  <span>Get Started</span>
-                )}
-              </Button>
-            </Card>
-          ))}
-        </div>
+        <PricingPlans
+          plans={pricingPlanCards}
+          selectedPlanId={selectedPlanId}
+          onSelectPlan={setSelectedPlanId}
+          onCtaClick={handleCheckout}
+        />
 
         <div className="bg-gray-50 p-6 rounded-lg mb-12">
           <div className="flex items-start">

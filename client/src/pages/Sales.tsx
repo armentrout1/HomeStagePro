@@ -1,16 +1,8 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { StarRating } from "@/components/ui/star-rating";
+import { PricingPlans, type PricingPlan } from "@/components/billing/PricingPlans";
 import { Link } from "wouter";
-
-// Pricing plan type
-interface PricingPlan {
-  id: string;
-  name: string;
-  price: number;
-  description: string;
-  features: string[];
-  highlight?: boolean;
-}
 
 // Sample before/after images
 const beforeAfterSamples = [
@@ -56,47 +48,44 @@ const testimonials = [
 // Pricing plans
 const pricingPlans: PricingPlan[] = [
   {
-    id: "day-pass",
-    name: "Day Pass",
-    price: 3,
-    description: "Perfect for a single property",
+    id: "quick-pack",
+    name: "Quick Pack",
+    price: "$9",
+    subtitle: "5 stagings to use anytime",
     features: [
-      "Unlimited stagings for 24 hours",
+      "5 AI stagings included",
+      "High-resolution downloads",
       "Secure token authentication",
-      "High-resolution images",
-      "Instant access after payment",
-      "Download all images"
-    ]
-  },
-  {
-    id: "pack-10",
-    name: "Staging Pack",
-    price: 9,
-    description: "Great for multiple properties",
-    features: [
-      "10 room stagings",
-      "No time limit",
-      "Secure token authentication",
-      "High-resolution images",
-      "Download all images"
+      "Use anytime, no expiration",
     ],
-    highlight: true
+    ctaLabel: "Get Started",
   },
   {
-    id: "unlimited",
-    name: "Unlimited",
-    price: 19,
-    description: "For real estate professionals",
+    id: "value-pack",
+    name: "Value Pack",
+    price: "$25",
+    subtitle: "20 stagings to use anytime",
     features: [
-      "Unlimited stagings for 30 days",
+      "20 AI stagings included",
+      "High-resolution downloads",
       "Secure token authentication",
-      "High-resolution images",
-      "Download all images",
+      "Access to all styles",
+    ],
+    ctaLabel: "Get Started",
+  },
+  {
+    id: "pro-monthly",
+    name: "Pro Monthly",
+    price: "$49",
+    subtitle: "50 stagings every month",
+    features: [
+      "50 AI stagings per month",
       "Priority processing",
-      "Custom furniture styles",
-      "Commercial use license"
-    ]
-  }
+      "Access to all styles",
+      "Upcoming style drops",
+    ],
+    ctaLabel: "Get Started",
+  },
 ];
 
 // Benefits of using AI staging
@@ -141,10 +130,10 @@ const stagingBenefits = [
 ];
 
 export default function Sales() {
-  // Handle upgrade click 
-  const handleUpgradeClick = (plan: PricingPlan) => {
-    // Navigate to the upgrade page with the selected plan
-    window.location.href = `/upgrade?plan=${plan.id}`;
+  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(pricingPlans[1]?.id ?? pricingPlans[0]?.id ?? null);
+
+  const handlePlanCtaClick = (planId: string) => {
+    window.location.href = `/upgrade?plan=${planId}`;
   };
 
   return (
@@ -218,59 +207,12 @@ export default function Sales() {
             <p className="text-center text-gray-600 mb-12 max-w-3xl mx-auto">
               Select the perfect plan for your needs. All plans include high-quality AI-generated stagings you can download and use immediately.
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {pricingPlans.map((plan) => (
-                <div 
-                  key={plan.id}
-                  className={`bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl ${
-                    plan.highlight ? 'border-2 border-primary transform scale-105' : ''
-                  }`}
-                >
-                  <div className={`p-6 ${plan.highlight ? 'bg-primary text-white' : 'bg-gray-50'}`}>
-                    <h3 className="text-2xl font-bold">{plan.name}</h3>
-                    <div className="mt-2 flex items-baseline">
-                      <span className="text-4xl font-bold">${plan.price}</span>
-                      {plan.id !== "unlimited" ? (
-                        <span className="ml-1 text-sm opacity-80">/one-time</span>
-                      ) : (
-                        <span className="ml-1 text-sm opacity-80">/month</span>
-                      )}
-                    </div>
-                    <p className={`mt-2 ${plan.highlight ? 'text-white opacity-90' : 'text-gray-500'}`}>
-                      {plan.description}
-                    </p>
-                  </div>
-                  <div className="p-6">
-                    <ul className="space-y-3">
-                      {plan.features.map((feature, index) => (
-                        <li key={index} className="flex items-center">
-                          <svg 
-                            xmlns="http://www.w3.org/2000/svg" 
-                            className="h-5 w-5 text-green-500 mr-2" 
-                            fill="none" 
-                            viewBox="0 0 24 24" 
-                            stroke="currentColor"
-                          >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
-                    <button
-                      onClick={() => handleUpgradeClick(plan)}
-                      className={`mt-6 w-full py-3 px-4 rounded-md ${
-                        plan.highlight 
-                          ? 'bg-primary text-white hover:bg-primary/90' 
-                          : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-                      } font-medium transition-colors`}
-                    >
-                      Get Started
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <PricingPlans
+              plans={pricingPlans}
+              selectedPlanId={selectedPlanId}
+              onSelectPlan={setSelectedPlanId}
+              onCtaClick={handlePlanCtaClick}
+            />
           </div>
 
           {/* Testimonials */}

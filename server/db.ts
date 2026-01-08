@@ -1,6 +1,8 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { log } from "./vite";
+import { usageEntitlements, type UsageEntitlement } from "@shared/schema";
+import { eq } from "drizzle-orm";
 
 const {
   DATABASE_URL,
@@ -105,3 +107,29 @@ export const pingDatabase = async (logResult = false): Promise<boolean> => {
 void (async () => {
   await pingDatabase(true);
 })();
+
+export const getOrCreateUsageEntitlement = async (
+  tokenId: string,
+): Promise<UsageEntitlement> => {
+  const [inserted] = await db
+    .insert(usageEntitlements)
+    .values({ tokenId })
+    .onConflictDoNothing()
+    .returning();
+
+  if (inserted) {
+    return inserted;
+  }
+
+  const [existing] = await db
+    .select()
+    .from(usageEntitlements)
+    .where(eq(usageEntitlements.tokenId, tokenId))
+    .limit(1);
+
+  if (!existing) {
+    throw new Error(`Failed to load usage entitlement for token ${tokenId}`);
+  }
+
+  return existing;
+};
