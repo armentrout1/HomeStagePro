@@ -8,6 +8,8 @@ import {
   varchar,
   jsonb,
   bigserial,
+  index,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -140,7 +142,12 @@ export const stripePurchases = pgTable("stripe_purchases", {
   stripeEvent: jsonb("stripe_event"),
   stripeSession: jsonb("stripe_session"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
+}, (table) => ({
+  uxStripeEventId: uniqueIndex("ux_stripe_purchases_event_id").on(table.stripeEventId),
+  ixCheckoutSessionId: index("ix_stripe_purchases_checkout_session_id").on(table.checkoutSessionId),
+  ixPaymentIntentId: index("ix_stripe_purchases_payment_intent_id").on(table.paymentIntentId),
+  ixCreatedAt: index("ix_stripe_purchases_created_at").on(table.createdAt.desc()),
+}));
 
 export type StripePurchase = typeof stripePurchases.$inferSelect;
 export type InsertStripePurchase = typeof stripePurchases.$inferInsert;

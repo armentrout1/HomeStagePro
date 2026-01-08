@@ -217,7 +217,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     const signature = req.headers["stripe-signature"];
+    const rawBody = (req as any).rawBody as Buffer | undefined;
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+    console.log(
+      `[stripe_webhook] signature_present=${Boolean(signature)} raw_body_length=${
+        rawBody ? rawBody.length : 0
+      }`,
+    );
 
     if (!signature || !webhookSecret) {
       return res
@@ -284,7 +291,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 `Stripe purchase already recorded for event ${event.id}`,
               );
             } else {
-              throw err;
+              console.error(
+                `[stripe_purchases] insert_failed event=${event.id}`,
+                err,
+              );
+              return res
+                .status(500)
+                .send("Webhook Error: Failed to record purchase");
             }
           }
 
@@ -304,7 +317,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (err) {
       const error = err as Error;
       console.error("Webhook error:", error);
-      res.status(400).send(`Webhook Error: ${error.message}`);
+      res.status(500).send(`Webhook Error: ${error.message}`);
     }
   });
   
