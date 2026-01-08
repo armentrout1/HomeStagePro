@@ -32,7 +32,7 @@ export interface TokenResult {
 
 export const ACCESS_TOKEN_COOKIE_NAME = "access_token";
 
-export function generateToken(planIdRaw: string): TokenResult {
+export function generateToken(planIdRaw: string, existingJti?: string): TokenResult {
 
   const planId = resolvePlanId(planIdRaw);
 
@@ -46,6 +46,7 @@ export function generateToken(planIdRaw: string): TokenResult {
   }
 
   const now = Math.floor(Date.now() / 1000);
+  const jti = existingJti || randomUUID();
   const payload: TokenPayload = {
     planId,
     tokenType: config.tokenType,
@@ -53,11 +54,12 @@ export function generateToken(planIdRaw: string): TokenResult {
     totalUses: config.uses,
     expiresAt: getExpirationTimestamp(config.durationDays, now),
     quality: config.quality,
+    jti,
   };
 
   return {
     token: jwt.sign(payload, TOKEN_SECRET, {
-      jwtid: randomUUID(),
+      jwtid: jti,
       expiresIn: payload.expiresAt - now,
     }),
     payload,

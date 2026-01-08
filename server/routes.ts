@@ -3,8 +3,8 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { stripePurchases, type InsertStripePurchase } from "@shared/schema";
 import { db } from "./db";
-import { getOrCreateUsageEntitlement, ensureDbUsageOnSuccess } from "./usageEntitlements";
-import { sql } from "drizzle-orm";
+import { getOrCreateUsageEntitlement, ensureDbUsageOnSuccess, grantPaidCredits } from "./usageEntitlements";
+import { sql, eq } from "drizzle-orm";
 import {
   generateStagedRoom,
   saveStagedImage,
@@ -367,12 +367,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { planId, planLabel } = session.metadata || {};
 
         if (!planId) {
+          console.warn(`[entitlements] missing_or_invalid_plan session=${session_id}`);
           return res
             .status(400)
             .json({ error: "Missing plan ID in session metadata" });
         }
 
-        const tokenResult = generateToken(planId);
+        const planConfig = getPlanConfig(planId);
+        if (!planConfig) {
+          console.warn(`[entitlements] missing_or_invalid_plan session=${session_id}`);
+          return res
+            .status(400)
+            .json({ error: "Invalid plan ID in session metadata" });
+        }
+
+        // Check if credits already granted for this session (idempotency)
+        const [existingPurchase] = await db
+          .select({ tokenId: stripePurchases.tokenId })
+          .from(stripePurchases)
+          .where(eq(stripePurchases.checkoutSessionId, session_id as string))
+          .limit(1);
+
+        let tokenId: string;
+        let creditsGranted = false;
+
+        if (existingPurchase?.tokenId) {
+          // Credits already granted, reuse existing tokenId
+          tokenId = existingPurchase.tokenId;
+        } else {
+          // First time: generate new token, grant credits
+          const tokenResult = generateToken(planId);
+          tokenId = tokenResult.payload.jti!;
+
+          // Create/get usage entitlement row
+          await getOrCreateUsageEntitlement(tokenId);
+
+          // Grant paid credits based on plan
+          await grantPaidCredits(tokenId, planConfig.uses);
+
+          // Link stripe_purchases row to tokenId (for idempotency tracking)
+          const updateResult = await db
+            .update(stripePurchases)
+            .set({ tokenId })
+            .where(eq(stripePurchases.checkoutSessionId, session_id as string));
+
+          const rowsUpdated = (updateResult as any).rowCount ?? (updateResult as any).changes ?? 0;
+          if (rowsUpdated === 0) {
+            console.warn(
+              `[entitlements] purchase_row_missing session=${session_id} tokenId=${tokenId.slice(0, 8)}`,
+            );
+          }
+
+          creditsGranted = true;
+          console.log(
+            `[entitlements] granted plan=${planId} credits=${planConfig.uses} tokenId=${tokenId.slice(0, 8)} session=${session_id}`,
+          );
+        }
+
+        // Generate token (reuse tokenId for consistency)
+        const tokenResult = generateToken(planId, tokenId);
         setAccessTokenCookie(res, tokenResult);
 
         const payload = tokenResult.payload;
@@ -386,6 +439,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           usesLeft: payload.usesLeft,
           planId: payload.planId,
           quality: payload.quality,
+          creditsGranted,
         });
       } else if (session.status === 'open') {
         return res.json({ status: 'processing' });

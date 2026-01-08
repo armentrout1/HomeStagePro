@@ -37,6 +37,19 @@ export const getOrCreateUsageEntitlement = async (
   return existing;
 };
 
+export const grantPaidCredits = async (
+  tokenId: string,
+  credits: number,
+): Promise<void> => {
+  await db.execute(sql`
+    UPDATE usage_entitlements
+    SET
+      paid_granted = paid_granted + ${credits},
+      updated_at = NOW()
+    WHERE token_id = ${tokenId}
+  `);
+};
+
 export const consumeOneEntitlement = async (
   tokenId: string,
 ): Promise<UsageResult> => {

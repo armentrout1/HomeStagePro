@@ -141,6 +141,7 @@ export const stripePurchases = pgTable("stripe_purchases", {
   receiptUrl: text("receipt_url"),
   stripeEvent: jsonb("stripe_event"),
   stripeSession: jsonb("stripe_session"),
+  tokenId: text("token_id"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => ({
   uxStripeEventId: uniqueIndex("ux_stripe_purchases_event_id").on(table.stripeEventId),
