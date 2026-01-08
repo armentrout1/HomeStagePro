@@ -54,7 +54,6 @@ export function generateToken(planIdRaw: string, existingJti?: string): TokenRes
     totalUses: config.uses,
     expiresAt: getExpirationTimestamp(config.durationDays, now),
     quality: config.quality,
-    jti,
   };
 
   return {
