@@ -11,14 +11,6 @@ const {
   PGPASSWORD,
 } = process.env;
 
-const hasPgEnvConfig = Boolean(
-  PGHOST && PGPORT && PGDATABASE && PGUSER && PGPASSWORD
-);
-
-type DbMode = "pg_env" | "database_url" | "local";
-
-let dbMode: DbMode = "local";
-
 const buildLocalConfig = () => ({
   host: PGHOST ?? "localhost",
   port: Number(PGPORT ?? "5432"),
@@ -30,48 +22,54 @@ const buildLocalConfig = () => ({
 
 const sslConfig = { ssl: { rejectUnauthorized: false } };
 
-const client =
-  hasPgEnvConfig
-    ? (() => {
-        dbMode = "pg_env";
-        return postgres({
-          host: PGHOST!,
-          port: Number(PGPORT),
-          database: PGDATABASE!,
-          user: PGUSER!,
-          password: PGPASSWORD!,
-          max: 1,
-          ...sslConfig,
-        });
-      })()
-    : DATABASE_URL
-    ? (() => {
-        dbMode = "database_url";
-        return postgres(DATABASE_URL, {
-          max: 1,
-          ...sslConfig,
-        });
-      })()
-    : (() => {
-        dbMode = "local";
-        return postgres(buildLocalConfig());
-      })();
+let dbMode: "database_url" | "pg_env";
+let logHost = "n/a";
+let logDatabase = "n/a";
+
+const client = (() => {
+  if (DATABASE_URL) {
+    dbMode = "database_url";
+    try {
+      const parsed = new URL(DATABASE_URL);
+      logHost = parsed.hostname || "n/a";
+      logDatabase = parsed.pathname.replace(/^\//, "") || "n/a";
+    } catch {
+      logHost = "unparsed";
+      logDatabase = "unparsed";
+    }
+
+    return postgres(DATABASE_URL, {
+      max: 1,
+      ...sslConfig,
+    });
+  }
+
+  dbMode = "pg_env";
+  const config = buildLocalConfig();
+  logHost = config.host;
+  logDatabase = config.database;
+
+  if (PGHOST && PGPORT && PGDATABASE && PGUSER && PGPASSWORD) {
+    return postgres(
+      {
+        host: PGHOST,
+        port: Number(PGPORT),
+        database: PGDATABASE,
+        user: PGUSER,
+        password: PGPASSWORD,
+        max: 1,
+        ...sslConfig,
+      },
+    );
+  }
+
+  return postgres(config);
+})();
 
 export const db = drizzle(client);
 
-const logMessage =
-  dbMode === "pg_env"
-    ? "DB: using PG* env vars"
-    : dbMode === "database_url"
-    ? "DB: using DATABASE_URL"
-    : "DB: using local config";
-
-log(logMessage);
-log(
-  `DB target: mode=${dbMode} host=${PGHOST ?? "n/a"} db=${
-    PGDATABASE ?? "n/a"
-  } databaseUrlSet=${Boolean(DATABASE_URL)}`
-);
+const modeLabel = dbMode === "database_url" ? "DATABASE_URL" : "PG*";
+log(`DB init mode=${modeLabel} host=${logHost} db=${logDatabase}`);
 
 const logNamespace = "db";
 
