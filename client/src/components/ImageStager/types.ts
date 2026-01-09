@@ -9,6 +9,14 @@ export type UsageStatus = {
     timeRemaining: string;
     usageLeft?: number;
   };
+  // Token-based response fields (normalized into legacy fields above)
+  totalRemaining?: number;
+  paidRemaining?: number;
+  freeRemaining?: number;
+  freeLimit?: number;
+  freeUsed?: number;
+  paidGranted?: number;
+  paidUsed?: number;
 };
 
 export type SaveImagePayload = {
