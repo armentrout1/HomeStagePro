@@ -79,6 +79,7 @@ export function setAccessTokenCookie(res: Response, result: TokenResult) {
     secure: true,
     sameSite: "lax" as const,
     path: "/",
+    domain: ".roomstagerpro.com",
     maxAge: diffMs,
     expires: expiresAt,
   });
@@ -90,7 +91,10 @@ export function setAccessTokenCookie(res: Response, result: TokenResult) {
 }
 
 export function clearAccessToken(res: Response) {
-  res.clearCookie(ACCESS_TOKEN_COOKIE_NAME);
+  res.clearCookie(ACCESS_TOKEN_COOKIE_NAME, {
+    path: "/",
+    domain: ".roomstagerpro.com",
+  });
 }
 
 export function verifyToken(token: string): TokenPayload | null {
