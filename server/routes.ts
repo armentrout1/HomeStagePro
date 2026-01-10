@@ -360,7 +360,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Check checkout session status and set token in cookie
-  app.get('/api/checkout-status', async (req, res) => {
+  app.get('/api/checkout-status', checkAccessToken, async (req, res) => {
     if (!stripe) {
       return res.status(500).json({ error: "Stripe is not configured" });
     }
@@ -400,7 +400,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .limit(1);
 
         let creditsGranted = false;
-        const existingTokenId = existingPurchase?.tokenId;
+        
+        // Priority for tokenId:
+        // 1. If this session already has a tokenId (idempotency for same session)
+        // 2. If user already has a valid token cookie (accumulate credits)
+        // 3. Generate new tokenId
+        const existingCookieTokenId = getTokenIdFromRequest(req);
+        const existingTokenId = existingPurchase?.tokenId || existingCookieTokenId;
 
         const tokenResult = existingTokenId
           ? generateToken(planId, existingTokenId)
@@ -427,7 +433,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
 
-        if (!existingTokenId) {
+        if (!existingPurchase?.tokenId) {
+          // Only grant credits if this specific session hasn't already granted them
           try {
             await getOrCreateUsageEntitlement(tokenId);
             await grantPaidCredits(tokenId, planConfig.uses);
@@ -445,11 +452,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               });
             }
 
+            const isAccumulating = Boolean(existingCookieTokenId);
             console.log("[entitlements] granted", {
               plan: planId,
               credits: planConfig.uses,
               session: session.id,
               tokenId: tokenId.slice(0, 8),
+              accumulated: isAccumulating,
             });
             creditsGranted = true;
           } catch (err) {
