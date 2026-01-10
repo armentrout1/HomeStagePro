@@ -54,23 +54,15 @@ export const consumeOneEntitlement = async (
   tokenId: string,
 ): Promise<UsageResult> => {
   // Use raw SQL for atomic update with row locking
+  // Token entitlements only track PAID credits (free is tracked per-IP separately)
   const result = await db.execute(sql`
     UPDATE usage_entitlements
     SET
-      free_used = CASE
-        WHEN free_used < free_granted THEN free_used + 1
-        ELSE free_used
-      END,
-      paid_used = CASE
-        WHEN free_used >= free_granted AND paid_used < paid_granted THEN paid_used + 1
-        ELSE paid_used
-      END,
+      paid_used = paid_used + 1,
       updated_at = NOW()
     WHERE token_id = ${tokenId}
-      AND (free_used < free_granted OR paid_used < paid_granted)
+      AND paid_used < paid_granted
     RETURNING
-      free_granted,
-      free_used,
       paid_granted,
       paid_used
   `);
@@ -87,23 +79,20 @@ export const consumeOneEntitlement = async (
       throw new Error(`No usage entitlement found for token ${tokenId}`);
     }
 
-    throw new Error("No usage remaining");
+    throw new Error("No paid usage remaining");
   }
 
   const row = result[0] as {
-    free_granted: number;
-    free_used: number;
     paid_granted: number;
     paid_used: number;
   };
 
-  const freeRemaining = Math.max(0, row.free_granted - row.free_used);
   const paidRemaining = Math.max(0, row.paid_granted - row.paid_used);
 
   return {
-    freeRemaining,
+    freeRemaining: 0, // Free is tracked per-IP, not per-token
     paidRemaining,
-    totalRemaining: freeRemaining + paidRemaining,
+    totalRemaining: paidRemaining,
   };
 };
 

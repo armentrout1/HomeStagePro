@@ -173,3 +173,21 @@ export const usageEntitlements = pgTable(
 
 export type UsageEntitlement = typeof usageEntitlements.$inferSelect;
 export type InsertUsageEntitlement = typeof usageEntitlements.$inferInsert;
+
+// IP-based free usage tracking (lifetime 2 free per IP)
+export const ipFreeUsage = pgTable(
+  "ip_free_usage",
+  {
+    ipHash: text("ip_hash").notNull(),
+    freeUsed: integer("free_used").notNull().default(0),
+    freeLimit: integer("free_limit").notNull().default(2),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => ({
+    uxIpFreeUsageIpHash: uniqueIndex("ux_ip_free_usage_ip_hash").on(table.ipHash),
+  }),
+);
+
+export type IpFreeUsage = typeof ipFreeUsage.$inferSelect;
+export type InsertIpFreeUsage = typeof ipFreeUsage.$inferInsert;
