@@ -85,6 +85,7 @@ export function setAccessTokenCookie(res: Response, result: TokenResult) {
   });
   console.log("[cookie] set access_token", {
     path: "/",
+    domain: ".roomstagerpro.com",
     sameSite: "lax",
     secure: true,
   });
