@@ -76,10 +76,16 @@ export function setAccessTokenCookie(res: Response, result: TokenResult) {
 
   res.cookie(ACCESS_TOKEN_COOKIE_NAME, result.token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: true,
     sameSite: "lax" as const,
+    path: "/",
     maxAge: diffMs,
     expires: expiresAt,
+  });
+  console.log("[cookie] set access_token", {
+    path: "/",
+    sameSite: "lax",
+    secure: true,
   });
 }
 
