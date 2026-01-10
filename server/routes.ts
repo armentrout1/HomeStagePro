@@ -68,9 +68,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // IP / token usage status endpoint
   app.get('/api/usage-status', checkAccessToken, async (req, res) => {
+    console.log("[usage-status-debug]", {
+      hasCookie: Boolean(req.cookies?.access_token),
+      hasPayload: Boolean((req as any).accessTokenPayload),
+      payloadKeys: (req as any).accessTokenPayload ? Object.keys((req as any).accessTokenPayload) : [],
+      tokenId: getTokenIdFromRequest(req),
+    });
+
     const tokenId = getTokenIdFromRequest(req);
 
     if (!tokenId) {
+      console.log(`[usage-status] mode=ip tokenId=null hasPaidFields=false`);
       return getIpUsageStatus(req, res);
     }
 
@@ -79,6 +87,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const freeRemaining = Math.max(0, entitlement.freeGranted - entitlement.freeUsed);
       const paidRemaining = Math.max(0, entitlement.paidGranted - entitlement.paidUsed);
       const totalRemaining = freeRemaining + paidRemaining;
+      const hasPaidFields = paidRemaining > 0 || entitlement.paidGranted > 0;
+
+      console.log(`[usage-status] mode=token tokenId=${tokenId.slice(0, 8)} hasPaidFields=${hasPaidFields}`);
 
       return res.json({
         freeLimit: entitlement.freeGranted,
