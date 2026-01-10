@@ -24,6 +24,9 @@ import {
 import { getPlanConfig, resolvePlanId } from "./plans";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Cookie parser must be registered BEFORE any routes that use cookies
+  app.use(cookieParser());
+
   // Health check endpoint for custom domain validation
   app.get('/api/health', (req, res) => {
     res.json({ status: 'ok' });
@@ -136,9 +139,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       webhookPath: "/api/webhook",
     });
   });
-    
-  // Use cookie-parser middleware
-  app.use(cookieParser());
 
   // OpenAI image generation endpoint with IP-based usage limiting
   app.post(

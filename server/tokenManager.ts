@@ -74,27 +74,30 @@ export function setAccessTokenCookie(res: Response, result: TokenResult) {
     return;
   }
 
+  const tokenLength = result.token.length;
+
   res.cookie(ACCESS_TOKEN_COOKIE_NAME, result.token, {
     httpOnly: true,
     secure: true,
     sameSite: "lax" as const,
     path: "/",
-    domain: ".roomstagerpro.com",
     maxAge: diffMs,
     expires: expiresAt,
   });
+
   console.log("[cookie] set access_token", {
+    tokenLength,
     path: "/",
-    domain: ".roomstagerpro.com",
     sameSite: "lax",
     secure: true,
+    maxAgeMs: diffMs,
+    expiresAt: expiresAt.toISOString(),
   });
 }
 
 export function clearAccessToken(res: Response) {
   res.clearCookie(ACCESS_TOKEN_COOKIE_NAME, {
     path: "/",
-    domain: ".roomstagerpro.com",
   });
 }
 

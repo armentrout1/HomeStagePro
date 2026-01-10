@@ -4,6 +4,10 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
+
+// Trust proxy for Railway/production environments (required for secure cookies behind reverse proxy)
+app.set('trust proxy', 1);
+
 // Increase the JSON payload size limit to 50MB and capture raw body for Stripe webhooks
 app.use(
   express.json({
