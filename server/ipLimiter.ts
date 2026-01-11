@@ -6,6 +6,7 @@ import { sql } from "drizzle-orm";
 import { log } from "./vite";
 import { FREE_QUALITY } from "./plans";
 import { hasValidAccess } from "./tokenManager";
+import { logSecurityEvent } from "./securityEvents";
 
 // Hash IP for privacy (don't store raw IPs)
 const hashIp = (ip: string): string =>
@@ -14,6 +15,11 @@ const hashIp = (ip: string): string =>
 // Free usage limit
 const FREE_USAGE_LIMIT = 2;
 export const DISABLE_USAGE_LIMITS = process.env.DISABLE_USAGE_LIMITS === "true";
+
+if (process.env.NODE_ENV === "production" && DISABLE_USAGE_LIMITS) {
+  throw new Error("DISABLE_USAGE_LIMITS must not be enabled in production");
+}
+
 const UNLIMITED_USAGE_LIMIT = 999_999;
 
 /**
@@ -114,8 +120,19 @@ export const ipLimiter = async (
     next();
   } catch (err) {
     log(`IP limiter error: ${err}`);
-    // On error, allow the request (fail open)
-    next();
+
+    if (process.env.NODE_ENV === "production") {
+      logSecurityEvent({
+        type: "USAGE_LIMITER_UNAVAILABLE",
+        path: req.path,
+        message: String(err),
+      });
+      return res.status(503).json({
+        error: "Usage limiter unavailable. Please try again shortly.",
+      });
+    }
+
+    return next();
   }
 };
 

@@ -1,4 +1,5 @@
 import express, { type Request, Response, NextFunction } from "express";
+import helmet from "helmet";
 import path from "path";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
@@ -7,6 +8,8 @@ const app = express();
 
 // Trust proxy for Railway/production environments (required for secure cookies behind reverse proxy)
 app.set('trust proxy', 1);
+
+app.use(helmet());
 
 // Increase the JSON payload size limit to 50MB and capture raw body for Stripe webhooks
 app.use(

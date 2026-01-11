@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { stripePurchases, type InsertStripePurchase } from "@shared/schema";
 import { db } from "./db";
 import { getOrCreateUsageEntitlement, ensureDbUsageOnSuccess, grantPaidCredits } from "./usageEntitlements";
-import { sql, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import {
   generateStagedRoom,
   saveStagedImage,
@@ -22,6 +22,14 @@ import {
   getTokenIdFromRequest,
 } from "./tokenManager";
 import { getPlanConfig, resolvePlanId } from "./plans";
+import { checkoutSessionLimiter } from "./middleware/checkoutSessionLimiter";
+import { stagingRateLimiter } from "./middleware/stagingRateLimiter";
+import { logSecurityEvent } from "./securityEvents";
+
+const isProd = process.env.NODE_ENV === "production";
+const debugLog = (...args: any[]) => {
+  if (!isProd) console.log(...args);
+};
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Cookie parser must be registered BEFORE any routes that use cookies
@@ -32,22 +40,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ status: 'ok' });
   });
 
-  // TODO: DEBUG ROUTE - REMOVE BEFORE PRODUCTION
-  app.get("/api/stripe-purchases/count", async (req, res) => {
-    const debugHeader = req.header("X-Debug-Key");
-    const expectedKey = process.env.DEBUG_KEY;
-
-    if (!expectedKey || debugHeader !== expectedKey) {
-      return res.status(403).json({ error: "Forbidden" });
-    }
-
-    const [result] = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(stripePurchases);
-
-    res.json({ count: Number(result?.count ?? 0) });
-  });
-  
   // Create a fallback route for client-side routing
   const clientRoutes = [
     '/home-staging-tips',
@@ -109,6 +101,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     : null;
   
   app.get('/api/stripe/status', (req, res) => {
+    if (process.env.NODE_ENV === "production") {
+      return res.status(404).json({ error: "Not found" });
+    }
+
     const secretKey = process.env.STRIPE_SECRET_KEY;
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
     let mode: "test" | "live" | "unknown" = "unknown";
@@ -134,6 +130,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     "/api/generate-staged-room",
     checkAccessToken,
     attachEntitlement,
+    stagingRateLimiter,
     ipLimiter,
     ensureDbUsageOnSuccess,
     generateStagedRoom,
@@ -141,6 +138,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Add a test endpoint to check token status
   app.get('/api/check-token', (req, res) => {
+    if (process.env.NODE_ENV === "production") {
+      return res.status(404).json({ error: "Not found" });
+    }
+
     if (req.cookies?.access_token) {
       const payload = verifyToken(req.cookies.access_token);
       if (payload) {
@@ -164,7 +165,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/users/:userId/staged-images', getUserStagedImages);
   
   // Stripe checkout session creation
-  app.post('/api/create-checkout-session', async (req, res) => {
+  app.post('/api/create-checkout-session', checkoutSessionLimiter, async (req, res) => {
     if (!stripe) {
       return res.status(500).json({ error: "Stripe is not configured" });
     }
@@ -247,7 +248,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const rawBody = (req as any).rawBody as Buffer | undefined;
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
-    console.log(
+    debugLog(
       `[stripe_webhook] signature_present=${Boolean(signature)} raw_body_length=${
         rawBody ? rawBody.length : 0
       }`,
@@ -269,6 +270,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
     } catch (err) {
       console.error("Webhook signature verification failed:", err);
+      logSecurityEvent({
+        type: "STRIPE_WEBHOOK_ERROR",
+        status: 400,
+        message: `signature verification failed: ${(err as Error)?.message ?? "unknown error"}`,
+      });
       return res.status(400).send("Webhook signature verification failed");
     }
 
@@ -308,7 +314,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           try {
             await storage.createStripePurchase(purchase);
-            console.log(
+            debugLog(
               `[stripe_purchases] inserted event=${event.id} session=${session.id} plan=${purchase.planId} amount=${purchase.amountTotalCents}`,
             );
           } catch (err) {
@@ -331,19 +337,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const { planId } = session.metadata || {};
           // Generate JWT token based on the plan
           if (planId) {
-            console.log(`Processing completed payment for plan: ${planId}`);
+            debugLog(`Processing completed payment for plan: ${planId}`);
             // Token will be set on session status check
           }
           break;
         }
         default:
-          console.log(`Unhandled event type: ${event.type}`);
+          debugLog(`Unhandled event type: ${event.type}`);
       }
 
       res.json({ received: true });
     } catch (err) {
       const error = err as Error;
       console.error("Webhook error:", error);
+      logSecurityEvent({
+        type: "STRIPE_WEBHOOK_ERROR",
+        status: 500,
+        message: error.message ?? "unknown error",
+      });
       res.status(500).send(`Webhook Error: ${error.message}`);
     }
   });
@@ -442,7 +453,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
 
             const isAccumulating = Boolean(existingCookieTokenId);
-            console.log("[entitlements] granted", {
+            debugLog("[entitlements] granted", {
               plan: planId,
               credits: planConfig.uses,
               session: session.id,

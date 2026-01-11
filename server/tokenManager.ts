@@ -9,10 +9,16 @@ import {
   getPlanConfig,
   resolvePlanId,
 } from "./plans";
+
 import { log } from "./vite";
 
-const TOKEN_SECRET =
-  process.env.JWT_SECRET || "staging-app-secret-key-change-in-production";
+const tokenSecret = process.env.JWT_SECRET;
+
+if (!tokenSecret) {
+  throw new Error("JWT_SECRET is required");
+}
+
+const TOKEN_SECRET = tokenSecret;
 
 export interface TokenPayload {
   planId: PlanId;
@@ -202,7 +208,11 @@ export function attachEntitlement(
 }
 
 export function hasValidAccess(req: Request): boolean {
-  return !!(req.accessTokenPayload && req.accessTokenPayload.usesLeft > 0);
+  const p = req.accessTokenPayload;
+  if (!p) return false;
+
+  const now = Math.floor(Date.now() / 1000);
+  return p.usesLeft > 0 && p.expiresAt > now;
 }
 
 export function getTokenIdFromRequest(req: Request): string | null {
