@@ -37,6 +37,13 @@ export const ROUTE_SEO: Record<string, RouteSeo> = {
     canonicalPath: "/virtual-vs-traditional",
     ogImage: "/images/meta-preview.png",
   },
+  "/virtual-staging": {
+    title: "Virtual Staging Services | HomeStage Pro",
+    description:
+      "Modernize listings fast with AI virtual staging, before/after proof, and transparent packages from HomeStage Pro. Book a consult in minutes.",
+    canonicalPath: "/virtual-staging",
+    ogImage: "/images/meta-preview.png",
+  },
   "/selling-tips": {
     title: "Home Selling Tips | RoomStagerPro",
     description:

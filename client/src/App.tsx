@@ -8,6 +8,7 @@ import Home from "./pages/Home";
 import HomeStagingTips from "./pages/HomeStagingTips";
 import RealEstatePhotos from "./pages/RealEstatePhotos";
 import VirtualVsTraditional from "./pages/VirtualVsTraditional";
+import VirtualStaging from "./pages/VirtualStaging";
 import SellingTips from "./pages/SellingTips";
 import NotFound from "@/pages/not-found";
 
@@ -47,6 +48,12 @@ function Router() {
           <>
             <SeoHead path="/virtual-vs-traditional" />
             <VirtualVsTraditional />
+          </>
+        </Route>
+        <Route path="/virtual-staging">
+          <>
+            <SeoHead path="/virtual-staging" />
+            <VirtualStaging />
           </>
         </Route>
         <Route path="/selling-tips">

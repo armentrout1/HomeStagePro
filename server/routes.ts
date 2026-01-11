@@ -40,22 +40,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ status: 'ok' });
   });
 
-  // Create a fallback route for client-side routing
+  // Client routes handled client-side; no server-side redirects needed
   const clientRoutes = [
     '/home-staging-tips',
     '/real-estate-photos',
     '/virtual-vs-traditional',
     '/selling-tips'
   ];
-  
-  // Handle all client routes and send index.html
   clientRoutes.forEach(route => {
-    app.get(route, (req, res, next) => {
-      if (req.headers.accept?.includes('text/html')) {
-        return res.redirect('/');
-      }
-      next();
-    });
+    app.get(route, (_req, _res, next) => next());
   });
   
   // put application routes here

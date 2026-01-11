@@ -1,6 +1,5 @@
 import express, { type Request, Response, NextFunction } from "express";
 import helmet from "helmet";
-import path from "path";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
@@ -8,6 +7,56 @@ const app = express();
 
 // Trust proxy for Railway/production environments (required for secure cookies behind reverse proxy)
 app.set('trust proxy', 1);
+
+// Canonical host + HTTPS + trailing slash normalization (non-API routes)
+app.use((req, res, next) => {
+  if (req.path === "/api" || req.path.startsWith("/api/")) {
+    return next();
+  }
+
+  const normalizeHeader = (value?: string | string[]) =>
+    Array.isArray(value) ? value[0] : value;
+
+  const forwardedProto = normalizeHeader(req.headers["x-forwarded-proto"]);
+  const forwardedHost = normalizeHeader(req.headers["x-forwarded-host"]);
+  const currentProtocol = (forwardedProto ?? req.protocol ?? "http").split(",")[0].trim();
+  const currentHost = (forwardedHost ?? req.headers.host ?? "").split(",")[0].trim();
+
+  if (!currentHost) {
+    return next();
+  }
+
+  const originalUrl = req.originalUrl || "/";
+  const queryIndex = originalUrl.indexOf("?");
+  let pathname = queryIndex >= 0 ? originalUrl.slice(0, queryIndex) : originalUrl;
+  const search = queryIndex >= 0 ? originalUrl.slice(queryIndex) : "";
+
+  let redirectRequired = false;
+  let targetHost = currentHost.toLowerCase().startsWith("www.")
+    ? currentHost.slice(4)
+    : currentHost;
+
+  if (targetHost !== currentHost) {
+    redirectRequired = true;
+  }
+
+  if (pathname.length > 1 && pathname.endsWith("/")) {
+    pathname = pathname.slice(0, -1);
+    redirectRequired = true;
+  }
+
+  const protocolIsHttps = currentProtocol === "https";
+  if (!protocolIsHttps) {
+    redirectRequired = true;
+  }
+
+  if (!redirectRequired) {
+    return next();
+  }
+
+  const redirectUrl = `https://${targetHost}${pathname}${search}`;
+  return res.redirect(301, redirectUrl);
+});
 
 const supabaseOrigin = process.env.SUPABASE_URL
   ? new URL(process.env.SUPABASE_URL).origin
