@@ -48,6 +48,7 @@ export const ROOM_SPECIFIC_GUARDRAILS: Record<string, readonly string[]> =
       "Follow the STRICT FURNITURE SET block exactly—never exceed the allowed items or counts.",
       "Prefer placing the sofa or sectional against the longest uninterrupted wall that is NOT near doors/entry.",
       "Only add an accent chair when the STRICT block explicitly allows it and the placement leaves generous door and pathway clearance.",
+      "Place the primary sofa or loveseat flush against the main wall when feasible—prefer the longest uninterrupted wall, avoid floating furniture, and keep every doorway, window, vent, and circulation path clear.",
     ],
     kitchen: [
       "Keep countertops mostly visible; only add the minimal optional decor described in the STRICT block.",

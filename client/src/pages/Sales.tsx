@@ -8,14 +8,14 @@ import { Link } from "wouter";
 const beforeAfterSamples = [
   {
     id: "living-room",
-    before: "https://images.openai.com/blob/9b747797-3a49-42fe-8d61-cc0878f92de7/empty-living-room.png",
-    after: "https://images.openai.com/blob/fd84cd3f-7da7-4e51-a8f4-55aff12d65e0/staged-living-room.png",
+    before: "/sample-images/living-before.jpg",
+    after: "/sample-images/living-after.png",
     title: "Living Room Transformation"
   },
   {
     id: "bedroom",
-    before: "https://images.openai.com/blob/1d5b2a2d-f41b-465c-bd52-7d15dc373aa0/empty-bedroom.png",
-    after: "https://images.openai.com/blob/eaa8d193-39bd-4fe7-a18e-76e3c55f4a43/staged-bedroom.png",
+    before: "/sample-images/bed-before.webp",
+    after: "/sample-images/bed-after.png",
     title: "Bedroom Enhancement"
   }
 ];

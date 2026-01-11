@@ -29,6 +29,11 @@ Future ideas / roadmap: [`docs/staging/staging-roadmap.md`](./staging-roadmap.md
 - **Optional (large)**: plant or floor lamp (still only one of those), plus TV/media console when an uninterrupted wall exists; accent chair allowed only if away from doors.
 - **Forbidden**: beds, dining tables/chairs, desks, pianos, bar stools, non-listed items.
 
+### Room-Specific Guardrails
+- Prefer sofa/sectional placement along the longest uninterrupted wall away from doors.
+- Place the primary sofa or loveseat flush against that main wall whenever feasible—avoid floating the seating cluster, and keep all doorways, windows, vents, and circulation paths clear.
+- Only add an accent chair when explicitly allowed and when doorway/walkway clearance remains generous.
+
 ### Max Counts
 - **Standard**: seating pieces = 1 (sofa/loveseat), accent chairs = 0, tables = 1 coffee table, rugs = 1, optional decor ≤1.
 - **Large**: seating pieces ≤2 (sofa/sectional + optional accent chair), accent chairs ≤1, tables = 1 coffee table, rugs =1, decor as listed.

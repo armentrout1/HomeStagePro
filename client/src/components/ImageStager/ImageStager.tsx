@@ -59,16 +59,30 @@ export default function ImageStager() {
     refreshUsageStatus,
   });
 
-  const handleDownload = useCallback(() => {
+  const handleDownload = useCallback(async () => {
     if (!stagedImage) return;
     
-    const link = document.createElement('a');
-    link.href = stagedImage;
-    link.download = 'staged-room.jpg';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }, [stagedImage]);
+    try {
+      // Fetch the image and convert to blob to force download (cross-origin URLs ignore download attribute)
+      const response = await fetch(stagedImage);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = 'staged-room.jpg';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up the blob URL
+      URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      // Fallback: open in new tab if fetch fails
+      window.open(stagedImage, '_blank');
+      toast.error("Download failed", "Please right-click the image to save it");
+    }
+  }, [stagedImage, toast]);
 
   useEffect(() => {
     if (stagedImage && stagedImage !== previousStagedImageRef.current) {

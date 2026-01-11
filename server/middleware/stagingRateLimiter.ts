@@ -1,4 +1,4 @@
-import rateLimit from "express-rate-limit";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 import { logSecurityEvent } from "../securityEvents";
 
 export const stagingRateLimiter = rateLimit({
@@ -11,7 +11,7 @@ export const stagingRateLimiter = rateLimit({
     if (tokenId) {
       return `token:${tokenId}`;
     }
-    return `ip:${req.ip}`;
+    return `ip:${ipKeyGenerator(req as any)}`;
   },
   handler: (req, res) => {
     const tokenId = (req as any).stagingEntitlement?.tokenId;

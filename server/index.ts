@@ -9,15 +9,34 @@ const app = express();
 // Trust proxy for Railway/production environments (required for secure cookies behind reverse proxy)
 app.set('trust proxy', 1);
 
+const supabaseOrigin = process.env.SUPABASE_URL
+  ? new URL(process.env.SUPABASE_URL).origin
+  : null;
+
+const scriptSrc = ["'self'", "https://js.stripe.com"];
+if (app.get("env") !== "production") {
+  scriptSrc.push("'unsafe-inline'", "https://replit.com");
+}
+
 app.use(
   helmet({
     contentSecurityPolicy: {
       directives: {
         ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-        "script-src": ["'self'", "https://js.stripe.com"],
-        "img-src": ["'self'", "data:", "https://images.openai.com", "https://images.unsplash.com"],
+        "script-src": scriptSrc,
+        "img-src": [
+          "'self'",
+          "data:",
+          "https://images.openai.com",
+          "https://images.unsplash.com",
+          ...(supabaseOrigin ? [supabaseOrigin] : []),
+        ],
         "frame-src": ["'self'", "https://js.stripe.com", "https://hooks.stripe.com"],
-        "connect-src": ["'self'", "https://api.stripe.com"],
+        "connect-src": [
+          "'self'",
+          "https://api.stripe.com",
+          ...(supabaseOrigin ? [supabaseOrigin] : []),
+        ],
       },
     },
   }),
