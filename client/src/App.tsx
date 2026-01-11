@@ -15,6 +15,7 @@ import NotFound from "@/pages/not-found";
 import Upgrade from "./pages/Upgrade";
 import ThankYou from "./pages/ThankYou";
 import Sales from "./pages/Sales";
+import { SeoHead } from "@/seo/SeoHead";
 
 function Router() {
   useEffect(() => {
@@ -24,14 +25,54 @@ function Router() {
   return (
     <Layout>
       <Switch>
-        <Route path="/" component={Home} />
-        <Route path="/home-staging-tips" component={HomeStagingTips} />
-        <Route path="/real-estate-photos" component={RealEstatePhotos} />
-        <Route path="/virtual-vs-traditional" component={VirtualVsTraditional} />
-        <Route path="/selling-tips" component={SellingTips} />
-        <Route path="/sales" component={Sales} />
-        <Route path="/upgrade" component={Upgrade} />
-        <Route path="/thank-you" component={ThankYou} />
+        <Route path="/">
+          <>
+            <SeoHead path="/" />
+            <Home />
+          </>
+        </Route>
+        <Route path="/home-staging-tips">
+          <>
+            <SeoHead path="/home-staging-tips" />
+            <HomeStagingTips />
+          </>
+        </Route>
+        <Route path="/real-estate-photos">
+          <>
+            <SeoHead path="/real-estate-photos" />
+            <RealEstatePhotos />
+          </>
+        </Route>
+        <Route path="/virtual-vs-traditional">
+          <>
+            <SeoHead path="/virtual-vs-traditional" />
+            <VirtualVsTraditional />
+          </>
+        </Route>
+        <Route path="/selling-tips">
+          <>
+            <SeoHead path="/selling-tips" />
+            <SellingTips />
+          </>
+        </Route>
+        <Route path="/sales">
+          <>
+            <SeoHead path="/sales" />
+            <Sales />
+          </>
+        </Route>
+        <Route path="/upgrade">
+          <>
+            <SeoHead path="/upgrade" />
+            <Upgrade />
+          </>
+        </Route>
+        <Route path="/thank-you">
+          <>
+            <SeoHead path="/thank-you" />
+            <ThankYou />
+          </>
+        </Route>
         <Route component={NotFound} />
       </Switch>
     </Layout>
