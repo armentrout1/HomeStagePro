@@ -77,7 +77,28 @@ const faqs = [
   },
 ];
 
+const relatedResources = [
+  { href: "/gallery/", label: "AI staging gallery" },
+  { href: "/sales", label: "Sales & onboarding workspace" },
+  { href: "/virtual-staging", label: "Virtual staging overview" },
+  { href: "/virtual-staging-cost", label: "Virtual staging cost breakdown" },
+  {
+    href: "/virtual-staging-for-real-estate-agents",
+    label: "Guide for real estate agents",
+  },
+  {
+    href: "/virtual-staging-for-investors",
+    label: "Guide for investors",
+  },
+  { href: "/real-estate-photos", label: "Real estate photo prep" },
+  { href: "/virtual-vs-traditional", label: "Virtual vs. traditional staging" },
+];
+
 const VirtualStaging = () => {
+  const filteredResources = relatedResources.filter(
+    (resource) => resource.href !== "/virtual-staging",
+  );
+
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-16 px-4 py-16">
       <section className="rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-6 py-14 text-white shadow-2xl">
@@ -333,6 +354,22 @@ const VirtualStaging = () => {
             </article>
           ))}
         </div>
+      </section>
+
+      <section className="rounded-2xl border border-border bg-muted/40 p-8">
+        <h2 className="text-2xl font-semibold">Related resources</h2>
+        <p className="mt-2 text-muted-foreground">
+          Explore more virtual staging guides, pricing context, and proof assets to round out your pitch materials.
+        </p>
+        <ul className="mt-6 grid gap-3 sm:grid-cols-2">
+          {filteredResources.map((resource) => (
+            <li key={resource.href}>
+              <Link href={resource.href} className="text-sm font-medium text-primary underline">
+                {resource.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
       </section>
     </div>
   );

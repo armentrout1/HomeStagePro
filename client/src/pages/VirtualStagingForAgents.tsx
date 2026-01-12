@@ -84,6 +84,23 @@ const faq = [
   },
 ];
 
+const relatedResources = [
+  { href: "/gallery/", label: "AI staging gallery" },
+  { href: "/sales", label: "Sales & onboarding workspace" },
+  { href: "/virtual-staging", label: "Virtual staging overview" },
+  { href: "/virtual-staging-cost", label: "Virtual staging cost breakdown" },
+  {
+    href: "/virtual-staging-for-real-estate-agents",
+    label: "Guide for real estate agents",
+  },
+  {
+    href: "/virtual-staging-for-investors",
+    label: "Guide for investors",
+  },
+  { href: "/real-estate-photos", label: "Real estate photo prep" },
+  { href: "/virtual-vs-traditional", label: "Virtual vs. traditional staging" },
+];
+
 const VirtualStagingForAgents = () => {
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-16 px-4 py-16">
@@ -419,6 +436,22 @@ const VirtualStagingForAgents = () => {
             </div>
           ))}
         </div>
+      </section>
+
+      <section className="rounded-2xl border border-border bg-muted/40 p-8">
+        <h2 className="text-2xl font-semibold">Related resources</h2>
+        <p className="mt-2 text-muted-foreground">
+          Keep the conversation going with more guides on pricing, workflows, and visual proof designed for your clients.
+        </p>
+        <ul className="mt-6 grid gap-3 sm:grid-cols-2">
+          {relatedResources.map((resource) => (
+            <li key={resource.href}>
+              <Link href={resource.href} className="text-sm font-medium text-primary underline">
+                {resource.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
       </section>
     </div>
   );
