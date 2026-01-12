@@ -44,6 +44,13 @@ export const ROUTE_SEO: Record<string, RouteSeo> = {
     canonicalPath: "/virtual-staging",
     ogImage: "/images/meta-preview.png",
   },
+  "/virtual-staging-for-real-estate-agents": {
+    title: "Virtual Staging for Real Estate Agents – HomeStage Pro",
+    description:
+      "Equip listings with MLS-safe virtual staging, overnight turnarounds, and seller-ready proof. Explore pricing, workflow, and gallery assets in one guide.",
+    canonicalPath: "/virtual-staging-for-real-estate-agents",
+    ogImage: "/images/meta-preview.png",
+  },
   "/gallery": {
     title: "Before & After Virtual Staging Examples | RoomStagerPro",
     description:

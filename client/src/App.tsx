@@ -9,6 +9,7 @@ import HomeStagingTips from "./pages/HomeStagingTips";
 import RealEstatePhotos from "./pages/RealEstatePhotos";
 import VirtualVsTraditional from "./pages/VirtualVsTraditional";
 import VirtualStaging from "./pages/VirtualStaging";
+import VirtualStagingForAgents from "./pages/VirtualStagingForAgents";
 import Gallery from "./pages/Gallery";
 import SellingTips from "./pages/SellingTips";
 import NotFound from "@/pages/not-found";
@@ -55,6 +56,12 @@ function Router() {
           <>
             <SeoHead path="/virtual-staging" />
             <VirtualStaging />
+          </>
+        </Route>
+        <Route path="/virtual-staging-for-real-estate-agents">
+          <>
+            <SeoHead path="/virtual-staging-for-real-estate-agents" />
+            <VirtualStagingForAgents />
           </>
         </Route>
         <Route path="/gallery">
