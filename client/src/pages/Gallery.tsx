@@ -6,7 +6,7 @@ const galleryItems = [
     id: "living-1",
     title: "Modern living room reset",
     beforeSrc: "/gallery/living-1-before.webp",
-    afterSrc: "/gallery/living-1-after.jpg",
+    afterSrc: "/gallery/living-1-after",
     description:
       "Vacant condo space transformed with layered neutrals, sculptural lighting, and art direction that lifts perceived value.",
   },
@@ -14,7 +14,7 @@ const galleryItems = [
     id: "bed-1",
     title: "Primary bedroom retreat",
     beforeSrc: "/gallery/bed-1-before.webp",
-    afterSrc: "/gallery/bed-1-after.jpg",
+    afterSrc: "/gallery/bed-1-after",
     description:
       "Muted staging palette introduces warmth, textured bedding, and accent lighting to inspire move-in imagination.",
   },
@@ -53,12 +53,16 @@ const Gallery = () => {
               <div>
                 <p className="text-xs uppercase tracking-[0.35em] text-primary">After</p>
                 <div className="mt-4 overflow-hidden rounded-2xl">
-                  <img
-                    src={item.afterSrc}
-                    alt={`${item.title} after virtual staging`}
-                    className="w-full object-cover"
-                    loading="lazy"
-                  />
+                  <picture>
+                    <source srcSet={`${item.afterSrc}.webp`} type="image/webp" />
+                    <img
+                      src={`${item.afterSrc}.jpg`}
+                      alt={`${item.title} after virtual staging`}
+                      className="w-full object-cover"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </picture>
                 </div>
                 <div className="mt-6 space-y-3">
                   <h2 className="text-2xl font-semibold">{item.title}</h2>

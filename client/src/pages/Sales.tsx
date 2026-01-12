@@ -9,13 +9,13 @@ const beforeAfterSamples = [
   {
     id: "living-room",
     before: "/sample-images/living-before.jpg",
-    after: "/sample-images/living-after.png",
+    after: "/sample-images/living-after.webp",
     title: "Living Room Transformation"
   },
   {
     id: "bedroom",
     before: "/sample-images/bed-before.webp",
-    after: "/sample-images/bed-after.png",
+    after: "/sample-images/bed-after.webp",
     title: "Bedroom Enhancement"
   }
 ];
