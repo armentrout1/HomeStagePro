@@ -44,6 +44,20 @@ export const ROUTE_SEO: Record<string, RouteSeo> = {
     canonicalPath: "/virtual-staging",
     ogImage: "/images/meta-preview.png",
   },
+  "/virtual-staging-cost": {
+    title: "How Much Does Virtual Staging Cost? | HomeStage Pro",
+    description:
+      "See virtual staging pricing per photo, package tiers, and cost drivers. Compare to traditional installs and learn when each model makes financial sense.",
+    canonicalPath: "/virtual-staging-cost",
+    ogImage: "/images/meta-preview.png",
+  },
+  "/virtual-staging-for-investors": {
+    title: "Virtual Staging for Investors | HomeStage Pro",
+    description:
+      "Deploy AI staging for BRRRR, flips, and STR portfolios. Cut DOM, lift offers, and scale marketing with deal-ready visuals from HomeStage Pro.",
+    canonicalPath: "/virtual-staging-for-investors",
+    ogImage: "/images/meta-preview.png",
+  },
   "/virtual-staging-for-real-estate-agents": {
     title: "Virtual Staging for Real Estate Agents – HomeStage Pro",
     description:
