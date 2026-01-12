@@ -44,6 +44,13 @@ export const ROUTE_SEO: Record<string, RouteSeo> = {
     canonicalPath: "/virtual-staging",
     ogImage: "/images/meta-preview.png",
   },
+  "/gallery": {
+    title: "Before & After Virtual Staging Examples | RoomStagerPro",
+    description:
+      "Explore before and after virtual staging transformations that prove how AI-designed interiors win more clicks and offers.",
+    canonicalPath: "/gallery",
+    ogImage: "/images/meta-preview.png",
+  },
   "/selling-tips": {
     title: "Home Selling Tips | RoomStagerPro",
     description:

@@ -65,6 +65,9 @@ const supabaseOrigin = process.env.SUPABASE_URL
 const scriptSrc = ["'self'", "https://js.stripe.com"];
 if (app.get("env") !== "production") {
   scriptSrc.push("'unsafe-inline'", "https://replit.com");
+} else {
+  // Add SHA-256 hash for the download script in production
+  scriptSrc.push("'sha256-uL5TkfwVr7O3gZyyJyG8Dc2z1mkkIvQ7vOxNlJJdAa4='");
 }
 
 app.use(
@@ -73,6 +76,7 @@ app.use(
       directives: {
         ...helmet.contentSecurityPolicy.getDefaultDirectives(),
         "script-src": scriptSrc,
+        "script-src-attr": ["'self'"],
         "img-src": [
           "'self'",
           "data:",
