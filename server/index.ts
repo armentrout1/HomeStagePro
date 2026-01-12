@@ -40,11 +40,6 @@ app.use((req, res, next) => {
     redirectRequired = true;
   }
 
-  if (pathname.length > 1 && pathname.endsWith("/")) {
-    pathname = pathname.slice(0, -1);
-    redirectRequired = true;
-  }
-
   const protocolIsHttps = currentProtocol === "https";
   if (!protocolIsHttps) {
     redirectRequired = true;
