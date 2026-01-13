@@ -104,12 +104,15 @@ export default function Home() {
               </div>
             </div>
             <div className="md:w-1/2">
-              <img 
-                src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" 
-                alt="Beautifully staged living room" 
-                className="rounded-lg shadow-lg" 
-                width="600" 
-                height="400"
+              <img
+                src="/hero/home-hero.webp"
+                alt="Beautifully staged living room"
+                loading="eager"
+                decoding="async"
+                fetchPriority="high"
+                width="1600"
+                height="1067"
+                className="rounded-lg shadow-lg"
               />
             </div>
           </div>
