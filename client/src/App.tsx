@@ -1,26 +1,29 @@
 import { Route, Switch, useLocation } from "wouter";
-import { useEffect } from "react";
+import { Suspense, lazy, useEffect } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
 import Layout from "./components/layout/Layout";
 import Home from "./pages/Home";
-import HomeStagingTips from "./pages/HomeStagingTips";
-import RealEstatePhotos from "./pages/RealEstatePhotos";
-import VirtualVsTraditional from "./pages/VirtualVsTraditional";
-import VirtualStaging from "./pages/VirtualStaging";
-import VirtualStagingForAgents from "./pages/VirtualStagingForAgents";
-import VirtualStagingForInvestors from "./pages/VirtualStagingForInvestors";
-import VirtualStagingCost from "./pages/VirtualStagingCost";
-import Gallery from "./pages/Gallery";
-import SellingTips from "./pages/SellingTips";
 import NotFound from "@/pages/not-found";
-
-// Import the new pages
-import Upgrade from "./pages/Upgrade";
-import ThankYou from "./pages/ThankYou";
-import Sales from "./pages/Sales";
 import { SeoHead } from "@/seo/SeoHead";
+
+const HomeStagingTips = lazy(() => import("./pages/HomeStagingTips"));
+const RealEstatePhotos = lazy(() => import("./pages/RealEstatePhotos"));
+const VirtualVsTraditional = lazy(() => import("./pages/VirtualVsTraditional"));
+const VirtualStaging = lazy(() => import("./pages/VirtualStaging"));
+const VirtualStagingForAgents = lazy(
+  () => import("./pages/VirtualStagingForAgents"),
+);
+const VirtualStagingForInvestors = lazy(
+  () => import("./pages/VirtualStagingForInvestors"),
+);
+const VirtualStagingCost = lazy(() => import("./pages/VirtualStagingCost"));
+const Gallery = lazy(() => import("./pages/Gallery"));
+const SellingTips = lazy(() => import("./pages/SellingTips"));
+const Sales = lazy(() => import("./pages/Sales"));
+const Upgrade = lazy(() => import("./pages/Upgrade"));
+const ThankYou = lazy(() => import("./pages/ThankYou"));
 
 function Router() {
   useEffect(() => {
@@ -29,87 +32,93 @@ function Router() {
 
   return (
     <Layout>
-      <Switch>
-        <Route path="/">
-          <>
-            <SeoHead path="/" />
-            <Home />
-          </>
-        </Route>
-        <Route path="/home-staging-tips">
-          <>
-            <SeoHead path="/home-staging-tips" />
-            <HomeStagingTips />
-          </>
-        </Route>
-        <Route path="/real-estate-photos">
-          <>
-            <SeoHead path="/real-estate-photos" />
-            <RealEstatePhotos />
-          </>
-        </Route>
-        <Route path="/virtual-vs-traditional">
-          <>
-            <SeoHead path="/virtual-vs-traditional" />
-            <VirtualVsTraditional />
-          </>
-        </Route>
-        <Route path="/virtual-staging">
-          <>
-            <SeoHead path="/virtual-staging" />
-            <VirtualStaging />
-          </>
-        </Route>
-        <Route path="/virtual-staging-for-real-estate-agents">
-          <>
-            <SeoHead path="/virtual-staging-for-real-estate-agents" />
-            <VirtualStagingForAgents />
-          </>
-        </Route>
-        <Route path="/virtual-staging-for-investors">
-          <>
-            <SeoHead path="/virtual-staging-for-investors" />
-            <VirtualStagingForInvestors />
-          </>
-        </Route>
-        <Route path="/virtual-staging-cost">
-          <>
-            <SeoHead path="/virtual-staging-cost" />
-            <VirtualStagingCost />
-          </>
-        </Route>
-        <Route path="/gallery">
-          <>
-            <SeoHead path="/gallery" />
-            <Gallery />
-          </>
-        </Route>
-        <Route path="/selling-tips">
-          <>
-            <SeoHead path="/selling-tips" />
-            <SellingTips />
-          </>
-        </Route>
-        <Route path="/sales">
-          <>
-            <SeoHead path="/sales" />
-            <Sales />
-          </>
-        </Route>
-        <Route path="/upgrade">
-          <>
-            <SeoHead path="/upgrade" />
-            <Upgrade />
-          </>
-        </Route>
-        <Route path="/thank-you">
-          <>
-            <SeoHead path="/thank-you" />
-            <ThankYou />
-          </>
-        </Route>
-        <Route component={NotFound} />
-      </Switch>
+      <Suspense
+        fallback={
+          <div className="p-8 text-sm text-muted-foreground">Loading…</div>
+        }
+      >
+        <Switch>
+          <Route path="/">
+            <>
+              <SeoHead path="/" />
+              <Home />
+            </>
+          </Route>
+          <Route path="/home-staging-tips">
+            <>
+              <SeoHead path="/home-staging-tips" />
+              <HomeStagingTips />
+            </>
+          </Route>
+          <Route path="/real-estate-photos">
+            <>
+              <SeoHead path="/real-estate-photos" />
+              <RealEstatePhotos />
+            </>
+          </Route>
+          <Route path="/virtual-vs-traditional">
+            <>
+              <SeoHead path="/virtual-vs-traditional" />
+              <VirtualVsTraditional />
+            </>
+          </Route>
+          <Route path="/virtual-staging">
+            <>
+              <SeoHead path="/virtual-staging" />
+              <VirtualStaging />
+            </>
+          </Route>
+          <Route path="/virtual-staging-for-real-estate-agents">
+            <>
+              <SeoHead path="/virtual-staging-for-real-estate-agents" />
+              <VirtualStagingForAgents />
+            </>
+          </Route>
+          <Route path="/virtual-staging-for-investors">
+            <>
+              <SeoHead path="/virtual-staging-for-investors" />
+              <VirtualStagingForInvestors />
+            </>
+          </Route>
+          <Route path="/virtual-staging-cost">
+            <>
+              <SeoHead path="/virtual-staging-cost" />
+              <VirtualStagingCost />
+            </>
+          </Route>
+          <Route path="/gallery">
+            <>
+              <SeoHead path="/gallery" />
+              <Gallery />
+            </>
+          </Route>
+          <Route path="/selling-tips">
+            <>
+              <SeoHead path="/selling-tips" />
+              <SellingTips />
+            </>
+          </Route>
+          <Route path="/sales">
+            <>
+              <SeoHead path="/sales" />
+              <Sales />
+            </>
+          </Route>
+          <Route path="/upgrade">
+            <>
+              <SeoHead path="/upgrade" />
+              <Upgrade />
+            </>
+          </Route>
+          <Route path="/thank-you">
+            <>
+              <SeoHead path="/thank-you" />
+              <ThankYou />
+            </>
+          </Route>
+          <Route component={NotFound} />
+        </Switch>
+      </Suspense>
     </Layout>
   );
 }
