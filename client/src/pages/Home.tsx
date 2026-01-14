@@ -266,7 +266,7 @@ export default function Home() {
             </Link>
             <Link href="/selling-tips">
               <span className="bg-transparent hover:bg-blue-700 text-white font-medium py-3 px-8 rounded-lg transition border border-white inline-block cursor-pointer">
-                Learn More
+                Read selling tips for faster sales
               </span>
             </Link>
           </div>

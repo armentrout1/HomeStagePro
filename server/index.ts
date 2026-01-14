@@ -61,8 +61,11 @@ const scriptSrc = ["'self'", "https://js.stripe.com"];
 if (app.get("env") !== "production") {
   scriptSrc.push("'unsafe-inline'", "https://replit.com");
 } else {
-  // Add SHA-256 hash for the AdSense loader inline script in production
-  scriptSrc.push("'sha256-boJN3MQ54bsib3u1Yw5+BIxLNI4xnn/sUOuruatV/+M='");
+  // Add SHA-256 hashes for the inline scripts allowed in production
+  scriptSrc.push(
+    "'sha256-boJN3MQ54bsib3u1Yw5+BIxLNI4xnn/sUOuruatV/+M='",
+    "'sha256-n29WT7IJaMAbttUFylNL/JPxYo2eh1jEaMVNliPos18='",
+  );
 }
 
 app.use(
