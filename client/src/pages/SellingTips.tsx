@@ -186,16 +186,6 @@ export default function SellingTips() {
                   </li>
                 ))}
               </ul>
-              
-              <div className="bg-gray-50 p-4 rounded-lg mt-6">
-                <h4 className="font-semibold mb-2">Need More Help?</h4>
-                <p className="text-sm text-gray-700 mb-4">
-                  Download our comprehensive guide with worksheets and checklists to prepare your home for a fast sale.
-                </p>
-                <a href="#" className="bg-primary hover:bg-blue-600 text-white text-sm font-medium py-2 px-4 rounded inline-block transition">
-                  Download Free Guide
-                </a>
-              </div>
             </div>
           </div>
         </div>

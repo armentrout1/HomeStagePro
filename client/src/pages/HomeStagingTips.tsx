@@ -116,9 +116,12 @@ export default function HomeStagingTips() {
               <p className="text-gray-700 mb-4">
                 Our network of certified home stagers can transform your property for maximum appeal.
               </p>
-              <a href="#" className="bg-primary hover:bg-blue-600 text-white font-medium py-2 px-4 rounded inline-block transition">
+              <Link
+                href="/virtual-staging"
+                className="bg-primary hover:bg-blue-600 text-white font-medium py-2 px-4 rounded inline-block transition"
+              >
                 Find a Stager
-              </a>
+              </Link>
             </div>
           </div>
         </div>

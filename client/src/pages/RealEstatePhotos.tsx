@@ -155,9 +155,12 @@ export default function RealEstatePhotos() {
               <p className="text-gray-700 mb-4">
                 Connect with pre-screened professional real estate photographers in your area.
               </p>
-              <a href="#" className="bg-primary hover:bg-blue-600 text-white font-medium py-2 px-4 rounded inline-block transition">
+              <Link
+                href="/sales"
+                className="bg-primary hover:bg-blue-600 text-white font-medium py-2 px-4 rounded inline-block transition"
+              >
                 Get Started
-              </a>
+              </Link>
             </div>
           </div>
         </div>
