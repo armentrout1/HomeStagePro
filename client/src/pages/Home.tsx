@@ -44,21 +44,21 @@ export default function Home() {
     {
       title: "10 Essential Home Staging Tips",
       description: "Learn the key techniques professionals use to make homes irresistible to buyers.",
-      image: "https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80",
+      image: "/home/article-1.webp",
       readTime: "5 min read",
       link: "/home-staging-tips"
     },
     {
       title: "Why Professional Photos Matter",
       description: "Discover how quality photography can dramatically increase buyer interest.",
-      image: "https://images.unsplash.com/photo-1598928636135-d146006ff4be?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80",
+      image: "/home/article-2.webp",
       readTime: "4 min read",
       link: "/real-estate-photos"
     },
     {
       title: "Virtual vs Traditional Staging",
       description: "Compare the costs, benefits, and results of traditional and virtual staging options.",
-      image: "https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80",
+      image: "/home/article-3.webp",
       readTime: "6 min read",
       link: "/virtual-vs-traditional"
     }
@@ -69,13 +69,13 @@ export default function Home() {
       text: "After following the staging tips, our house sold in just 5 days for $20,000 over asking price. The professional photos made all the difference in attracting serious buyers.",
       name: "Sarah Thompson",
       location: "San Francisco, CA",
-      image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80"
+      image: "/home/testimonial-1.webp"
     },
     {
       text: "We tried selling our home for months with no success. After implementing virtual staging based on your guide, we had multiple offers within two weeks. The transformation was incredible!",
       name: "Michael Rodriguez",
       location: "Chicago, IL",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80"
+      image: "/home/testimonial-2.webp"
     }
   ];
 
@@ -191,12 +191,14 @@ export default function Home() {
               <Link key={index} href={article.link}>
                 <div className="group cursor-pointer">
                   <div className="pp-card border border-slate-300 shadow-md rounded-2xl overflow-hidden transition group-hover:shadow-lg">
-                    <img 
-                      src={article.image} 
-                      alt={article.title} 
-                      className="w-full h-48 object-cover" 
-                      width="400" 
+                    <img
+                      src={article.image}
+                      alt={article.title}
+                      className="w-full h-48 object-cover"
+                      width="400"
                       height="192"
+                      loading="lazy"
+                      decoding="async"
                     />
                     <div className="p-6 md:p-8">
                       <h3 className="text-xl font-semibold mb-2 group-hover:text-primary transition">{article.title}</h3>
@@ -228,12 +230,14 @@ export default function Home() {
                 <p className="text-gray-700 mb-4 italic">"{testimonial.text}"</p>
                 <div className="flex items-center">
                   <div className="mr-4">
-                    <img 
-                      src={testimonial.image} 
-                      alt={testimonial.name} 
-                      className="h-10 w-10 rounded-full object-cover" 
-                      width="40" 
+                    <img
+                      src={testimonial.image}
+                      alt={testimonial.name}
+                      className="h-10 w-10 rounded-full object-cover"
+                      width="40"
                       height="40"
+                      loading="lazy"
+                      decoding="async"
                     />
                   </div>
                   <div>
