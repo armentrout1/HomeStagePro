@@ -1,7 +1,9 @@
+import { Suspense, lazy } from "react";
 import { Link } from "wouter";
 import { StarRating } from "@/components/ui/star-rating";
-import ImageStager from "@/components/ImageStager";
 import { AdUnit } from "@/components/ui/ad-unit";
+
+const ImageStager = lazy(() => import("@/components/ImageStager"));
 
 export default function Home() {
   const features = [
@@ -126,7 +128,15 @@ export default function Home() {
           <p className="text-lg md:text-xl text-gray-600 text-center mb-12 md:mb-9 max-w-3xl mx-auto">
             Upload a photo of your empty room and watch as our AI transforms it into a beautifully staged space. See the potential of your property in seconds!
           </p>
-          <ImageStager />
+          <Suspense
+            fallback={
+              <div className="rounded-2xl border border-slate-200/80 bg-white p-6 text-center text-base text-gray-500 shadow-sm">
+                Loading stager…
+              </div>
+            }
+          >
+            <ImageStager />
+          </Suspense>
         </div>
       </section>
 
