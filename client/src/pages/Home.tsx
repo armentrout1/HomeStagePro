@@ -1,10 +1,19 @@
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect } from "react";
 import { Link } from "wouter";
 import { StarRating } from "@/components/ui/star-rating";
 
 const ImageStager = lazy(() => import("@/components/ImageStager"));
 
 export default function Home() {
+  useEffect(() => {
+    if (window.location.hash === "#ai-stager") {
+      const el = document.getElementById("ai-stager");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+  }, []);
+
   const features = [
     {
       icon: (
