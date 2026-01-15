@@ -155,6 +155,20 @@ export default function Sales() {
             </Link>
           </div>
 
+          {/* Pricing Section */}
+          <div className="mb-20">
+            <h2 className="text-3xl font-bold text-center mb-4">Choose Your Staging Plan</h2>
+            <p className="text-center text-gray-600 mb-12 max-w-3xl mx-auto">
+              Select the perfect plan for your needs. All plans include high-quality AI-generated stagings you can download and use immediately.
+            </p>
+            <PricingPlans
+              plans={pricingPlans}
+              selectedPlanId={selectedPlanId}
+              onSelectPlan={setSelectedPlanId}
+              onCtaClick={handlePlanCtaClick}
+            />
+          </div>
+
           {/* Benefits Section */}
           <div className="mb-20">
             <h2 className="text-3xl font-bold text-center mb-12">Why Virtual Staging Works</h2>
