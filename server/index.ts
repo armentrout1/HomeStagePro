@@ -86,10 +86,17 @@ app.use(
           "https://images.unsplash.com",
           ...(supabaseOrigin ? [supabaseOrigin] : []),
         ],
-        "frame-src": ["'self'", "https://js.stripe.com", "https://hooks.stripe.com"],
+        "frame-src": [
+          "'self'",
+          "https://js.stripe.com",
+          "https://hooks.stripe.com",
+          "https://googleads.g.doubleclick.net",
+        ],
         "connect-src": [
           "'self'",
           "https://api.stripe.com",
+          "https://pagead2.googlesyndication.com",
+          "https://ep1.adtrafficquality.google",
           ...(supabaseOrigin ? [supabaseOrigin] : []),
         ],
       },
