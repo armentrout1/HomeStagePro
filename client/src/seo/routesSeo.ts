@@ -79,6 +79,13 @@ export const ROUTE_SEO: Record<string, RouteSeo> = {
     canonicalPath: "/gallery",
     ogImage: "/images/meta-preview.png",
   },
+  "/how-it-works": {
+    title: "How RoomStagerPro Works | Fast AI Staging Workflow",
+    description:
+      "See the four-step HomeStage Pro workflow: upload photos, pick a style, get 24-hour AI turnarounds, and download MLS-ready files.",
+    canonicalPath: "/how-it-works",
+    ogImage: "/images/meta-preview.png",
+  },
   "/selling-tips": {
     title: "Home Selling Tips | RoomStagerPro",
     description:
