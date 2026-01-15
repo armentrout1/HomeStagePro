@@ -65,6 +65,13 @@ export const ROUTE_SEO: Record<string, RouteSeo> = {
     canonicalPath: "/virtual-staging-for-real-estate-agents",
     ogImage: "/images/meta-preview.png",
   },
+  "/virtual-staging-for-short-term-rentals": {
+    title: "Virtual Staging for Short-Term Rentals | Boost Airbnb Bookings",
+    description:
+      "Professional virtual staging for Airbnb and VRBO properties. Increase bookings by 40% with AI-powered furniture placement. Transform empty rentals into desirable stays.",
+    canonicalPath: "/virtual-staging-for-short-term-rentals",
+    ogImage: "/images/meta-preview.png",
+  },
   "/gallery": {
     title: "Before & After Virtual Staging Examples | RoomStagerPro",
     description:

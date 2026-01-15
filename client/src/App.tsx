@@ -19,6 +19,9 @@ const VirtualStagingForInvestors = lazy(
   () => import("./pages/VirtualStagingForInvestors"),
 );
 const VirtualStagingCost = lazy(() => import("./pages/VirtualStagingCost"));
+const VirtualStagingForShortTermRentals = lazy(
+  () => import("./pages/VirtualStagingForShortTermRentals"),
+);
 const Gallery = lazy(() => import("./pages/Gallery"));
 const SellingTips = lazy(() => import("./pages/SellingTips"));
 const Sales = lazy(() => import("./pages/Sales"));
@@ -78,6 +81,12 @@ function Router() {
             <>
               <SeoHead path="/virtual-staging-for-investors" />
               <VirtualStagingForInvestors />
+            </>
+          </Route>
+          <Route path="/virtual-staging-for-short-term-rentals">
+            <>
+              <SeoHead path="/virtual-staging-for-short-term-rentals" />
+              <VirtualStagingForShortTermRentals />
             </>
           </Route>
           <Route path="/virtual-staging-cost">
