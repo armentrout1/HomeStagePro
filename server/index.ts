@@ -9,7 +9,12 @@ const app = express();
 app.set('trust proxy', 1);
 
 // Canonical host + HTTPS + trailing slash normalization (non-API routes)
+// Only apply in production - skip in development so localhost works
 app.use((req, res, next) => {
+  if (app.get("env") === "development") {
+    return next();
+  }
+
   if (req.path === "/api" || req.path.startsWith("/api/")) {
     return next();
   }
@@ -73,6 +78,8 @@ if (app.get("env") !== "production") {
 
 app.use(
   helmet({
+    // Disable HSTS in development so localhost works without HTTPS
+    strictTransportSecurity: app.get("env") !== "development",
     contentSecurityPolicy: {
       directives: {
         ...helmet.contentSecurityPolicy.getDefaultDirectives(),

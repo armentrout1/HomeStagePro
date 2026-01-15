@@ -15,12 +15,9 @@ export default function Header() {
 
   const navLinks = [
     { href: "/", label: "AI Stager" },
-    { href: "/home-staging-tips", label: "Staging Tips" },
-    { href: "/real-estate-photos", label: "Photos" },
     { href: "/gallery/", label: "Gallery" },
-    { href: "/virtual-vs-traditional", label: "Virtual Staging" },
-    { href: "/selling-tips", label: "Selling Tips" },
-    { href: "/sales", label: "Upgrade" },
+    { href: "/resources", label: "Resources" },
+    { href: "/sales", label: "Pricing" },
   ];
 
   useEffect(() => {

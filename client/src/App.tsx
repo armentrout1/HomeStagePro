@@ -27,6 +27,7 @@ const SellingTips = lazy(() => import("./pages/SellingTips"));
 const Sales = lazy(() => import("./pages/Sales"));
 const Upgrade = lazy(() => import("./pages/Upgrade"));
 const ThankYou = lazy(() => import("./pages/ThankYou"));
+const Resources = lazy(() => import("./pages/Resources"));
 
 function Router() {
   useEffect(() => {
@@ -111,6 +112,12 @@ function Router() {
             <>
               <SeoHead path="/sales" />
               <Sales />
+            </>
+          </Route>
+          <Route path="/resources">
+            <>
+              <SeoHead path="/resources" />
+              <Resources />
             </>
           </Route>
           <Route path="/upgrade">

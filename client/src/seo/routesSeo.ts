@@ -109,4 +109,11 @@ export const ROUTE_SEO: Record<string, RouteSeo> = {
     robots: "noindex,nofollow",
     ogImage: "/images/meta-preview.png",
   },
+  "/resources": {
+    title: "Resources | Virtual Staging Guides, Pricing & Examples",
+    description:
+      "Guides, use-cases, pricing, and proof to help agents, investors, and STR hosts use virtual staging to convert faster.",
+    canonicalPath: "/resources",
+    ogImage: "/images/meta-preview.png",
+  },
 };
