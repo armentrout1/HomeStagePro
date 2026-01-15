@@ -82,14 +82,14 @@ export default function Header() {
           <button
             type="button"
             onClick={handleAiStagerClick}
-            className="inline-flex items-center rounded-full border border-amber-400 px-4 py-2 text-sm font-medium text-slate-900 ring-1 ring-amber-200 transition hover:bg-amber-50 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2"
+            className="inline-flex items-center rounded-full border border-amber-400 px-4 py-2 text-sm font-medium text-slate-900 ring-1 ring-amber-200 transition hover:bg-amber-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2"
           >
             Try AI Stager
           </button>
         </nav>
         <button
           ref={mobileTriggerRef}
-          className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-full border border-amber-300 p-0 text-amber-700 transition hover:border-amber-400 hover:bg-amber-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+          className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-full border border-amber-300 p-0 text-amber-700 shadow-sm transition-transform duration-200 ease-out hover:scale-[1.03] active:scale-[0.97] hover:border-amber-400 hover:bg-amber-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
           onClick={toggleMobileMenu}
           aria-label="Toggle mobile menu"
         >
