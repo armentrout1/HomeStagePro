@@ -57,7 +57,11 @@ const supabaseOrigin = process.env.SUPABASE_URL
   ? new URL(process.env.SUPABASE_URL).origin
   : null;
 
-const scriptSrc = ["'self'", "https://js.stripe.com"];
+const scriptSrc = [
+  "'self'",
+  "https://js.stripe.com",
+  "https://pagead2.googlesyndication.com",
+];
 if (app.get("env") !== "production") {
   scriptSrc.push("'unsafe-inline'", "https://replit.com");
 } else {
