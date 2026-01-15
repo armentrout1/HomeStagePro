@@ -999,7 +999,7 @@
             "entity": "localhost"
           },
           {
-            "url": "http://localhost:5173/src/components/ui/ad-unit.tsx",
+            "url": "http://localhost:5173/src/components/ui/adunit-removed.tsx",
             "sessionTargetType": "page",
             "protocol": "http/1.1",
             "rendererStartTime": 837.6959999799728,
@@ -9897,12 +9897,12 @@
             ]
           },
           {
-            "name": "http://localhost:5173/src/components/ui/ad-unit.tsx",
+            "name": "http://localhost:5173/src/components/ui/adunit-removed.tsx",
             "resourceBytes": 7922,
             "encodedBytes": 7922,
             "children": [
               {
-                "name": "ad-unit.tsx",
+                "name": "adunit-removed.tsx",
                 "resourceBytes": 3002
               },
               {
@@ -10901,7 +10901,7 @@
             "wastedPercent": 29.042224510813597
           },
           {
-            "url": "http://localhost:5173/src/components/ui/ad-unit.tsx",
+            "url": "http://localhost:5173/src/components/ui/adunit-removed.tsx",
             "totalBytes": 7922,
             "wastedBytes": 4746,
             "wastedPercent": 59.90911386013633
@@ -12315,7 +12315,7 @@
                               "transferSize": 61858,
                               "children": {
                                 "47288.34": {
-                                  "url": "http://localhost:5173/src/components/ui/ad-unit.tsx",
+                                  "url": "http://localhost:5173/src/components/ui/adunit-removed.tsx",
                                   "navStartToEndTime": 864,
                                   "transferSize": 8212,
                                   "children": {}

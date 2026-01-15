@@ -1,7 +1,6 @@
 import { Suspense, lazy } from "react";
 import { Link } from "wouter";
 import { StarRating } from "@/components/ui/star-rating";
-import { AdUnit } from "@/components/ui/ad-unit";
 
 const ImageStager = lazy(() => import("@/components/ImageStager"));
 
@@ -93,14 +92,14 @@ export default function Home() {
                 Elevate your property's appeal with professional staging techniques and expert advice for a faster sale at the best price.
               </p>
               <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
-                <Link href="/home-staging-tips">
-                  <span className="bg-primary hover:bg-blue-600 text-white font-medium py-3 px-6 rounded-lg transition shadow-sm inline-block text-center cursor-pointer">
-                    Staging Tips
+                <Link href="/#ai-stager">
+                  <span className="inline-flex items-center justify-center rounded-full border border-amber-400 bg-amber-400/90 px-6 py-3 text-base font-semibold text-slate-900 ring-1 ring-amber-200 shadow-sm transition hover:bg-amber-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2">
+                    Try AI Stager
                   </span>
                 </Link>
-                <Link href="/selling-tips">
-                  <span className="bg-white hover:bg-gray-100 text-gray-800 font-medium py-3 px-6 rounded-lg transition border border-gray-300 shadow-sm inline-block text-center cursor-pointer">
-                    Selling Guide
+                <Link href="/sales">
+                  <span className="inline-flex items-center justify-center rounded-full border border-slate-300 px-6 py-3 text-base font-medium text-slate-700 transition hover:border-amber-400 hover:bg-amber-50 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2">
+                    See Pricing
                   </span>
                 </Link>
               </div>
@@ -137,15 +136,6 @@ export default function Home() {
           >
             <ImageStager />
           </Suspense>
-        </div>
-      </section>
-
-      {/* Ad Unit - Horizontal */}
-      <section className="py-8 bg-white border-t border-slate-200/70">
-        <div className="container mx-auto px-4 text-center">
-          <div className="mx-auto max-w-4xl overflow-hidden">
-            <AdUnit adSlot="1234567890" adFormat="horizontal" className="mx-auto" />
-          </div>
         </div>
       </section>
 
@@ -261,28 +251,18 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
             <Link href="/home-staging-tips">
               <span className="bg-white text-blue-600 hover:bg-blue-50 font-medium py-3 px-8 rounded-lg transition shadow-sm inline-block cursor-pointer">
-                Get Started
+                Staging Tips
               </span>
             </Link>
             <Link href="/selling-tips">
               <span className="bg-transparent hover:bg-blue-700 text-white font-medium py-3 px-8 rounded-lg transition border border-white inline-block cursor-pointer">
-                Read selling tips for faster sales
+                Selling Guide
               </span>
             </Link>
           </div>
         </div>
       </section>
       
-      {/* Ad Unit - Rectangle */}
-      <section className="py-12 bg-white border-t border-slate-200/70">
-        <div className="container mx-auto px-4 text-center">
-          <div className="flex justify-center">
-            <div className="mx-auto">
-              <AdUnit adSlot="9876543210" adFormat="rectangle" className="mx-auto" />
-            </div>
-          </div>
-        </div>
-      </section>
     </>
   );
 }

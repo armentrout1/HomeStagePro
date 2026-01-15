@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
 const sections = [
@@ -52,6 +53,27 @@ export default function Resources() {
             Guides, playbooks, and proof to help agents, investors, and short-term rental hosts
             ship polished listings faster.
           </p>
+          <div className="flex flex-col items-center gap-4 pt-4 sm:flex-row sm:justify-center">
+            <Button
+              asChild
+              className="w-full rounded-full border border-amber-400 bg-amber-400/90 px-6 py-3 text-base font-semibold text-slate-900 ring-1 ring-amber-200 shadow-sm transition hover:bg-amber-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 sm:w-auto"
+            >
+              <Link href="/#ai-stager">Try AI Stager</Link>
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              className="w-full rounded-full border border-slate-300 px-6 py-3 text-base font-medium text-slate-700 transition hover:border-amber-400 hover:bg-amber-50 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 sm:w-auto"
+            >
+              <Link href="/sales">See Pricing</Link>
+            </Button>
+            <Link
+              href="/gallery/"
+              className="text-sm font-semibold text-amber-600 transition hover:text-amber-700"
+            >
+              View Gallery
+            </Link>
+          </div>
         </header>
 
         <div className="grid gap-8 md:grid-cols-2">

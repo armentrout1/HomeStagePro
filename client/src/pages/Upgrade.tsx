@@ -1,5 +1,5 @@
 import { useMemo, useEffect, useState } from "react";
-import { AdUnit } from "@/components/ui/ad-unit";
+
 import {
   PricingPlans,
   type PricingPlan as SharedPricingPlan,
@@ -283,11 +283,6 @@ export default function Upgrade() {
               </p>
             </div>
           </div>
-        </div>
-        
-        {/* Ad Unit */}
-        <div className="flex justify-center my-8">
-          <AdUnit adSlot="5678901234" adFormat="horizontal" className="mx-auto" />
         </div>
       </div>
     </div>
