@@ -107,7 +107,7 @@ export default function Home() {
             </div>
             <div className="md:w-1/2">
               <img
-                src="/hero/home-hero.webp"
+                src="/hero/home-hero-v2.webp"
                 alt="Beautifully staged living room"
                 loading="eager"
                 decoding="async"

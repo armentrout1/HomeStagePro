@@ -126,8 +126,12 @@ export function serveStatic(app: Express) {
           return;
         }
 
+        if (urlPath.startsWith("/hero/")) {
+          res.setHeader("Cache-Control", "public, max-age=300");
+          return;
+        }
+
         if (
-          urlPath.startsWith("/hero/") ||
           urlPath.startsWith("/gallery/") ||
           urlPath.startsWith("/sample-images/")
         ) {
