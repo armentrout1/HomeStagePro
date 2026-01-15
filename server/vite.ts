@@ -127,7 +127,10 @@ export function serveStatic(app: Express) {
         }
 
         if (urlPath.startsWith("/hero/")) {
-          res.setHeader("Cache-Control", "public, max-age=300");
+          res.setHeader(
+            "Cache-Control",
+            "public, max-age=31536000, immutable",
+          );
           return;
         }
 
