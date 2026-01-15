@@ -61,6 +61,7 @@ const scriptSrc = [
   "'self'",
   "https://js.stripe.com",
   "https://pagead2.googlesyndication.com",
+  "https://ep2.adtrafficquality.google",
 ];
 if (app.get("env") !== "production") {
   scriptSrc.push("'unsafe-inline'", "https://replit.com");
