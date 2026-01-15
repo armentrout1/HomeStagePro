@@ -11,9 +11,10 @@ import { roomTypes } from "../constants";
 interface RoomTypeSelectProps {
   roomType: string;
   onRoomTypeChange: (value: string) => void;
+  showRoomTypeHint?: boolean;
 }
 
-export function RoomTypeSelect({ roomType, onRoomTypeChange }: RoomTypeSelectProps) {
+export function RoomTypeSelect({ roomType, onRoomTypeChange, showRoomTypeHint = false }: RoomTypeSelectProps) {
   return (
     <div className="mb-6 md:mb-5">
       <div className="mx-auto w-full max-w-full md:max-w-[26rem] lg:max-w-[26rem]">
@@ -26,7 +27,7 @@ export function RoomTypeSelect({ roomType, onRoomTypeChange }: RoomTypeSelectPro
         <Select value={roomType} onValueChange={onRoomTypeChange}>
           <SelectTrigger
             id="room-type"
-            className="pp-control mx-auto h-12 md:h-11 w-full rounded-full border border-slate-300 px-5 md:px-6 md:py-2 text-base md:text-lg shadow-sm ring-2 ring-slate-900/45 ring-offset-2 ring-offset-white focus-visible:ring-slate-900/70 data-[state=open]:ring-slate-900/70 md:max-w-[26rem] lg:max-w-[26rem]"
+            className="pp-control mx-auto h-12 md:h-11 w-full rounded-full border border-slate-300 px-5 md:px-6 md:py-2 text-base md:text-lg shadow-sm ring-1 ring-amber-200 ring-offset-2 ring-offset-white focus-visible:ring-2 focus-visible:ring-amber-400 data-[state=open]:ring-amber-300 md:max-w-[26rem] lg:max-w-[26rem]"
           >
             <SelectValue placeholder="Select Room Type" />
           </SelectTrigger>
@@ -42,6 +43,11 @@ export function RoomTypeSelect({ roomType, onRoomTypeChange }: RoomTypeSelectPro
             ))}
           </SelectContent>
         </Select>
+        {showRoomTypeHint && (
+          <p className="mt-3 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-3 py-2 text-center">
+            Tip: Pick the closest room type for better staging results.
+          </p>
+        )}
       </div>
     </div>
   );

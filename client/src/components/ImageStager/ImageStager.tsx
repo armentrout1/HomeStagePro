@@ -100,19 +100,21 @@ export default function ImageStager() {
 
   return (
     <div className="w-full max-w-4xl mx-auto px-2 md:px-0">
-      <Card className="p-6 md:px-8 shadow-md bg-white pp-card">
-        <div className="space-y-6 md:space-y-5 pb-36 md:pb-0">
-          <div className="text-center space-y-3 md:space-y-4">
-            <h3 className="text-2xl md:text-3xl font-bold">Transform Your Room with AI Staging</h3>
-            <p className="text-gray-600 md:text-lg">
-              Upload a photo of your empty room and our AI will transform it into a beautifully staged space in seconds!
-            </p>
-            <div>
-              <UsageStatusBanner usageStatus={usageStatus} isLoadingUsage={isLoadingUsage} />
-            </div>
+      <div className="rounded-2xl bg-gradient-to-r from-amber-300 via-amber-400 to-amber-300 p-[2px] shadow-lg">
+        <Card className="rounded-2xl bg-white p-6 md:px-8 shadow-md">
+          <div className="space-y-6 md:space-y-5 pb-36 md:pb-0">
+            <div className="text-center space-y-3 md:space-y-4">
+              <h3 className="text-2xl md:text-3xl font-bold">Transform Your Room with AI Staging</h3>
+              <p className="text-gray-600 md:text-lg">
+                Upload a photo of your empty room and our AI will transform it into a beautifully staged space in seconds!
+              </p>
           </div>
 
-          <RoomTypeSelect roomType={roomType} onRoomTypeChange={setRoomType} />
+          <RoomTypeSelect
+            roomType={roomType}
+            onRoomTypeChange={setRoomType}
+            showRoomTypeHint={Boolean(originalImage && !stagedImage)}
+          />
 
           <div className="w-full space-y-4 md:space-y-5 md:max-w-4xl md:mx-auto">
             <div className="md:hidden space-y-4">
@@ -214,7 +216,8 @@ export default function ImageStager() {
 
           <SavingIndicator isSaving={isSaving} />
         </div>
-      </Card>
+        </Card>
+      </div>
     </div>
   );
 }

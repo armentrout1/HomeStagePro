@@ -28,6 +28,10 @@
     @apply bg-slate-50 rounded-xl shadow-lg border border-slate-300 hover:shadow-xl transition-all duration-300;
   }
   
+  .pp-stager-card {
+    @apply bg-slate-50 rounded-xl border border-slate-200 shadow-lg ring-1 ring-amber-300/60 hover:shadow-xl hover:ring-amber-400/70 transition-all duration-300 focus-within:ring-2 focus-within:ring-amber-400/80;
+  }
+  
   .pp-panel {
     @apply bg-white rounded-xl border-2 border-slate-200 shadow-md hover:shadow-lg transition-shadow duration-200;
   }

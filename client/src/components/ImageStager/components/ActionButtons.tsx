@@ -35,7 +35,7 @@ export function ActionButtons({
               <Button
                 onClick={onUploadClick}
                 variant="outline"
-                className="w-full h-12 text-base font-medium border-slate-300 text-slate-700 hover:bg-slate-50"
+                className="w-full h-12 text-base font-medium border-slate-300 text-slate-700 hover:bg-slate-50 rounded-full"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -83,13 +83,13 @@ export function ActionButtons({
                 <Button
                   onClick={onStageClick}
                   variant="default"
-                  className="w-full h-12 text-base font-semibold shadow-md disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full h-12 text-base font-semibold rounded-full border border-amber-400 bg-amber-400/90 text-slate-900 shadow-md ring-1 ring-amber-200 transition hover:bg-amber-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-amber-400/90"
                   disabled={!originalImage || isLoading}
                   title={!originalImage ? "Please upload a photo first" : ""}
                 >
                   {isLoading ? (
                     <>
-                      <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-slate-200 border-t-white"></div>
+                      <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-amber-200 border-t-slate-900"></div>
                       Processing...
                     </>
                   ) : (
@@ -168,6 +168,11 @@ export function ActionButtons({
               </div>
             )}
           </div>
+          {!requiresUpgrade && !originalImage && !isLoading && (
+            <p className="mt-3 text-sm text-slate-500 text-center">
+              Upload a photo to enable staging.
+            </p>
+          )}
         </div>
       </div>
 
@@ -177,7 +182,7 @@ export function ActionButtons({
             <Button
               onClick={onUploadClick}
               variant="outline"
-              className="flex-1 min-w-[140px] h-11 text-sm font-medium border-slate-300 text-slate-800 hover:bg-slate-50 transition-colors"
+              className="flex-1 min-w-[140px] h-11 text-sm font-medium border-slate-300 text-slate-800 hover:bg-slate-50 transition-colors rounded-full"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -209,13 +214,13 @@ export function ActionButtons({
               <Button
                 onClick={onStageClick}
                 variant="default"
-                className="flex-1 min-w-[140px] h-11 text-sm font-semibold shadow-lg disabled:opacity-60 disabled:cursor-not-allowed transition-shadow"
+                className="flex-1 min-w-[140px] h-11 text-sm font-semibold rounded-full border border-amber-400 bg-amber-400/90 text-slate-900 shadow-lg ring-1 ring-amber-200 transition hover:bg-amber-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-amber-400/90"
                 disabled={!originalImage || isLoading}
                 title={!originalImage ? "Please upload a photo first" : ""}
               >
                 {isLoading ? (
                   <>
-                    <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-slate-200 border-t-white"></div>
+                    <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-amber-200 border-t-slate-900"></div>
                     Working
                   </>
                 ) : (
@@ -245,6 +250,11 @@ export function ActionButtons({
               </Button>
             )}
           </div>
+          {!requiresUpgrade && !originalImage && !isLoading && (
+            <p className="mt-3 text-sm text-slate-500 text-center">
+              Upload a photo to enable staging.
+            </p>
+          )}
         </div>
       </div>
     </>

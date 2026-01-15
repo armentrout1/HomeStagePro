@@ -1,18 +1,29 @@
-import { Suspense, lazy, useEffect } from "react";
+import { Suspense, lazy, useCallback, useEffect } from "react";
 import { Link } from "wouter";
 import { StarRating } from "@/components/ui/star-rating";
 
 const ImageStager = lazy(() => import("@/components/ImageStager"));
 
 export default function Home() {
-  useEffect(() => {
-    if (window.location.hash === "#ai-stager") {
-      const el = document.getElementById("ai-stager");
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
+  const scrollToStager = useCallback(() => {
+    if (typeof document === "undefined") return;
+    const el = document.getElementById("ai-stager");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }, []);
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      if (window.location.hash === "#ai-stager") {
+        scrollToStager();
+      }
+    };
+
+    handleHashChange();
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, [scrollToStager]);
 
   const features = [
     {
@@ -101,7 +112,14 @@ export default function Home() {
                 Elevate your property's appeal with professional staging techniques and expert advice for a faster sale at the best price.
               </p>
               <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
-                <Link href="/#ai-stager">
+                <Link
+                  href="/#ai-stager"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    scrollToStager();
+                    window.history.pushState(null, "", "/#ai-stager");
+                  }}
+                >
                   <span className="inline-flex items-center justify-center rounded-full border border-amber-400 bg-amber-400/90 px-6 py-3 text-base font-semibold text-slate-900 ring-1 ring-amber-200 shadow-sm transition hover:bg-amber-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2">
                     Try AI Stager
                   </span>
