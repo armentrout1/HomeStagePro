@@ -92,6 +92,8 @@ app.use(
           "https://js.stripe.com",
           "https://hooks.stripe.com",
           "https://googleads.g.doubleclick.net",
+          "https://ep2.adtrafficquality.google",
+          "https://www.google.com",
         ],
         "connect-src": [
           "'self'",
