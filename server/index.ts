@@ -60,8 +60,6 @@ const supabaseOrigin = process.env.SUPABASE_URL
 const scriptSrc = [
   "'self'",
   "https://js.stripe.com",
-  "https://pagead2.googlesyndication.com",
-  "https://ep2.adtrafficquality.google",
 ];
 if (app.get("env") !== "production") {
   scriptSrc.push("'unsafe-inline'", "https://replit.com");
@@ -91,15 +89,11 @@ app.use(
           "'self'",
           "https://js.stripe.com",
           "https://hooks.stripe.com",
-          "https://googleads.g.doubleclick.net",
-          "https://ep2.adtrafficquality.google",
           "https://www.google.com",
         ],
         "connect-src": [
           "'self'",
           "https://api.stripe.com",
-          "https://pagead2.googlesyndication.com",
-          "https://ep1.adtrafficquality.google",
           ...(supabaseOrigin ? [supabaseOrigin] : []),
         ],
       },
