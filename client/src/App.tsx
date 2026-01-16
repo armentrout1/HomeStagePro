@@ -30,6 +30,13 @@ const Upgrade = lazy(() => import("./pages/Upgrade"));
 const ThankYou = lazy(() => import("./pages/ThankYou"));
 const Resources = lazy(() => import("./pages/Resources"));
 
+const GalleryRouteContent = () => (
+  <>
+    <SeoHead path="/gallery" />
+    <Gallery />
+  </>
+);
+
 function Router() {
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -98,10 +105,10 @@ function Router() {
             </>
           </Route>
           <Route path="/gallery">
-            <>
-              <SeoHead path="/gallery" />
-              <Gallery />
-            </>
+            <GalleryRouteContent />
+          </Route>
+          <Route path="/gallery/">
+            <GalleryRouteContent />
           </Route>
           <Route path="/how-it-works">
             <>

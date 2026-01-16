@@ -38,30 +38,30 @@ export const ROUTE_SEO: Record<string, RouteSeo> = {
     ogImage: "/images/meta-preview.png",
   },
   "/virtual-staging": {
-    title: "Virtual Staging Services | HomeStage Pro",
+    title: "Virtual Staging Services | RoomStagerPro",
     description:
-      "Modernize listings fast with AI virtual staging, before/after proof, and transparent packages from HomeStage Pro. Book a consult in minutes.",
+      "Modernize listings fast with AI virtual staging, before/after proof, and transparent packages from RoomStagerPro. Book a consult in minutes.",
     canonicalPath: "/virtual-staging",
     ogImage: "/images/meta-preview.png",
   },
   "/virtual-staging-cost": {
-    title: "How Much Does Virtual Staging Cost? | HomeStage Pro",
+    title: "How Much Does Virtual Staging Cost? | RoomStagerPro",
     description:
-      "See virtual staging pricing per photo, package tiers, and cost drivers. Compare to traditional installs and learn when each model makes financial sense.",
+      "See virtual staging pricing per photo, package tiers, and cost drivers. Compare to traditional installs and learn when each model makes financial sense with RoomStagerPro.",
     canonicalPath: "/virtual-staging-cost",
     ogImage: "/images/meta-preview.png",
   },
   "/virtual-staging-for-investors": {
-    title: "Virtual Staging for Investors | HomeStage Pro",
+    title: "Virtual Staging for Investors | RoomStagerPro",
     description:
-      "Deploy AI staging for BRRRR, flips, and STR portfolios. Cut DOM, lift offers, and scale marketing with deal-ready visuals from HomeStage Pro.",
+      "Deploy AI staging for BRRRR, flips, and STR portfolios. Cut DOM, lift offers, and scale marketing with deal-ready visuals from RoomStagerPro.",
     canonicalPath: "/virtual-staging-for-investors",
     ogImage: "/images/meta-preview.png",
   },
   "/virtual-staging-for-real-estate-agents": {
-    title: "Virtual Staging for Real Estate Agents – HomeStage Pro",
+    title: "Virtual Staging for Real Estate Agents – RoomStagerPro",
     description:
-      "Equip listings with MLS-safe virtual staging, overnight turnarounds, and seller-ready proof. Explore pricing, workflow, and gallery assets in one guide.",
+      "Equip listings with MLS-safe virtual staging, overnight turnarounds, and seller-ready proof. Explore pricing, workflow, and gallery assets in one guide from RoomStagerPro.",
     canonicalPath: "/virtual-staging-for-real-estate-agents",
     ogImage: "/images/meta-preview.png",
   },
@@ -76,13 +76,13 @@ export const ROUTE_SEO: Record<string, RouteSeo> = {
     title: "Before & After Virtual Staging Examples | RoomStagerPro",
     description:
       "Explore before and after virtual staging transformations that prove how AI-designed interiors win more clicks and offers.",
-    canonicalPath: "/gallery",
+    canonicalPath: "/gallery/",
     ogImage: "/images/meta-preview.png",
   },
   "/how-it-works": {
     title: "How RoomStagerPro Works | Fast AI Staging Workflow",
     description:
-      "See the four-step HomeStage Pro workflow: upload photos, pick a style, get 24-hour AI turnarounds, and download MLS-ready files.",
+      "See the four-step RoomStagerPro workflow: upload photos, pick a style, get 24-hour AI turnarounds, and download MLS-ready files.",
     canonicalPath: "/how-it-works",
     ogImage: "/images/meta-preview.png",
   },
