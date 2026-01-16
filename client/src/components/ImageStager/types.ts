@@ -2,7 +2,7 @@ export type UsageStatus = {
   usageCount: number;
   limit: number;
   remaining: number;
-  status: 'active' | 'exceeded' | 'premium';
+  status: 'active' | 'exceeded' | 'premium' | 'unlimited';
   accessToken?: {
     type: 'day-pass' | 'pack-10' | 'unlimited';
     expiresAt: string;

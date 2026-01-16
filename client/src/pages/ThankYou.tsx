@@ -112,10 +112,14 @@ export default function ThankYou() {
             )}
             
             <div className="space-x-4">
-              <Button asChild size="lg">
-                <Link href="/">
-                  Start Staging
-                </Link>
+              <Button
+                size="lg"
+                onClick={() => {
+                  sessionStorage.setItem("scrollToAiStager", "1");
+                  window.location.href = "/";
+                }}
+              >
+                Start Staging
               </Button>
             </div>
           </div>

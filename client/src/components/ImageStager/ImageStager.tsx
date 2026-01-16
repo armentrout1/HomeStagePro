@@ -212,6 +212,11 @@ export default function ImageStager() {
               onResetClick={handleReset}
               onDownloadClick={handleDownload}
             />
+
+            <UsageStatusBanner
+              usageStatus={usageStatus}
+              isLoadingUsage={isLoadingUsage}
+            />
           </div>
 
           <SavingIndicator isSaving={isSaving} />

@@ -7,6 +7,7 @@ const sections = [
     description: "Kick off virtual staging with the core experience, pricing overview, and gallery proof.",
     links: [
       { href: "/virtual-staging", label: "Virtual Staging Overview" },
+      { href: "/how-it-works", label: "How It Works" },
       { href: "/sales", label: "Plans & Pricing" },
       { href: "/gallery/", label: "Before & After Gallery" },
     ],

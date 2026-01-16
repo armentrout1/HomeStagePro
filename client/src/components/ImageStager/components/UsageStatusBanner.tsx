@@ -66,6 +66,20 @@ export function UsageStatusBanner({ usageStatus, isLoadingUsage }: UsageStatusBa
                 </Link>
               </div>
             )}
+            <div className="text-xs mt-1 text-gray-500">
+              {usageStatus.paidRemaining !== undefined || usageStatus.paidGranted !== undefined || usageStatus.paidUsed !== undefined ? (
+                <>
+                  {paid} paid + {free} free
+                </>
+              ) : (
+                <>
+                  {free} free remaining
+                </>
+              )}
+            </div>
+            {usageStatus.status === 'unlimited' && (
+              <div className="text-xs mt-1 text-yellow-600">Dev mode: usage limits disabled</div>
+            )}
           </div>
         )}
       </div>

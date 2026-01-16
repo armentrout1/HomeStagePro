@@ -7,10 +7,23 @@ const ImageStager = lazy(() => import("@/components/ImageStager"));
 export default function Home() {
   const scrollToStager = useCallback(() => {
     if (typeof document === "undefined") return;
-    const el = document.getElementById("ai-stager");
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+
+    let attempts = 0;
+    const maxAttempts = 20;
+
+    const tryScroll = () => {
+      const el = document.getElementById("ai-stager");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+      attempts += 1;
+      if (attempts < maxAttempts) {
+        requestAnimationFrame(tryScroll);
+      }
+    };
+
+    tryScroll();
   }, []);
 
   useEffect(() => {
@@ -23,6 +36,20 @@ export default function Home() {
     handleHashChange();
     window.addEventListener("hashchange", handleHashChange);
     return () => window.removeEventListener("hashchange", handleHashChange);
+  }, [scrollToStager]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    if (sessionStorage.getItem("scrollToAiStager") === "1") {
+      sessionStorage.removeItem("scrollToAiStager");
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          scrollToStager();
+          window.history.replaceState(null, "", "/#ai-stager");
+        });
+      });
+    }
   }, [scrollToStager]);
 
   const features = [

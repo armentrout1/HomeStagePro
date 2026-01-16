@@ -40,8 +40,14 @@ const HowItWorks = () => {
           instant downloads you can drop into your MLS or pitch decks.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-4">
-          <Button asChild size="lg">
-            <Link href="/#ai-stager">Start in the AI Stager</Link>
+          <Button
+            size="lg"
+            onClick={() => {
+              sessionStorage.setItem("scrollToAiStager", "1");
+              window.location.href = "/";
+            }}
+          >
+            Start in the AI Stager
           </Button>
           <Button asChild variant="outline" size="lg">
             <Link href="/sales">Talk to Sales</Link>
@@ -82,8 +88,14 @@ const HowItWorks = () => {
           listing.
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-          <Button asChild size="lg">
-            <Link href="/#ai-stager">Launch the AI Stager</Link>
+          <Button
+            size="lg"
+            onClick={() => {
+              sessionStorage.setItem("scrollToAiStager", "1");
+              window.location.href = "/";
+            }}
+          >
+            Launch the AI Stager
           </Button>
           <Button asChild variant="secondary" size="lg">
             <Link href="/sales">Book a Sales Call</Link>
