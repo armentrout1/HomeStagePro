@@ -102,7 +102,7 @@ export default function ImageStager() {
     <div className="w-full max-w-4xl mx-auto px-2 md:px-0">
       <div className="rounded-2xl bg-gradient-to-r from-amber-300 via-amber-400 to-amber-300 p-[2px] shadow-lg">
         <Card className="rounded-2xl bg-white p-6 md:px-8 shadow-md">
-          <div className="space-y-6 md:space-y-5 pb-36 md:pb-0">
+          <div className="space-y-6 md:space-y-5 pb-10 md:pb-0">
             <div className="text-center space-y-3 md:space-y-4">
               <h3 className="text-2xl md:text-3xl font-bold">Transform Your Room with AI Staging</h3>
               <p className="text-gray-600 md:text-lg">
