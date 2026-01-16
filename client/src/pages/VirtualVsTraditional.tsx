@@ -72,7 +72,7 @@ export default function VirtualVsTraditional() {
             </div>
             <div className="p-6">
               <img 
-                src="https://images.unsplash.com/photo-1600585153490-76fb20a32601?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" 
+                src="/images/traditional-staging.webp" 
                 alt="Traditional home staging" 
                 className="w-full h-48 object-cover rounded-lg mb-4" 
                 width="400" 
@@ -126,7 +126,7 @@ export default function VirtualVsTraditional() {
             </div>
             <div className="p-6">
               <img 
-                src="https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" 
+                src="/images/virtual-staging.webp" 
                 alt="Virtual home staging" 
                 className="w-full h-48 object-cover rounded-lg mb-4" 
                 width="400" 
