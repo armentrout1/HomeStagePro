@@ -1,3 +1,5 @@
+param([switch]$UseRailwayUp)
+
 # One-command deploy to Railway (HomeStagePro / production)
 
 $ErrorActionPreference = "Stop"
@@ -52,7 +54,11 @@ if ($gitStatus) {
 
 # 4) Deploy
 # This triggers a deploy in the linked project/environment/service.
-Write-Host "Triggering Railway deploy..."
-railway up --detach
+if ($UseRailwayUp) {
+  Write-Host "Triggering Railway deploy..."
+  railway up --detach
+} else {
+  Write-Host "Skipping railway up. Push to main will deploy via Railway GitHub integration."
+}
 
 Write-Host "Deploy triggered. Check Railway logs for runtime confirmation."
