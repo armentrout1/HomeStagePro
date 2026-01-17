@@ -115,6 +115,32 @@ export default function Footer() {
               </li>
             </ul>
           </div>
+
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Legal</h3>
+            <ul className="space-y-2">
+              <li>
+                <Link href="/privacy">
+                  <span className="text-gray-300 hover:text-white transition cursor-pointer">Privacy Policy</span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/terms">
+                  <span className="text-gray-300 hover:text-white transition cursor-pointer">Terms of Service</span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/about">
+                  <span className="text-gray-300 hover:text-white transition cursor-pointer">About</span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact">
+                  <span className="text-gray-300 hover:text-white transition cursor-pointer">Contact</span>
+                </Link>
+              </li>
+            </ul>
+          </div>
           
           <div>
             <h3 className="text-lg font-semibold mb-4">Contact</h3>

@@ -29,6 +29,10 @@ const Sales = lazy(() => import("./pages/Sales"));
 const Upgrade = lazy(() => import("./pages/Upgrade"));
 const ThankYou = lazy(() => import("./pages/ThankYou"));
 const Resources = lazy(() => import("./pages/Resources"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const TermsOfService = lazy(() => import("./pages/TermsOfService"));
+const About = lazy(() => import("./pages/About"));
+const Contact = lazy(() => import("./pages/Contact"));
 
 const GalleryRouteContent = () => (
   <>
@@ -132,6 +136,30 @@ function Router() {
             <>
               <SeoHead path="/resources" />
               <Resources />
+            </>
+          </Route>
+          <Route path="/privacy">
+            <>
+              <SeoHead path="/privacy" />
+              <PrivacyPolicy />
+            </>
+          </Route>
+          <Route path="/terms">
+            <>
+              <SeoHead path="/terms" />
+              <TermsOfService />
+            </>
+          </Route>
+          <Route path="/about">
+            <>
+              <SeoHead path="/about" />
+              <About />
+            </>
+          </Route>
+          <Route path="/contact">
+            <>
+              <SeoHead path="/contact" />
+              <Contact />
             </>
           </Route>
           <Route path="/upgrade">

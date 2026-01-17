@@ -37,6 +37,11 @@ app.use((req, res, next) => {
   const search = queryIndex >= 0 ? originalUrl.slice(queryIndex) : "";
 
   let redirectRequired = false;
+  if (pathname === "/gallery") {
+    pathname = "/gallery/";
+    redirectRequired = true;
+  }
+
   let targetHost = currentHost.toLowerCase().startsWith("www.")
     ? currentHost.slice(4)
     : currentHost;

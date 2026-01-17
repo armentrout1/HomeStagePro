@@ -123,4 +123,32 @@ export const ROUTE_SEO: Record<string, RouteSeo> = {
     canonicalPath: "/resources",
     ogImage: "/images/meta-preview.png",
   },
+  "/privacy": {
+    title: "Privacy Policy | RoomStagerPro",
+    description:
+      "Learn how RoomStagerPro collects, uses, and protects your information when you use our website and virtual staging services.",
+    canonicalPath: "/privacy",
+    ogImage: "/images/meta-preview.png",
+  },
+  "/terms": {
+    title: "Terms of Service | RoomStagerPro",
+    description:
+      "Review the Terms of Service that govern your access to RoomStagerPro and the use of our virtual staging tools.",
+    canonicalPath: "/terms",
+    ogImage: "/images/meta-preview.png",
+  },
+  "/about": {
+    title: "About RoomStagerPro | AI Virtual Staging",
+    description:
+      "Learn what RoomStagerPro is, who it’s for, and how our AI-assisted virtual staging helps listings stand out.",
+    canonicalPath: "/about",
+    ogImage: "/images/meta-preview.png",
+  },
+  "/contact": {
+    title: "Contact RoomStagerPro | Support & Questions",
+    description:
+      "Contact RoomStagerPro for support, billing questions, or partnership inquiries about AI virtual staging.",
+    canonicalPath: "/contact",
+    ogImage: "/images/meta-preview.png",
+  },
 };
