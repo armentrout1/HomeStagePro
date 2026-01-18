@@ -5,22 +5,22 @@ const steps = [
   {
     title: "Upload your rooms",
     description:
-      "Drop empty or under-furnished listing photos into the AI stager intake. Flag quirks, finishes, and disclosure language so we can stay MLS compliant from the start.",
+      "Upload a room photo, choose the room type, and we'll stage it automatically—no MLS intake or disclosures required.",
   },
   {
-    title: "Pick a design direction",
+    title: "Select a room type",
     description:
-      "Select one of our curated interior style presets or describe the buyer profile you are targeting. We align render sets to the listing narrative before production begins.",
+      "Pick the room you need staged—Living Room, Bedroom, Kitchen, and more—so we can tailor the layout accordingly.",
   },
   {
-    title: "24-hour AI + designer render",
+    title: "AI generates your staged image",
     description:
-      "Our hybrid workflow blends AI ideation with human retouching for lighting, window views, and accurate scale. Expect first proofs in 24 hours for standard queues.",
+      "Our AI handles the staging for you, typically delivering the finished image within a few minutes—no manual retouching queues.",
   },
   {
-    title: "Download MLS-ready files",
+    title: "Download your staged image",
     description:
-      "Approve finals and download full-resolution JPGs plus disclosure overlays. Assets are ready for MLS, social cuts, and listing presentations instantly.",
+      "Approve the result and download a high-quality version you can drop into marketing materials immediately.",
   },
 ];
 
@@ -35,9 +35,9 @@ const HowItWorks = () => {
           How HomeStage Pro Delivers Turnkey Virtual Staging
         </h1>
         <p className="mx-auto max-w-3xl text-lg text-muted-foreground">
-          Upload, style, approve, and publish staged rooms in a single session. Our
-          process is optimized for quick agent intake, 24-hour turnarounds, and
-          instant downloads you can drop into your MLS or pitch decks.
+          Upload, select a room type, approve, and publish staged rooms in a single
+          session. Our process is optimized for fast AI generation and instant
+          downloads you can drop into your listings or pitch decks.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-4">
           <Button

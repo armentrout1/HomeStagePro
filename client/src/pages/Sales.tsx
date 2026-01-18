@@ -26,14 +26,14 @@ const testimonials = [
     id: "1",
     name: "Sarah Johnson",
     role: "Real Estate Agent",
-    content: "We sold our client's property 40% faster after using these AI stagings. The photos were incredibly realistic and helped buyers visualize the space.",
+    content: "These AI stagings made our listing feel finished and move-in ready. The photos were incredibly realistic and helped buyers visualize the space.",
     rating: 5
   },
   {
     id: "2",
     name: "Michael Rodriguez",
     role: "Home Seller",
-    content: "I was skeptical at first, but these virtual stagings transformed my empty condo. We had three offers within a week!",
+    content: "I was skeptical at first, but these virtual stagings transformed my empty condo. We had serious interest almost immediately after posting.",
     rating: 5
   },
   {
@@ -69,7 +69,7 @@ const pricingPlans: PricingPlan[] = [
       "20 AI stagings included",
       "High-resolution downloads",
       "Secure token authentication",
-      "Access to all styles",
+      "Access to all room types",
     ],
     ctaLabel: "Get Started",
   },
@@ -80,9 +80,9 @@ const pricingPlans: PricingPlan[] = [
     subtitle: "50 stagings every month",
     features: [
       "50 AI stagings per month",
-      "Priority processing",
-      "Access to all styles",
-      "Upcoming style drops",
+      "High-resolution downloads",
+      "Secure token authentication",
+      "Access to all room types",
     ],
     ctaLabel: "Get Started",
   },
@@ -91,8 +91,8 @@ const pricingPlans: PricingPlan[] = [
 // Benefits of using AI staging
 const stagingBenefits = [
   {
-    title: "Sell Properties 30% Faster",
-    description: "Properties with staged photos sell significantly faster than those with empty rooms.",
+    title: "Help Listings Stand Out",
+    description: "Properties with staged photos feel polished and more compelling than empty rooms.",
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -100,8 +100,8 @@ const stagingBenefits = [
     )
   },
   {
-    title: "Increase Sale Price by 5-10%",
-    description: "Professionally staged properties typically command higher selling prices.",
+    title: "Support Confident Pricing",
+    description: "Professionally presented spaces reinforce the value of your asking price.",
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -109,8 +109,8 @@ const stagingBenefits = [
     )
   },
   {
-    title: "Save Thousands on Traditional Staging",
-    description: "Virtual staging costs a fraction of physical staging while delivering similar benefits.",
+    title: "Spend Less Than Traditional Staging",
+    description: "Virtual staging provides a polished look without costly furniture rentals.",
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -118,8 +118,8 @@ const stagingBenefits = [
     )
   },
   {
-    title: "Generate More Buyer Interest",
-    description: "Staged listings receive 40% more buyer inquiries than non-staged properties.",
+    title: "Boost Buyer Interest",
+    description: "Thoughtfully staged listings capture more attention from active shoppers.",
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -144,11 +144,12 @@ export default function Sales() {
             <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               Transform Empty Spaces into Selling Opportunities
             </h1>
-            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-600 mb-4 max-w-3xl mx-auto">
               Professional staging helps sell properties <span className="font-semibold">faster and for more money</span>. 
               Our AI staging delivers professional results at a fraction of the cost.
             </p>
-            <Link href="/upgrade">
+            <p className="text-base text-gray-700 mb-8">Try 2 free stagings — no login required.</p>
+            <Link href="/#ai-stager">
               <Button size="lg" className="text-lg px-8 py-6">
                 Start Staging Now
               </Button>

@@ -42,6 +42,7 @@ export const ROUTE_SEO: Record<string, RouteSeo> = {
     description:
       "Modernize listings fast with AI virtual staging, before/after proof, and transparent packages from RoomStagerPro. Book a consult in minutes.",
     canonicalPath: "/virtual-staging",
+    robots: "noindex,nofollow",
     ogImage: "/images/meta-preview.png",
   },
   "/virtual-staging-cost": {
@@ -91,6 +92,13 @@ export const ROUTE_SEO: Record<string, RouteSeo> = {
     description:
       "Get actionable tips for selling homes faster, from curb appeal ideas to AI-powered staging strategies.",
     canonicalPath: "/selling-tips",
+    ogImage: "/images/meta-preview.png",
+  },
+  "/affordable-virtual-staging": {
+    title: "Affordable Virtual Staging | 5 for $9 | RoomStagerPro",
+    description:
+      "Affordable AI virtual staging with 2 free stagings, no login required, and packs starting at 5 for $9. Fast results and instant downloads.",
+    canonicalPath: "/affordable-virtual-staging",
     ogImage: "/images/meta-preview.png",
   },
   "/sales": {

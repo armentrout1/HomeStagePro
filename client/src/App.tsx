@@ -12,6 +12,9 @@ const HomeStagingTips = lazy(() => import("./pages/HomeStagingTips"));
 const RealEstatePhotos = lazy(() => import("./pages/RealEstatePhotos"));
 const VirtualVsTraditional = lazy(() => import("./pages/VirtualVsTraditional"));
 const VirtualStaging = lazy(() => import("./pages/VirtualStaging"));
+const AffordableVirtualStaging = lazy(
+  () => import("./pages/AffordableVirtualStaging"),
+);
 const VirtualStagingForAgents = lazy(
   () => import("./pages/VirtualStagingForAgents"),
 );
@@ -124,6 +127,12 @@ function Router() {
             <>
               <SeoHead path="/selling-tips" />
               <SellingTips />
+            </>
+          </Route>
+          <Route path="/affordable-virtual-staging">
+            <>
+              <SeoHead path="/affordable-virtual-staging" />
+              <AffordableVirtualStaging />
             </>
           </Route>
           <Route path="/sales">

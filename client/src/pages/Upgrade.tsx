@@ -55,9 +55,7 @@ type FeatureKey =
   | "high_res_downloads"
   | "secure_token_auth"
   | "usage_tracking"
-  | "priority_processing"
-  | "access_all_styles"
-  | "future_styles";
+  | "access_all_styles";
 
 interface FeatureDefinition {
   key: FeatureKey;
@@ -78,18 +76,14 @@ const featureDefinitions: FeatureDefinition[] = [
   { key: "high_res_downloads", label: "High-resolution downloads" },
   { key: "secure_token_auth", label: "Secure token authentication" },
   { key: "usage_tracking", label: "Usage tracking" },
-  { key: "access_all_styles", label: "Access to all styles" },
-  { key: "priority_processing", label: "Priority processing" },
-  { key: "future_styles", label: "Upcoming style drops" },
+  { key: "access_all_styles", label: "Access to all room types" },
 ];
 
 const createFeatureSet = (overrides: Partial<Record<FeatureKey, boolean>> = {}) => ({
   high_res_downloads: false,
   secure_token_auth: false,
   usage_tracking: false,
-  priority_processing: false,
   access_all_styles: false,
-  future_styles: false,
   ...overrides,
 });
 
@@ -115,9 +109,7 @@ export default function Upgrade() {
           high_res_downloads: true,
           secure_token_auth: true,
           usage_tracking: false,
-          priority_processing: false,
           access_all_styles: false,
-          future_styles: false,
         }),
       },
       {
@@ -130,9 +122,7 @@ export default function Upgrade() {
           high_res_downloads: true,
           secure_token_auth: true,
           usage_tracking: true,
-          priority_processing: false,
           access_all_styles: true,
-          future_styles: false,
         }),
       },
       {
@@ -144,9 +134,7 @@ export default function Upgrade() {
           high_res_downloads: true,
           secure_token_auth: true,
           usage_tracking: true,
-          priority_processing: true,
           access_all_styles: true,
-          future_styles: true,
         }),
       },
     ],

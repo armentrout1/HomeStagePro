@@ -21,6 +21,10 @@ export function SeoHead({ path }: SeoHeadProps) {
       <meta property="og:type" content="website" />
       {seo.robots && <meta name="robots" content={seo.robots} />}
       {ogImageUrl && <meta property="og:image" content={ogImageUrl} />}
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content={seo.title} />
+      <meta name="twitter:description" content={seo.description} />
+      {ogImageUrl && <meta name="twitter:image" content={ogImageUrl} />}
     </Helmet>
   );
 }
