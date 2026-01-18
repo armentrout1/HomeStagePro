@@ -4,7 +4,7 @@ export default function SellingTips() {
   const quickFacts = [
     "Homes that sell within the first 2 weeks typically achieve higher prices",
     "95% of buyers use the internet to search for homes",
-    "Homes with professional photos sell 32% faster"
+    "Professional photos can help listings attract more attention"
   ];
 
   const relatedResources = [
@@ -24,7 +24,7 @@ export default function SellingTips() {
     },
     {
       title: "3. Stage Your Home",
-      content: "Whether you choose traditional or virtual staging, showcasing your home's potential is crucial. Staged homes sell 73% faster on average than non-staged properties."
+      content: "Whether you choose traditional or virtual staging, showcasing your home's potential is crucial. Staging helps buyers visualize each room and improves how the property is presented."
     },
     {
       title: "4. Make Essential Repairs",

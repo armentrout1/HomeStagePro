@@ -60,7 +60,7 @@ export default function Home() {
         </svg>
       ),
       title: "Faster Sales",
-      description: "Well-staged homes sell up to 73% faster than non-staged properties.",
+      description: "Staged listings can help buyers visualize the space and increase interest.",
       color: "text-primary"
     },
     {
@@ -70,7 +70,7 @@ export default function Home() {
         </svg>
       ),
       title: "Higher Value",
-      description: "Professionally staged properties can sell for 5-15% more than the asking price.",
+      description: "Staging can help improve presentation and perceived value.",
       color: "text-secondary"
     },
     {
@@ -81,7 +81,7 @@ export default function Home() {
         </svg>
       ),
       title: "Better Impressions",
-      description: "90% of buyers form their opinion within the first 90 seconds of viewing a property.",
+      description: "Buyers often form their first impression quickly when viewing a property.",
       color: "text-accent"
     }
   ];

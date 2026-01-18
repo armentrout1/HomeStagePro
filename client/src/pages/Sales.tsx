@@ -145,9 +145,10 @@ export default function Sales() {
               Transform Empty Spaces into Selling Opportunities
             </h1>
             <p className="text-xl text-gray-600 mb-4 max-w-3xl mx-auto">
-              Professional staging helps sell properties <span className="font-semibold">faster and for more money</span>. 
+              Professional staging can help listings look more market-ready and increase interest. 
               Our AI staging delivers professional results at a fraction of the cost.
             </p>
+
             <p className="text-base text-gray-700 mb-8">Try 2 free stagings — no login required.</p>
             <Link href="/#ai-stager">
               <Button size="lg" className="text-lg px-8 py-6">
@@ -253,7 +254,7 @@ export default function Sales() {
           <div className="text-center bg-gradient-to-r from-blue-600 to-purple-600 text-white py-12 px-6 rounded-xl shadow-lg">
             <h2 className="text-3xl font-bold mb-4">Ready to Transform Your Property Listings?</h2>
             <p className="text-lg mb-8 max-w-2xl mx-auto">
-              Join thousands of real estate professionals using AI staging to sell properties faster and at better prices.
+              Join real estate professionals using AI staging to present listings with a polished, market-ready look.
             </p>
             <Link href="/upgrade">
               <Button size="lg" variant="secondary" className="text-primary font-bold text-lg px-8 py-6">

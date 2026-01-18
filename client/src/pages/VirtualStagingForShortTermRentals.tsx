@@ -1,36 +1,90 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 
+const benefits = [
+  {
+    title: "Refresh galleries fast",
+    body:
+      "Upload a current photo, pick the room type, and download a staged version usually within a few minutes—perfect for OTA refreshes between guests.",
+  },
+  {
+    title: "No concierges required",
+    body:
+      "Everything happens inside the AI uploader. Two free stagings let you test the look before purchasing packs that fit your booking cadence.",
+  },
+  {
+    title: "You control disclosures",
+    body:
+      "Files download untouched so you can add the exact “virtually staged” caption each platform expects before publishing.",
+  },
+];
+
+const workflowSteps = [
+  {
+    title: "Upload room photos",
+    body:
+      "Use clutter-free shots of living rooms, bedrooms, kitchens, or flex areas. Each angle consumes one credit.",
+  },
+  {
+    title: "Select the room type",
+    body:
+      "Choose from the supported room list (living, bedroom, dining, kitchen, flex/office). There are no style presets yet, but you can note ideas for yourself.",
+  },
+  {
+    title: "Download & rerun",
+    body:
+      "Grab the JPG/PNG, add your disclosure overlay, and drop it into Airbnb or VRBO. Want a different vibe? Spend another credit and rerun the room.",
+  },
+];
+
+const packOptions = [
+  {
+    name: "Free Trial",
+    price: "$0",
+    description: "2 stagings · no login required",
+  },
+  {
+    name: "Quick Pack",
+    price: "$9",
+    description: "5 stagings for weekend refreshes",
+  },
+  {
+    name: "Value Pack",
+    price: "$25",
+    description: "20 stagings for host teams",
+  },
+  {
+    name: "Pro Monthly",
+    price: "$49",
+    description: "50 stagings refreshed each month",
+  },
+];
+
 const faq = [
   {
-    question: "How quickly can I get my short-term rental virtually staged?",
+    question: "How fast do renders finish?",
     answer:
-      "Standard STR virtual staging projects are completed within 24-48 hours, with express options for hosts facing last-minute bookings or OTA refresh deadlines.",
+      "Most rooms complete within a few minutes. There are no guaranteed SLAs or express tiers, so upload slightly ahead of your listing deadline.",
   },
   {
-    question: "Will virtual staging help me charge higher rates for my Airbnb?",
+    question: "Do you add the Airbnb/VRBO disclosure for me?",
     answer:
-      "Professionally staged listings see 20-40% gains in nightly rates and occupancy. Guests instantly understand the lifestyle you are selling and are willing to pay for the perceived value.",
+      "No. Downloads are clean files so you can add the exact wording your platform requires before hitting publish.",
   },
   {
-    question: "Can you stage rooms that are currently empty or under construction?",
+    question: "Can I choose styles or presets?",
     answer:
-      "Yes. Upload clean progress photos and we will add realistic furniture, decor, and lighting cues so travelers visualize the final experience before you turn the space.",
+      "Not yet. Room-type selection is available today, and styles are on the roadmap. If you need another look, rerun the room with a new credit.",
   },
   {
-    question: "How do you keep staged rooms aligned with real amenities?",
+    question: "What happens if the render isn’t right?",
     answer:
-      "Every project starts with a discovery call so renders match your actual finishes and amenities. We reference your brand guide, amenity list, and booking persona to avoid misrepresentation.",
+      "There’s no revision queue. Simply rerun the room—each attempt uses one credit and finishes quickly.",
   },
   {
-    question: "What if I need different looks for seasons or target guests?",
+    question: "Do credits expire?",
     answer:
-      "Order multiple style presets—winter hygge, summer coastal, digital nomad workspaces—and rotate them with your seasonal pricing strategy to keep listings fresh.",
-  },
-  {
-    question: "Do the renders comply with Airbnb and VRBO rules?",
-    answer:
-      "Absolutely. We add subtle overlays and provide caption language that keeps you compliant with Airbnb, VRBO, and Booking.com disclosure policies.",
+      "One-off packs never expire. Pro Monthly refreshes every 30 days so active hosts always have credits on hand.",
   },
 ];
 
@@ -38,193 +92,75 @@ const VirtualStagingForShortTermRentals = () => {
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-16 px-4 py-16">
       <header className="space-y-5">
-        <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
-          Use Case · Short-Term Rentals
-        </p>
-        <h1 className="text-4xl font-semibold">
-          Virtual Staging for Short-Term Rentals (Airbnb/VRBO)
-        </h1>
+        <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Use Case · Short-Term Rentals</p>
+        <h1 className="text-4xl font-semibold">Virtual staging for Airbnb, VRBO, and boutique stays</h1>
         <p className="text-lg text-muted-foreground">
-          Convert more bookings by merchandising every space with AI-powered staging
-          tuned for Airbnb, VRBO, and boutique vacation rental platforms. Show guests
-          the complete stay—from cozy living zones to productive work areas—before
-          they ever land on your doorstep.
+          Show guests what the stay feels like before they arrive. Upload a photo, pick the room type, and get a staged version back—usually within a few minutes.
         </p>
         <div className="flex flex-wrap gap-3">
           <Button asChild size="lg">
-            <Link href="/sales">See STR Packages</Link>
+            <Link href="/#ai-stager">Try 2 Free Stagings</Link>
           </Button>
           <Button asChild size="lg" variant="secondary">
-            <Link href="/gallery/">View Examples</Link>
-          </Button>
-          <Button asChild size="lg" variant="outline">
-            <Link href="/">Try AI Stager</Link>
+            <Link href="/sales">See Packs</Link>
           </Button>
         </div>
-        <p className="text-sm text-muted-foreground">
-          Launch the full STR playbook soon—this live page will keep expanding with
-          fresh proof points, packages, and host resources.
-        </p>
+        <p className="text-sm text-muted-foreground">No discovery calls, no concierge—just a self-serve tool built for hosts who need fast visuals.</p>
       </header>
 
-      <section className="space-y-8">
-        <h2 className="text-3xl font-semibold">
-          Why Virtual Staging is Essential for Short-Term Rentals
-        </h2>
-        <div className="space-y-6 text-muted-foreground">
-          <div>
-            <h3 className="text-2xl font-semibold text-foreground">
-              The Competitive Advantage of Staged STR Properties
-            </h3>
-            <p>
-              Staged listings outperform blank rooms because travelers shop with
-              their imagination. By merchandising every corner with curated
-              furniture, props, and lighting, you highlight usable zones (reading
-              nooks, WFH desks, kid-friendly bunks) that boost occupancy and repeat
-              stays. Lifestyle visuals also help your listing climb OTA search
-              results as guests spend more time engaging with photos.
-            </p>
-          </div>
-          <div>
-            <h3 className="text-2xl font-semibold text-foreground">
-              ROI of Virtual Staging for Airbnb Hosts
-            </h3>
-            <p>
-              Compared to the cost of physical installs, AI staging delivers a
-              faster break-even. Hosts routinely see 40% lifts in booking inquiries
-              after refreshing their gallery. Pair this guide with the pricing
-              breakdown at{" "}
-              <Link href="/virtual-staging-cost" className="text-primary underline">
-                /virtual-staging-cost
-              </Link>{" "}
-              and the services overview at{" "}
-              <Link href="/virtual-staging" className="text-primary underline">
-                /virtual-staging
-              </Link>{" "}
-              to show owners the full financial picture.
-            </p>
-          </div>
+      <section className="space-y-6">
+        <h2 className="text-3xl font-semibold">Why hosts use the AI stager</h2>
+        <div className="grid gap-4 md:grid-cols-3">
+          {benefits.map((benefit) => (
+            <article key={benefit.title} className="rounded-2xl border border-border p-4">
+              <h3 className="text-lg font-semibold">{benefit.title}</h3>
+              <p className="mt-2 text-sm text-muted-foreground">{benefit.body}</p>
+            </article>
+          ))}
         </div>
       </section>
 
-      <section className="space-y-8">
-        <h2 className="text-3xl font-semibold">
-          Virtual Staging Solutions for Different Property Types
-        </h2>
-        <div className="space-y-6 text-muted-foreground">
-          <div>
-            <h3 className="text-2xl font-semibold text-foreground">
-              Entire Home Staging Strategies
-            </h3>
-            <p>
-              Showcase every room from the moment a traveler opens your listing.
-              Style the hero photo with an inviting living room vignette, add family
-              dining scenes, and merchandise bedrooms with layered textiles that
-              tease comfort and adequate storage. Kitchens and bathrooms get subtle
-              upgrades—artisan coffee setups, spa towel stacks, and thoughtful
-              lighting edits that telegraph cleanliness.
-            </p>
-          </div>
-          <div>
-            <h3 className="text-2xl font-semibold text-foreground">
-              Private Room and Shared Space Staging
-            </h3>
-            <p>
-              Hosts offering private rooms or coliving suites need to convey both
-              privacy and community. Use staging to define personal workstations,
-              blackout drapery, and lockable storage while highlighting stylish
-              shared kitchens and lounges. Balanced layouts reassure guests that
-              comfort and capacity coexist.
-            </p>
-          </div>
-          <div>
-            <h3 className="text-2xl font-semibold text-foreground">
-              Specialty Property Staging
-            </h3>
-            <p>
-              Luxury villas demand layered art direction, while tiny homes benefit
-              from multifunctional furniture that underscores efficient square
-              footage. No matter the niche—glamping sites, ski condos, urban
-              lofts—our team builds presets that align with your brand voice and
-              audience expectations.
-            </p>
-          </div>
+      <section className="space-y-6">
+        <h2 className="text-3xl font-semibold">MVP workflow for STR hosts</h2>
+        <div className="grid gap-4 md:grid-cols-3">
+          {workflowSteps.map((step, index) => (
+            <article key={step.title} className="rounded-2xl border border-border p-4">
+              <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Step {index + 1}</p>
+              <h3 className="mt-2 text-lg font-semibold">{step.title}</h3>
+              <p className="mt-2 text-sm text-muted-foreground">{step.body}</p>
+            </article>
+          ))}
         </div>
+        <p className="text-sm text-muted-foreground">No human stylists, discovery calls, or approval loops. Everything is self-serve, and reruns simply use another credit.</p>
       </section>
 
-      <section className="space-y-8">
-        <h2 className="text-3xl font-semibold">
-          Technical Requirements for STR Virtual Staging
-        </h2>
-        <div className="space-y-6 text-muted-foreground">
-          <div>
-            <h3 className="text-2xl font-semibold text-foreground">
-              Photography Best Practices for Virtual Staging
-            </h3>
-            <p>
-              Crisp inputs equal premium outputs. Follow the lighting and angle tips
-              from{" "}
-              <Link href="/real-estate-photos" className="text-primary underline">
-                /real-estate-photos
-              </Link>{" "}
-              to ensure every RAW file captures ceiling height, window placement,
-              and power outlets. Declutter surfaces, hide cords, and shoot wide
-              enough to leave room for furniture compositing.
-            </p>
-          </div>
-          <div>
-            <h3 className="text-2xl font-semibold text-foreground">
-              Platform-Specific Staging Guidelines
-            </h3>
-            <p>
-              Airbnb prefers clean, bright imagery while VRBO highlights amenity
-              closeups. Booking.com requires disclosures similar to MLS boards. Use
-              this guide alongside the comparison at{" "}
-              <Link
-                href="/virtual-vs-traditional"
-                className="text-primary underline"
-              >
-                /virtual-vs-traditional
-              </Link>{" "}
-              so owners understand how digital staging stays compliant while beating
-              traditional installs on speed.
-            </p>
-          </div>
+      <section className="space-y-6">
+        <h2 className="text-3xl font-semibold">Pack options for STR refreshes</h2>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {packOptions.map((pack) => (
+            <article key={pack.name} className="rounded-2xl border border-border p-4">
+              <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground">{pack.name}</p>
+              <p className="mt-2 text-2xl font-bold">{pack.price}</p>
+              <p className="text-sm text-muted-foreground">{pack.description}</p>
+            </article>
+          ))}
         </div>
+        <p className="text-sm text-muted-foreground">Credits never expire unless you opt into the monthly plan. Monthly packs refresh automatically so you’re ready for seasonal updates.</p>
       </section>
 
-      <section className="space-y-8">
-        <h2 className="text-3xl font-semibold">
-          Maximizing Your STR Investment with Virtual Staging
-        </h2>
-        <div className="space-y-6 text-muted-foreground">
-          <div>
-            <h3 className="text-2xl font-semibold text-foreground">
-              Seasonal Staging Strategies
-            </h3>
-            <p>
-              Rotate visuals to match traveler intent. Think cozy throws and warm
-              lighting for winter ski weekends, breezy fabrics for coastal summers,
-              and greenery plus hydration stations for festival traffic. These quick
-              refreshes keep OTA thumbnails current and increase click-through as
-              guests search by season.
-            </p>
-          </div>
-          <div>
-            <h3 className="text-2xl font-semibold text-foreground">
-              Pricing Strategy Integration
-            </h3>
-            <p>
-              Use staged galleries to justify premium ADRs and to test dynamic
-              pricing. Pair before/after sets with your revenue data and share them
-              in owner updates or the pricing deck at{" "}
-              <Link href="/sales" className="text-primary underline">
-                /sales
-              </Link>
-              . When travelers see aspirational visuals, they accept higher nightly
-              rates and longer minimum stays.
-            </p>
-          </div>
+      <section className="rounded-2xl border border-border bg-muted/40 p-8 text-center">
+        <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground">CTA</p>
+        <h3 className="mt-2 text-2xl font-semibold">Update your gallery before peak season</h3>
+        <p className="mt-3 text-muted-foreground">
+          Launch the uploader now, or grab a pack so every listing refresh comes with polished visuals and accurate disclosures you control.
+        </p>
+        <div className="mt-5 flex flex-wrap justify-center gap-3">
+          <Button asChild size="lg">
+            <Link href="/#ai-stager">Try 2 Free Stagings</Link>
+          </Button>
+          <Button asChild size="lg" variant="secondary">
+            <Link href="/sales">Buy Credits</Link>
+          </Button>
         </div>
       </section>
 
@@ -261,47 +197,15 @@ const VirtualStagingForShortTermRentals = () => {
         </div>
       </section>
 
-      <section className="rounded-2xl border p-6">
-        <h2 className="text-3xl font-semibold">Proof That Styled STRs Convert</h2>
-        <p className="mt-3 text-muted-foreground">
-          Hosts who refreshed their listings with 20 staged photos saw 12% occupancy
-          gains and $31 ADR lifts within 30 days. Browse the before/after gallery at{" "}
-          <Link href="/gallery/" className="text-primary underline">
-            /gallery/
-          </Link>{" "}
-          to pull comps for your next owner update or lending package.
-        </p>
-      </section>
-
       <section className="space-y-4">
-        <h2 className="text-3xl font-semibold">FAQ: STR Operators</h2>
+        <h2 className="text-3xl font-semibold">FAQ</h2>
         <div className="space-y-4">
           {faq.map((item) => (
-            <div key={item.question} className="rounded-2xl border p-5">
+            <article key={item.question} className="rounded-2xl border border-border p-5">
               <h3 className="text-xl font-semibold">{item.question}</h3>
               <p className="mt-2 text-sm text-muted-foreground">{item.answer}</p>
-            </div>
+            </article>
           ))}
-        </div>
-      </section>
-
-      <section className="rounded-2xl border bg-muted/40 p-6">
-        <h2 className="text-2xl font-semibold">Ready to Stage Your STR?</h2>
-        <p className="mt-2 text-muted-foreground">
-          Tap into rapid turnarounds, OTA-friendly disclosures, and seasonal refresh
-          packages built for occupancy growth. Use the AI uploader now and hand off
-          the rest to our staging team.
-        </p>
-        <div className="mt-4 flex flex-wrap gap-3">
-          <Button asChild size="lg">
-            <Link href="/sales">See STR Packages</Link>
-          </Button>
-          <Button asChild size="lg" variant="secondary">
-            <Link href="/gallery/">View Examples</Link>
-          </Button>
-          <Button asChild size="lg" variant="outline">
-            <Link href="/">Try AI Stager</Link>
-          </Button>
         </div>
       </section>
     </div>

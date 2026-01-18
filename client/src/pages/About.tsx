@@ -7,7 +7,7 @@ const sections = [
   {
     title: "What We Do",
     body:
-      "Upload your room photos, choose desired styles, and get polished visuals back fast. Our workflow combines AI concepts, designer-quality retouching, and easy downloads so you can share before-and-after proof on MLS, social, or presentations without delays.",
+      "Upload your room photos, choose desired styles, and get polished visuals back fast. Our workflow combines AI concepts, AI-powered staging, and easy downloads so you can share before-and-after proof on MLS, social, or presentations without delays.",
   },
   {
     title: "Who It’s For",
