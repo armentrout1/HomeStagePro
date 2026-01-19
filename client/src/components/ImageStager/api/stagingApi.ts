@@ -4,6 +4,8 @@ export type GenerateStagedRoomRequest = {
 };
 
 export type GenerateStagedRoomResponse = {
+  requestId: string;
+  promptHash: string;
   stagedSignedUrl?: string | null;
   imageUrl?: string | null;
   storageBucket?: string | null;

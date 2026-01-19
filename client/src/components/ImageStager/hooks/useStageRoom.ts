@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { queryClient } from "@/lib/queryClient";
 import { roomTypes } from "../constants";
 import { SaveImagePayload } from "../types";
@@ -29,6 +29,8 @@ export function useStageRoom(args: UseStageRoomArgs) {
   } = args;
 
   const isMountedRef = useRef(true);
+  const [requestId, setRequestId] = useState<string | null>(null);
+  const [promptHash, setPromptHash] = useState<string | null>(null);
 
   useEffect(() => {
     return () => {
@@ -82,7 +84,11 @@ export function useStageRoom(args: UseStageRoomArgs) {
       return;
     }
 
-    ifMounted(() => setIsLoading(true));
+    ifMounted(() => {
+      setIsLoading(true);
+      setRequestId(null);
+      setPromptHash(null);
+    });
     try {
       ifMounted(() => setProgressPhase("Preparing image…"));
       // Remove the data URL prefix to get just the base64 data
@@ -109,6 +115,10 @@ export function useStageRoom(args: UseStageRoomArgs) {
       ifMounted(() => setProgressPhase("Finalizing…"));
       const stagedPreviewUrl = data.stagedSignedUrl ?? data.imageUrl ?? null;
       ifMounted(() => setStagedImage(stagedPreviewUrl));
+      ifMounted(() => {
+        setRequestId(data.requestId);
+        setPromptHash(data.promptHash);
+      });
       
       // Save the staged image to the database
       ifMounted(() => setProgressPhase("Saving…"));
@@ -156,5 +166,5 @@ export function useStageRoom(args: UseStageRoomArgs) {
     ifMounted,
   ]);
 
-  return { stageRoom };
+  return { stageRoom, requestId, promptHash };
 }

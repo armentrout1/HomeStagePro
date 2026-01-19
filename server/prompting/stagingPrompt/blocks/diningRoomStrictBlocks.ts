@@ -2,6 +2,9 @@ import type { DiningRoomProfile } from "../profiles/diningRoomProfile";
 import { DINING_FORBIDDEN } from "../rooms/diningRoom.constants";
 import type { StrictBlocksResult } from "./types";
 
+const KITCHEN_MISCLASSIFICATION_GUARD =
+  "KITCHEN MISCLASSIFICATION GUARD (MUST FOLLOW): This is a dining area/breakfast nook, NOT a kitchen. Do NOT add or modify cabinets, countertops, sinks, faucets, dishwashers, stoves, refrigerators, or any plumbing/appliances. Do NOT create new built-ins or casework.";
+
 export const buildDiningRoomStrictBlocks = (
   profile: DiningRoomProfile,
   options?: { isConstrained?: boolean }
@@ -52,6 +55,7 @@ export const buildDiningRoomStrictBlocks = (
   const prefixLines = [
     `STRICT DINING BLOCK (${profile.toUpperCase()}) — MUST FOLLOW:`,
     requiredLine,
+    KITCHEN_MISCLASSIFICATION_GUARD,
     chairsLine,
     tabletopLine,
     rugLine,

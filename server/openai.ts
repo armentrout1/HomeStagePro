@@ -3,6 +3,7 @@
  * See docs/staging/staging-profiles.md
  * If you change staging behavior, update the MD in the same change.
  */
+import crypto from "crypto";
 import { toFile } from "openai";
 import {
   type Request,
@@ -278,12 +279,16 @@ Layout constraints (MUST FOLLOW):
       layoutConstraints,
     })}${layoutPrompt}`;
 
+    const promptHashFull = crypto.createHash("sha256").update(finalPrompt).digest("hex");
+    const promptHash = promptHashFull.slice(0, 16);
+
     if (process.env.NODE_ENV !== "production") {
       const preview =
         finalPrompt.length > 1200
           ? finalPrompt.slice(0, 1200) + "…(truncated)"
           : finalPrompt;
       log(`[${reqId}] finalPromptPreview=${preview}`);
+      log(`[${reqId}] promptHash=${promptHash}`);
     }
 
     const inputFile = await toFile(
@@ -329,6 +334,8 @@ Layout constraints (MUST FOLLOW):
 
     return res.json({
       success: true,
+      requestId: reqId,
+      promptHash,
       imageUrl: stagedSignedUrl ?? stagedDataUrl,
       originalSignedUrl,
       stagedSignedUrl: stagedSignedUrl ?? stagedDataUrl,

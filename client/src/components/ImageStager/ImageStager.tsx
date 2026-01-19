@@ -48,7 +48,7 @@ export default function ImageStager() {
     toast.success("Reset complete", "All images have been cleared");
   }, [toast, setOriginalImage, setStagedImage, setRoomType]);
   
-  const { stageRoom } = useStageRoom({
+  const { stageRoom, requestId, promptHash } = useStageRoom({
     originalImage,
     roomType,
     setStagedImage,
@@ -212,6 +212,14 @@ export default function ImageStager() {
               onResetClick={handleReset}
               onDownloadClick={handleDownload}
             />
+
+            {requestId && promptHash && (
+              <div className="text-center text-xs text-slate-500">
+                <p className="font-medium text-slate-600">Support Info</p>
+                <p className="font-mono">Request ID: {requestId}</p>
+                <p className="font-mono">Prompt Hash: {promptHash}</p>
+              </div>
+            )}
 
             <UsageStatusBanner
               usageStatus={usageStatus}
