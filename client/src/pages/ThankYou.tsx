@@ -47,6 +47,13 @@ export default function ThankYou() {
           usageAllowed: data.usageAllowed
         });
         
+        // Fire Google Ads conversion event for successful paid checkout
+        if (typeof window.gtag === 'function') {
+          window.gtag('event', 'conversion', {
+            'send_to': 'AW-11090220613/Te5ZCLnx5JgYEMWsnagp'
+          });
+        }
+        
         // The access token is stored in an HTTP-only cookie by the server
         // No need to store it in localStorage
       } else if (data.status === 'canceled') {

@@ -122,6 +122,13 @@ export function useStageRoom(args: UseStageRoomArgs) {
       
       toast.success("Success!", "Your staged room image is ready");
       
+      // Fire Google Ads conversion event for successful staging
+      if (typeof window.gtag === 'function') {
+        window.gtag('event', 'conversion', {
+          'send_to': 'AW-11090220613/Te5ZCLnx5JgYEMWsnagp'
+        });
+      }
+      
       // Refresh usage status after successful staging
       await refreshUsageStatus();
     } catch (err) {
