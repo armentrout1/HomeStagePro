@@ -70,6 +70,7 @@ const supabaseOrigin = process.env.SUPABASE_URL
 const scriptSrc = [
   "'self'",
   "https://js.stripe.com",
+  "https://www.googletagmanager.com",
 ];
 if (app.get("env") !== "production") {
   scriptSrc.push("'unsafe-inline'", "https://replit.com");
@@ -78,6 +79,10 @@ if (app.get("env") !== "production") {
   scriptSrc.push(
     "'sha256-boJN3MQ54bsib3u1Yw5+BIxLNI4xnn/sUOuruatV/+M='",
     "'sha256-n29WT7IJaMAbttUFylNL/JPxYo2eh1jEaMVNliPos18='",
+    "'sha256-p1jjDXnv6NASdPDaUe2vsUALDjdhBUot9Ott3iC9r2s='",
+    "'sha256-Pi/JkwBagMvcNE5XRw5GgXFgDwEYEtOhXyPvaSBlAgA='",
+    "'sha256-GDqIbszyCfvuqX9YqWR+1WNHDbF4e6eE01T75j/RfVg='",
+    "'sha256-k/pznNPI15H1v4b3LQDMoHloaXWP9zTUvmWt1gpnu98='",
   );
 }
 
@@ -106,6 +111,11 @@ app.use(
         "connect-src": [
           "'self'",
           "https://api.stripe.com",
+          "https://www.google-analytics.com",
+          "https://region1.google-analytics.com",
+          "https://www.googletagmanager.com",
+          "https://stats.g.doubleclick.net",
+          "https://analytics.google.com",
           ...(supabaseOrigin ? [supabaseOrigin] : []),
         ],
       },
