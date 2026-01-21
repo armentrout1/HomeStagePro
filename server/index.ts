@@ -107,6 +107,7 @@ app.use(
           "https://js.stripe.com",
           "https://hooks.stripe.com",
           "https://www.google.com",
+          "https://tagassistant.google.com",
         ],
         "connect-src": [
           "'self'",
@@ -116,6 +117,7 @@ app.use(
           "https://www.googletagmanager.com",
           "https://stats.g.doubleclick.net",
           "https://analytics.google.com",
+          "https://tagassistant.google.com",
           ...(supabaseOrigin ? [supabaseOrigin] : []),
         ],
       },
