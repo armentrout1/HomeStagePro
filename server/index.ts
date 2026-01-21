@@ -77,7 +77,7 @@ if (app.get("env") !== "production") {
 } else {
   // Add SHA-256 hash for the gtag inline script in index.html
   scriptSrc.push(
-    "'sha256-ofOD6fiAsejiBDJU1dPJkX4m6Wo64Uy/F0UgyaBisMo='",
+    "'sha256-a5/4LESxLxxYh6mBEAsjCui0e3VpaYN8SV/OK9fNX+o='",
   );
 }
 
