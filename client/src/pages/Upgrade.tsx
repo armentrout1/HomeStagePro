@@ -4,6 +4,8 @@ import {
   PricingPlans,
   type PricingPlan as SharedPricingPlan,
 } from "@/components/billing/PricingPlans";
+import { trackBeginCheckout } from "@/analytics/ecommerce";
+
 import { useToast } from "@/hooks/use-toast";
 import { loadStripe, type Stripe } from "@stripe/stripe-js";
 import { apiRequest } from "@/lib/queryClient";
@@ -176,6 +178,19 @@ export default function Upgrade() {
     if (!plan) {
       return;
     }
+
+    trackBeginCheckout({
+      currency: "USD",
+      value: plan.price,
+      items: [
+        {
+          item_id: planId,
+          item_name: plan.name,
+          price: plan.price,
+          quantity: 1,
+        },
+      ],
+    });
 
     setIsLoading(plan.id);
 
