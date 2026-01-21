@@ -7,6 +7,7 @@ import Layout from "./components/layout/Layout";
 import Home from "./pages/Home";
 import NotFound from "@/pages/not-found";
 import { SeoHead } from "@/seo/SeoHead";
+import { trackPageView } from "./analytics/gtag";
 
 const HomeStagingTips = lazy(() => import("./pages/HomeStagingTips"));
 const RealEstatePhotos = lazy(() => import("./pages/RealEstatePhotos"));
@@ -45,9 +46,15 @@ const GalleryRouteContent = () => (
 );
 
 function Router() {
+  const [location] = useLocation();
+
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [useLocation()[0]]);
+  }, [location]);
+
+  useEffect(() => {
+    trackPageView(location);
+  }, [location]);
 
   return (
     <Layout>
