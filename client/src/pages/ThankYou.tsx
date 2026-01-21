@@ -50,7 +50,7 @@ export default function ThankYou() {
         // Fire Google Ads conversion event for successful paid checkout
         if (typeof window.gtag === 'function') {
           window.gtag('event', 'conversion', {
-            'send_to': 'AW-11090220613/Te5ZCLnx5JgYEMWsnagp'
+            'send_to': 'AW-11090220613/W5fYCODZtOkbEMWsnagp'
           });
         }
         
