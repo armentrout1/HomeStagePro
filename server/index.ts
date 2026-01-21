@@ -77,7 +77,7 @@ if (app.get("env") !== "production") {
 } else {
   // Add SHA-256 hash for the gtag inline script in index.html
   scriptSrc.push(
-    "'sha256-p1jjDXnv6NASdPDaUe2vsUALDjdhBUot9Ott3iC9r2s='",
+    "'sha256-ofOD6fiAsejiBDJU1dPJkX4m6Wo64Uy/F0UgyaBisMo='",
   );
 }
 
@@ -96,6 +96,13 @@ app.use(
           "https://images.openai.com",
           "https://images.unsplash.com",
           "https://www.googletagmanager.com",
+          "https://www.google.com",
+          "https://www.google-analytics.com",
+          "https://fonts.gstatic.com",
+          "https://googleads.g.doubleclick.net",
+          "https://td.doubleclick.net",
+          "https://pagead2.googlesyndication.com",
+          "https://*.googlesyndication.com",
           ...(supabaseOrigin ? [supabaseOrigin] : []),
         ],
         "frame-src": [
