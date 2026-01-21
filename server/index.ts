@@ -100,6 +100,7 @@ app.use(
           "data:",
           "https://images.openai.com",
           "https://images.unsplash.com",
+          "https://www.googletagmanager.com",
           ...(supabaseOrigin ? [supabaseOrigin] : []),
         ],
         "frame-src": [
