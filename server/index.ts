@@ -71,6 +71,8 @@ const scriptSrc = [
   "'self'",
   "https://js.stripe.com",
   "https://www.googletagmanager.com",
+  "https://googleads.g.doubleclick.net",
+  "https://www.googleadservices.com",
 ];
 if (app.get("env") !== "production") {
   scriptSrc.push("'unsafe-inline'", "https://replit.com");
@@ -114,6 +116,7 @@ app.use(
           "https://hooks.stripe.com",
           "https://www.google.com",
           "https://tagassistant.google.com",
+          "https://www.googletagmanager.com",
         ],
         "connect-src": [
           "'self'",
@@ -124,6 +127,7 @@ app.use(
           "https://stats.g.doubleclick.net",
           "https://analytics.google.com",
           "https://tagassistant.google.com",
+          "https://www.google.com",
           ...(supabaseOrigin ? [supabaseOrigin] : []),
         ],
       },
