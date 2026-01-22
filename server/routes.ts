@@ -423,6 +423,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             planId: payload.planId,
             quality: payload.quality,
             creditsGranted,
+            price: planConfig.price,
+            sessionId: session.id,
           });
         }
 
@@ -475,6 +477,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           planId: payload.planId,
           quality: payload.quality,
           creditsGranted,
+          price: planConfig.price,
+          sessionId: session.id,
         });
       } else if (session.status === 'open') {
         return res.json({ status: 'processing' });

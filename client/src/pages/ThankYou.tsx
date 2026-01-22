@@ -12,6 +12,8 @@ export default function ThankYou() {
     plan?: string;
     accessUntil?: string;
     usageAllowed?: number;
+    price?: number;
+    sessionId?: string;
   } | null>(null);
 
   useEffect(() => {
@@ -44,13 +46,18 @@ export default function ThankYou() {
         setPaymentInfo({
           plan: data.planName,
           accessUntil: data.accessUntil,
-          usageAllowed: data.usageAllowed
+          usageAllowed: data.usageAllowed,
+          price: data.price,
+          sessionId: data.sessionId
         });
         
         // Fire Google Ads conversion event for successful paid checkout
         if (typeof window.gtag === 'function') {
           window.gtag('event', 'conversion', {
-            'send_to': 'AW-11090220613/W5fYCODZtOkbEMWsnagp'
+            'send_to': 'AW-11090220613/W5fYCODZtOkbEMWsnagp',
+            'value': data.price ?? 1.0,
+            'currency': 'USD',
+            'transaction_id': data.sessionId ?? ''
           });
         }
         

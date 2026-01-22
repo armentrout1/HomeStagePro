@@ -90,7 +90,6 @@ const createFeatureSet = (overrides: Partial<Record<FeatureKey, boolean>> = {}) 
 });
 
 const planIdMapping: Record<string, string> = {
-  // TODO: remove mapping after backend plan ids updated
   "quick-pack": "quick-pack",
   "value-pack": "value-pack",
   "pro-monthly": "pro-monthly",

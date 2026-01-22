@@ -42,7 +42,6 @@ export const ROUTE_SEO: Record<string, RouteSeo> = {
     description:
       "Modernize listings fast with AI virtual staging, before/after proof, and transparent packages from RoomStagerPro. Book a consult in minutes.",
     canonicalPath: "/virtual-staging",
-    robots: "noindex,nofollow",
     ogImage: "/images/meta-preview.png",
   },
   "/virtual-staging-cost": {
@@ -77,7 +76,7 @@ export const ROUTE_SEO: Record<string, RouteSeo> = {
     title: "Before & After Virtual Staging Examples | RoomStagerPro",
     description:
       "Explore before and after virtual staging transformations that prove how AI-designed interiors win more clicks and offers.",
-    canonicalPath: "/gallery/",
+    canonicalPath: "/gallery",
     ogImage: "/images/meta-preview.png",
   },
   "/how-it-works": {

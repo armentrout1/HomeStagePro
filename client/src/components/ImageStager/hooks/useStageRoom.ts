@@ -97,9 +97,6 @@ export function useStageRoom(args: UseStageRoomArgs) {
       // Get the selected room type label for the prompt
       const selectedRoomTypeLabel = roomTypes.find(rt => rt.value === roomType)?.label || "Room";
 
-      // Log the staging process
-      console.log(`Starting staging process for ${selectedRoomTypeLabel}`);
-
       ifMounted(() => setProgressPhase("Generating staged image…"));
       const result = await generateStagedRoom({
         imageBase64: base64Image,
@@ -107,7 +104,6 @@ export function useStageRoom(args: UseStageRoomArgs) {
       });
 
       if (!result.ok) {
-        console.info('[STAGE_CONV] API response not ok, conversion will not fire');
         throw new Error(result.errorMessage);
       }
 
@@ -123,7 +119,6 @@ export function useStageRoom(args: UseStageRoomArgs) {
       
       // Save the staged image to the database
       ifMounted(() => setProgressPhase("Saving…"));
-      console.info('[STAGE_CONV] Starting database save');
       await saveImageToDatabase({
         storageBucket: data.storageBucket,
         originalStoragePath: data.originalStoragePath,
@@ -131,27 +126,20 @@ export function useStageRoom(args: UseStageRoomArgs) {
         originalImageUrl: data.originalSignedUrl ?? null,
         stagedImageUrl: data.stagedSignedUrl ?? data.imageUrl ?? null,
       });
-      console.info('[STAGE_CONV] Database save completed');
       
       toast.success("Success!", "Your staged room image is ready");
       
       // Fire Google Ads conversion event for successful staging
-      console.info('[STAGE_CONV] About to check gtag availability');
       if (typeof window.gtag === 'function') {
-        console.info('[STAGE_CONV] gtag function available, firing conversion');
         window.gtag('event', 'conversion', {
           'send_to': 'AW-11090220613/Te5ZCLnx5JgYEMWsnagp'
         });
-        console.info('[STAGE_CONV] Conversion event fired');
-      } else {
-        console.info('[STAGE_CONV] gtag function not available');
       }
       
       // Refresh usage status after successful staging
       await refreshUsageStatus();
     } catch (err) {
       console.error('Error staging image:', err);
-      console.info('[STAGE_CONV] Error occurred, conversion will not fire');
       toast.error("Error", err instanceof Error ? err.message : "Failed to generate staged image");
       
       // Refresh usage status even after error (might be due to limit)

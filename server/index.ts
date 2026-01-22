@@ -37,8 +37,10 @@ app.use((req, res, next) => {
   const search = queryIndex >= 0 ? originalUrl.slice(queryIndex) : "";
 
   let redirectRequired = false;
-  if (pathname === "/gallery") {
-    pathname = "/gallery/";
+  
+  // Strip trailing slashes (except for root "/")
+  if (pathname !== "/" && pathname.endsWith("/")) {
+    pathname = pathname.slice(0, -1);
     redirectRequired = true;
   }
 
