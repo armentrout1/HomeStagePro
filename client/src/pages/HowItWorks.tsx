@@ -81,7 +81,7 @@ const HowItWorks = () => {
         </h2>
         <p className="mt-4 text-base text-muted-foreground">
           Browse before-and-after sets, client wins, and style boards inside our
-          <Link href="/gallery/" className="text-primary underline">
+          <Link href="/gallery" className="text-primary underline">
             {" gallery showcase"}
           </Link>
           . Use the same intake flow to recreate those results for your next

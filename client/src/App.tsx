@@ -121,9 +121,6 @@ function Router() {
           <Route path="/gallery">
             <GalleryRouteContent />
           </Route>
-          <Route path="/gallery/">
-            <GalleryRouteContent />
-          </Route>
           <Route path="/how-it-works">
             <>
               <SeoHead path="/how-it-works" />

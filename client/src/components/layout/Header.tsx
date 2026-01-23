@@ -15,7 +15,7 @@ export default function Header() {
 
   const navLinks = [
     { href: "/", label: "AI Stager" },
-    { href: "/gallery/", label: "Gallery" },
+    { href: "/gallery", label: "Gallery" },
     { href: "/resources", label: "Resources" },
     { href: "/sales", label: "Pricing" },
   ];

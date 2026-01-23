@@ -9,7 +9,7 @@ const sections = [
       { href: "/virtual-staging", label: "Virtual Staging Overview" },
       { href: "/how-it-works", label: "How It Works" },
       { href: "/sales", label: "Plans & Pricing" },
-      { href: "/gallery/", label: "Before & After Gallery" },
+      { href: "/gallery", label: "Before & After Gallery" },
     ],
   },
   {
@@ -69,7 +69,7 @@ export default function Resources() {
               <Link href="/sales">See Pricing</Link>
             </Button>
             <Link
-              href="/gallery/"
+              href="/gallery"
               className="text-sm font-semibold text-amber-600 transition hover:text-amber-700"
             >
               View Gallery

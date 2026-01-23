@@ -63,7 +63,7 @@ const faqs = [
 ];
 
 const relatedResources = [
-  { href: "/gallery/", label: "AI staging gallery" },
+  { href: "/gallery", label: "AI staging gallery" },
   { href: "/sales", label: "Sales & onboarding workspace" },
   { href: "/virtual-staging", label: "Virtual staging overview" },
   { href: "/virtual-staging-cost", label: "Virtual staging cost breakdown" },

@@ -137,7 +137,7 @@ const faq = [
 ];
 
 const relatedResources = [
-  { href: "/gallery/", label: "AI staging gallery" },
+  { href: "/gallery", label: "AI staging gallery" },
   { href: "/sales", label: "Sales & onboarding workspace" },
   { href: "/virtual-staging", label: "Virtual staging overview" },
   { href: "/virtual-staging-cost", label: "Virtual staging cost breakdown" },
@@ -237,12 +237,12 @@ const VirtualStagingForInvestors = () => {
         <p className="mt-3 text-muted-foreground">
           Use the free credits for your first rooms or grab a pack so every acquisition, refi, or STR refresh has staging ready on day one.
         </p>
-        <div className="mt-5 flex flex-wrap justify-center gap-3">
-          <Button asChild size="lg">
-            <Link href="/#ai-stager">Try 2 Free Stagings</Link>
-          </Button>
+        <div className="flex flex-wrap justify-center gap-3">
           <Button asChild size="lg" variant="secondary">
-            <Link href="/sales">Discuss Packs</Link>
+            <Link href="/">Try AI Stager</Link>
+          </Button>
+          <Button asChild size="lg">
+            <Link href="/sales">See Packages &amp; Pricing</Link>
           </Button>
         </div>
       </section>
