@@ -52,10 +52,9 @@ app.use((req, res, next) => {
     redirectRequired = true;
   }
 
-  const protocolIsHttps = currentProtocol === "https";
-  if (!protocolIsHttps) {
-    redirectRequired = true;
-  }
+  // HTTPS enforcement is handled by Cloudflare - do NOT redirect here
+  // Doing so causes redirect loops with Cloudflare Flexible SSL mode
+  // If you need server-side HTTPS enforcement, ensure Cloudflare SSL is set to "Full" mode
 
   if (!redirectRequired) {
     return next();
