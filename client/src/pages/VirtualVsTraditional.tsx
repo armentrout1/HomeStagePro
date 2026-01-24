@@ -1,3 +1,5 @@
+import { Link } from "wouter";
+
 export default function VirtualVsTraditional() {
   const comparisonData = [
     { factor: "Cost", traditional: "$1,500 - $5,000+", virtual: "$200 - $800" },
@@ -59,6 +61,17 @@ export default function VirtualVsTraditional() {
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Virtual vs. Traditional Staging</h1>
           <p className="text-xl text-gray-700 max-w-4xl">
             Compare the benefits, costs, and results of virtual and traditional staging methods to decide which is right for your property.
+          </p>
+          <p className="text-lg text-gray-600 max-w-4xl mt-4">
+            If virtual staging looks like the right fit, view{" "}
+            <Link href="/gallery" className="text-blue-600 underline">
+              before-and-after examples
+            </Link>{" "}
+            in our proof library, then compare{" "}
+            <Link href="/sales" className="text-blue-600 underline">
+              plans and pricing
+            </Link>{" "}
+            to stage your own listings.
           </p>
         </div>
       </div>

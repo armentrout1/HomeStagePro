@@ -133,10 +133,10 @@ export default function Home() {
           <div className="flex flex-col md:flex-row items-center">
             <div className="md:w-1/2 mb-8 md:mb-0 md:pr-8">
               <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-4">
-                Perfect Staging, Perfect Sale
+                AI Virtual Staging to Help Homes Sell Faster
               </h1>
               <p className="text-lg text-gray-700 mb-6">
-                Elevate your property's appeal with professional staging techniques and expert advice for a faster sale at the best price.
+                Upload an empty room and transform it into a market-ready listing image in minutes. Explore real before-and-after examples, learn how virtual staging works, or view affordable pricing when you're ready.
               </p>
               <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
                 <Link

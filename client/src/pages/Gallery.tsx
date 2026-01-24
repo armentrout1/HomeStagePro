@@ -30,6 +30,13 @@ const Gallery = () => {
           Explore how AI-assisted staging elevates raw listing photos into polished marketing assets.
           Every pair below uses the exact workflow available inside the RoomStager Pro app.
         </p>
+        <p className="mt-2 text-muted-foreground">
+          Want to create results like these for your own listings? Explore our{" "}
+          <Link href="/virtual-staging" className="text-primary underline">
+            AI virtual staging service
+          </Link>{" "}
+          to see how the same workflow is used to stage real properties in minutes.
+        </p>
       </section>
 
       <div className="grid gap-8">

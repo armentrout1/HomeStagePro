@@ -92,6 +92,9 @@ const VirtualStaging = () => {
         <p className="mt-4 max-w-3xl text-lg text-slate-200">
           Upload an empty room, select the room type, and download a staged version—usually within a few minutes. No phone calls, no waiting list, just quick visuals you can review and rerun as needed.
         </p>
+        <p className="mt-2 text-sm text-slate-300">
+          To compare plans, pricing, and purchase options, see our virtual staging plans.
+        </p>
         <div className="mt-8 flex flex-wrap items-center gap-4">
           <div className="rounded-xl border border-white/20 px-4 py-3 text-sm text-slate-200">
             2 free stagings · no login required
