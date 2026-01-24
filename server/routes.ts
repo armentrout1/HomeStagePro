@@ -21,10 +21,12 @@ import {
   setAccessTokenCookie,
   attachEntitlement,
   getTokenIdFromRequest,
+  requireAuthedUserId,
 } from "./tokenManager";
 import { getPlanConfig, resolvePlanId } from "./plans";
 import { checkoutSessionLimiter } from "./middleware/checkoutSessionLimiter";
 import { stagingRateLimiter } from "./middleware/stagingRateLimiter";
+import { feedbackRateLimiter } from "./middleware/feedbackRateLimiter";
 import { logSecurityEvent } from "./securityEvents";
 
 const isProd = process.env.NODE_ENV === "production";
@@ -155,8 +157,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Database routes for staged images
-  app.post('/api/staged-images', saveStagedImage);
-  app.get('/api/users/:userId/staged-images', getUserStagedImages);
+  app.post('/api/staged-images', checkAccessToken, saveStagedImage);
+  app.get('/api/users/:userId/staged-images', checkAccessToken, getUserStagedImages);
 
   const feedbackSchema = z
     .object({
@@ -186,7 +188,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       country: z.string().optional().nullable(),
       email: z.string().email().optional().nullable(),
       userId: z.number().int().optional().nullable(),
-      clientSubmissionId: z.string().optional().nullable(),
+      clientSubmissionId: z.string().uuid().optional().nullable(),
     })
     .transform((data) => ({
       rating: data.rating,
@@ -216,7 +218,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       clientSubmissionId: data.clientSubmissionId ?? null,
     }));
 
-  app.post("/api/feedback", async (req, res) => {
+  const createPropertySchema = z.object({
+    title: z.string().min(1),
+    userId: z.number().int().positive(),
+    description: z.string().optional().nullable(),
+    address: z.string().optional().nullable(),
+    price: z.number().int().positive().optional().nullable(),
+    bedrooms: z.number().int().min(0).optional().nullable(),
+    bathrooms: z.number().int().min(0).optional().nullable(),
+    squareFeet: z.number().int().min(0).optional().nullable(),
+    featuredImageId: z.number().int().positive().optional().nullable(),
+    isStaged: z.boolean().optional(),
+  });
+
+  const updatePropertySchema = createPropertySchema.partial();
+
+  app.post("/api/feedback", feedbackRateLimiter, async (req, res) => {
     try {
       const parsed = feedbackSchema.parse(req.body);
       const { clientSubmissionId, ...rest } = parsed;
@@ -229,7 +246,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const insertQuery = clientSubmissionId
         ? db
             .insert(feedbackSubmissions)
-            .values(parsed)
+            .values(updatePayload)
             .onConflictDoUpdate({
               target: feedbackSubmissions.clientSubmissionId,
               set: updatePayload,
@@ -603,10 +620,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // User routes
-  app.get('/api/users/:id', async (req, res) => {
+  app.get('/api/users/:id', checkAccessToken, async (req, res) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
       return res.status(400).json({ error: "Invalid user ID" });
+    }
+
+    const authedUserId = requireAuthedUserId(req);
+    if (authedUserId === null) {
+      return res.status(401).json({ error: "Authentication required" });
+    }
+
+    if (authedUserId !== id) {
+      return res.status(403).json({ error: "Access denied" });
     }
     
     const user = await storage.getUser(id);
@@ -620,10 +646,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Property routes
-  app.get('/api/properties/user/:userId', async (req, res) => {
+  app.get('/api/properties/user/:userId', checkAccessToken, async (req, res) => {
     const userId = parseInt(req.params.userId);
     if (isNaN(userId)) {
       return res.status(400).json({ error: "Invalid user ID" });
+    }
+
+    const authedUserId = requireAuthedUserId(req);
+    if (authedUserId === null) {
+      return res.status(401).json({ error: "Authentication required" });
+    }
+
+    if (authedUserId !== userId) {
+      return res.status(403).json({ error: "Access denied" });
     }
     
     const properties = await storage.getPropertiesByUserId(userId);
@@ -644,24 +679,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return res.json(property);
   });
   
-  app.post('/api/properties', async (req, res) => {
+  app.post('/api/properties', checkAccessToken, async (req, res) => {
     try {
-      const property = await storage.createProperty(req.body);
+      const parsed = createPropertySchema.parse(req.body);
+      const property = await storage.createProperty(parsed);
       return res.json(property);
     } catch (err) {
       const error = err as Error;
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid payload", details: err.issues });
+      }
       return res.status(400).json({ error: error.message });
     }
   });
   
-  app.put('/api/properties/:id', async (req, res) => {
+  app.put('/api/properties/:id', checkAccessToken, async (req, res) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
       return res.status(400).json({ error: "Invalid property ID" });
     }
     
     try {
-      const updatedProperty = await storage.updateProperty(id, req.body);
+      const parsed = updatePropertySchema.parse(req.body);
+      const updatedProperty = await storage.updateProperty(id, parsed);
       if (!updatedProperty) {
         return res.status(404).json({ error: "Property not found" });
       }
@@ -669,6 +709,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.json(updatedProperty);
     } catch (err) {
       const error = err as Error;
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid payload", details: err.issues });
+      }
       return res.status(400).json({ error: error.message });
     }
   });

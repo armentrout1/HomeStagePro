@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import {
@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
 import { useFeedbackContext } from "@/state/feedbackContext";
-import { REVIEW_URL } from "@/components/feedback/FeedbackCtas";
 import {
   defaultValues,
   type FormValues,
@@ -25,19 +24,14 @@ import { StepTwoDetails } from "@/components/feedback/FeedbackDrawer/components/
 export function FeedbackDrawer() {
   const { toast } = useToast();
   const context = useFeedbackContext();
-  const { isOpen, step, setStep, handleClose, handleSheetChange } = useFeedbackDrawer();
-  const [basicsSaved, setBasicsSaved] = useState(false);
-  const [detailsSaved, setDetailsSaved] = useState(false);
+  const { isOpen, handleClose, handleSheetChange } = useFeedbackDrawer();
+  const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [clientSubmissionId, setClientSubmissionId] = useState<string | null>(null);
 
-  const {
-    control,
-    handleSubmit,
-    reset,
-    register,
-    setValue,
-    watch,
-    formState: { isSubmitting },
-  } = useForm<FormValues>({ defaultValues });
+  const CLIENT_SUBMISSION_STORAGE_KEY = "feedback.clientSubmissionId";
+
+  const { control, handleSubmit, reset, register, setValue, watch } = useForm<FormValues>({ defaultValues });
 
   const rating = watch("rating");
   const goal = watch("goal");
@@ -48,18 +42,51 @@ export function FeedbackDrawer() {
     () => Boolean(watermarkPreference && watermarkPreference !== "never"),
     [watermarkPreference],
   );
-  const showTestimonialConsent = useMemo(
-    () => (rating ?? 0) >= 4,
-    [rating],
-  );
-  const isBasicsSubmitDisabled = !rating || !goal || isSubmitting;
-  const isDetailsSubmitDisabled = isSubmitting;
+  const showTestimonialConsent = useMemo(() => (rating ?? 0) >= 4, [rating]);
+  const canSubmit = Boolean(rating && goal);
+  const isSubmitDisabled = !canSubmit || isSubmitting || hasSubmitted;
+
+  const ensureClientSubmissionId = () => {
+    if (typeof window === "undefined") {
+      return null;
+    }
+    if (clientSubmissionId) {
+      return clientSubmissionId;
+    }
+    const stored = window.localStorage.getItem(CLIENT_SUBMISSION_STORAGE_KEY);
+    if (stored) {
+      setClientSubmissionId(stored);
+      return stored;
+    }
+    const generated = crypto.randomUUID();
+    setClientSubmissionId(generated);
+    window.localStorage.setItem(CLIENT_SUBMISSION_STORAGE_KEY, generated);
+    return generated;
+  };
+
+  const handleFooterSubmit = () => {
+    handleSubmit(onSubmit)();
+  };
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const stored = window.localStorage.getItem(CLIENT_SUBMISSION_STORAGE_KEY);
+    if (stored) {
+      setClientSubmissionId(stored);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      ensureClientSubmissionId();
+    }
+  }, [isOpen]);
 
   const closeAndReset = () => {
     handleClose();
     reset(defaultValues);
-    setBasicsSaved(false);
-    setDetailsSaved(false);
+    setHasSubmitted(false);
+    setIsSubmitting(false);
   };
 
   const handleDrawerOpenChange = (open: boolean) => {
@@ -68,10 +95,6 @@ export function FeedbackDrawer() {
     } else {
       handleSheetChange(true);
     }
-  };
-
-  const handleReviewClick = () => {
-    window.open(REVIEW_URL, "_blank", "noopener,noreferrer");
   };
 
   const normalize = (value?: string) => {
@@ -90,75 +113,25 @@ export function FeedbackDrawer() {
     country: context.country,
   });
 
-  const buildBasePayload = (
-    values: FormValues,
-    overrides: Partial<ExtendedFeedbackPayload> = {},
-  ): ExtendedFeedbackPayload => {
+  const buildFeedbackPayload = (values: FormValues): ExtendedFeedbackPayload => {
     const contextFields = getContextFields();
+    const submissionId = ensureClientSubmissionId();
+    const wantsWatermarkText = Boolean(
+      values.watermarkPreference && values.watermarkPreference !== "never",
+    );
 
     return {
       rating: values.rating!,
       goal: values.goal,
-      issue: null,
-      freeformFeedback: null,
-      requestedFeature: null,
-      persona: null,
-      usageFrequency: null,
-      pricingPreference: null,
-      willingnessToPayRange: null,
-      watermarkPreference: null,
-      watermarkTextPreference: null,
-      canPublishTestimonial: false,
-      testimonialName: null,
-      testimonialCompany: null,
-      canShareBeforeAfter: false,
-      email: null,
-      ...contextFields,
-      ...overrides,
-    };
-  };
-
-  const onSubmitBasics = async (values: FormValues) => {
-    if (!values.rating || !values.goal) {
-      return;
-    }
-
-    const payload = buildBasePayload(values, {
       issue: normalize(values.issue),
       freeformFeedback: normalize(values.freeformFeedback),
-    });
-
-    await submitFeedbackWithToast({
-      payload,
-      toast,
-      onSuccess: () => {
-        setBasicsSaved(true);
-      },
-    });
-  };
-
-  const onSubmitDetails = async (values: FormValues) => {
-    if (!basicsSaved) {
-      toast({
-        title: "Submit basics first",
-        description: "Send rating & goal before optional details.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!values.rating || !values.goal) {
-      return;
-    }
-
-    const payload = buildBasePayload(values, {
       requestedFeature: normalize(values.requestedFeature),
       persona: normalize(values.persona),
       usageFrequency: normalize(values.usageFrequency),
       pricingPreference: normalize(values.pricingPreference),
       willingnessToPayRange: normalize(values.willingnessToPayRange),
       watermarkPreference: normalize(values.watermarkPreference),
-      watermarkTextPreference: showWatermarkText
+      watermarkTextPreference: wantsWatermarkText
         ? normalize(values.watermarkTextPreference)
         : null,
       canPublishTestimonial: values.canPublishTestimonial,
@@ -170,15 +143,30 @@ export function FeedbackDrawer() {
         : null,
       canShareBeforeAfter:
         values.canPublishTestimonial && values.canShareBeforeAfter ? true : false,
-    });
+      email: normalize(values.email),
+      clientSubmissionId: submissionId,
+      ...contextFields,
+    };
+  };
 
-    await submitFeedbackWithToast({
-      payload,
-      toast,
-      onSuccess: () => {
-        setDetailsSaved(true);
-      },
-    });
+  const onSubmit = async (values: FormValues) => {
+    if (!values.rating || !values.goal) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const payload = buildFeedbackPayload(values);
+      await submitFeedbackWithToast({
+        payload,
+        toast,
+        onSuccess: () => {
+          setHasSubmitted(true);
+        },
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -196,7 +184,7 @@ export function FeedbackDrawer() {
           </SheetHeader>
         </div>
 
-        <form onSubmit={(event) => event.preventDefault()} className="flex h-full flex-1 flex-col overflow-hidden">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex h-full flex-1 flex-col overflow-hidden">
           <div className="flex-1 overflow-y-auto px-6 py-4">
             <div className="space-y-8 pb-6">
               <StepOneBasic
@@ -204,37 +192,25 @@ export function FeedbackDrawer() {
                 register={register}
                 rating={rating}
                 goal={goal}
-                isSubmitting={isSubmitting}
-                isBasicsSubmitDisabled={isBasicsSubmitDisabled}
                 onSetRating={(value) => setValue("rating", value, { shouldValidate: true })}
-                onTellUsMore={() => setStep(2)}
-                onBackToBasics={() => setStep(1)}
-                onSubmitBasics={() => handleSubmit(onSubmitBasics)()}
-                basicsSaved={basicsSaved}
-                isShowingMore={step === 2}
               />
 
-              {step === 2 && (
-                <StepTwoDetails
-                  control={control}
-                  register={register}
-                  showWatermarkText={showWatermarkText}
-                  showTestimonialConsent={showTestimonialConsent}
-                  canPublishTestimonial={canPublishTestimonial}
-                  isSubmitting={isSubmitting}
-                  isDetailsSubmitDisabled={isDetailsSubmitDisabled}
-                  onSubmitDetails={() => handleSubmit(onSubmitDetails)()}
-                  detailsSaved={detailsSaved}
-                  basicsSaved={basicsSaved}
-                />
-              )}
+              <StepTwoDetails
+                control={control}
+                register={register}
+                showWatermarkText={showWatermarkText}
+                showTestimonialConsent={showTestimonialConsent}
+                canPublishTestimonial={canPublishTestimonial}
+              />
             </div>
           </div>
 
           <DrawerFooter
             rating={rating}
-            step={step}
-            onLeaveReview={handleReviewClick}
+            canSubmit={canSubmit}
+            isSubmitting={isSubmitting}
+            hasSubmitted={hasSubmitted}
+            onSubmit={handleFooterSubmit}
             onClose={closeAndReset}
           />
         </form>

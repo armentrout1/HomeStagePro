@@ -5,6 +5,7 @@
  */
 import crypto from "crypto";
 import { toFile } from "openai";
+import { z } from "zod";
 import {
   type Request,
   type Response,
@@ -12,6 +13,7 @@ import {
 
 import { log } from "./vite";
 import { storage } from "./storage";
+import { requireAuthedUserId } from "./tokenManager";
 import { buildStagingPrompt } from "./prompting/stagingPrompt";
 import { openai } from "./openaiClient";
 import { analyzeRoomLayout } from "./prompting/layoutAnalyzer";
@@ -20,6 +22,16 @@ import { supabase, getSignedImageUrl } from "./supabase";
 
 const STORAGE_BUCKET = "roomstager-images";
 const SIGNED_URL_EXPIRATION_SECONDS = 60 * 60 * 24 * 7;
+
+const stagedImageSchema = z.object({
+  originalStoragePath: z.string().min(1),
+  stagedStoragePath: z.string().min(1),
+  userId: z.number().int().positive().optional().nullable(),
+  originalImageUrl: z.string().url().optional().nullable(),
+  stagedImageUrl: z.string().url().optional().nullable(),
+  storageBucket: z.string().max(100).optional(),
+  roomType: z.string().max(50).optional(),
+});
 
 type DecodedImage = {
   bytes: Uint8Array;
@@ -355,30 +367,16 @@ Layout constraints (MUST FOLLOW):
 
 export const saveStagedImage = async (req: Request, res: Response) => {
   try {
-    const {
-      userId,
-      originalImageUrl,
-      stagedImageUrl,
-      originalStoragePath,
-      stagedStoragePath,
-      storageBucket,
-      roomType,
-    } = req.body;
-
-    if (!originalStoragePath || !stagedStoragePath) {
-      return res.status(400).json({
-        error: "originalStoragePath and stagedStoragePath are required",
-      });
-    }
+    const parsed = stagedImageSchema.parse(req.body);
 
     const stagedImage = await storage.createStagedImage({
-      userId: userId || null,
-      originalImageUrl: originalImageUrl ?? null,
-      stagedImageUrl: stagedImageUrl ?? null,
-      originalStoragePath,
-      stagedStoragePath,
-      storageBucket: storageBucket || STORAGE_BUCKET,
-      roomType: roomType || "Unknown",
+      userId: parsed.userId ?? null,
+      originalImageUrl: parsed.originalImageUrl ?? null,
+      stagedImageUrl: parsed.stagedImageUrl ?? null,
+      originalStoragePath: parsed.originalStoragePath,
+      stagedStoragePath: parsed.stagedStoragePath,
+      storageBucket: parsed.storageBucket || STORAGE_BUCKET,
+      roomType: parsed.roomType || "Unknown",
     });
 
     return res.json({
@@ -387,6 +385,9 @@ export const saveStagedImage = async (req: Request, res: Response) => {
     });
   } catch (err) {
     const error = err as Error;
+    if (err instanceof z.ZodError) {
+      return res.status(400).json({ error: "Invalid payload", details: err.issues });
+    }
     log(`Database error: ${error.message || "Unknown error"}`);
     return res.status(500).json({
       success: false,
@@ -401,6 +402,15 @@ export const getUserStagedImages = async (req: Request, res: Response) => {
     
     if (isNaN(userId)) {
       return res.status(400).json({ error: "Invalid user ID" });
+    }
+
+    const authedUserId = requireAuthedUserId(req);
+    if (authedUserId === null) {
+      return res.status(401).json({ error: "Authentication required" });
+    }
+
+    if (authedUserId !== userId) {
+      return res.status(403).json({ error: "Access denied" });
     }
     
     const images = await storage.getStagedImagesByUserId(userId);

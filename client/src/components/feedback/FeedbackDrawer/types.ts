@@ -15,6 +15,7 @@ export type FormValues = {
   willingnessToPayRange: string;
   watermarkPreference: string;
   watermarkTextPreference: string;
+  email: string;
   canPublishTestimonial: boolean;
   testimonialName: string;
   testimonialCompany: string;
@@ -33,6 +34,7 @@ export const defaultValues: FormValues = {
   willingnessToPayRange: "",
   watermarkPreference: "",
   watermarkTextPreference: "",
+  email: "",
   canPublishTestimonial: false,
   testimonialName: "",
   testimonialCompany: "",

@@ -27,6 +27,7 @@ export interface TokenPayload {
   totalUses: number;
   expiresAt: number;
   quality: PlanConfig["quality"];
+  userId?: number;
   jti?: string;
   sub?: string;
 }
@@ -233,6 +234,27 @@ export function getTokenIdFromRequest(req: Request): string | null {
 
   if (payload.sub && typeof payload.sub === "string") {
     return payload.sub;
+  }
+
+  return null;
+}
+
+export function requireAuthedUserId(req: Request): number | null {
+  const payload = req.accessTokenPayload;
+
+  if (!payload) {
+    return null;
+  }
+
+  if (typeof payload.userId === "number" && Number.isInteger(payload.userId)) {
+    return payload.userId;
+  }
+
+  if (typeof payload.sub === "string") {
+    const parsed = Number.parseInt(payload.sub, 10);
+    if (!Number.isNaN(parsed)) {
+      return parsed;
+    }
   }
 
   return null;

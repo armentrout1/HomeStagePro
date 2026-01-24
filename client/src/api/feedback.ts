@@ -20,6 +20,7 @@ export type FeedbackPayload = {
   country?: string | null;
   email?: string | null;
   source?: "post_render" | "post_download" | "post_purchase" | "nav_tab";
+  clientSubmissionId?: string | null;
 };
 
 export async function submitFeedback(payload: FeedbackPayload) {

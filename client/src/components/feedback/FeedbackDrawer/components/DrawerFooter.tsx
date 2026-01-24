@@ -1,17 +1,22 @@
 import { Button } from "@/components/ui/button";
 import { FeedbackCtas } from "@/components/feedback/FeedbackCtas";
+import { cn } from "@/lib/utils";
 
 type DrawerFooterProps = {
   rating: number | null;
-  step: 1 | 2;
-  onLeaveReview: () => void;
+  canSubmit: boolean;
+  isSubmitting: boolean;
+  hasSubmitted: boolean;
+  onSubmit: () => void;
   onClose: () => void;
 };
 
 export function DrawerFooter({
   rating,
-  step,
-  onLeaveReview,
+  canSubmit,
+  isSubmitting,
+  hasSubmitted,
+  onSubmit,
   onClose,
 }: DrawerFooterProps) {
   return (
@@ -20,7 +25,7 @@ export function DrawerFooter({
         <div className="space-y-1 text-sm text-muted-foreground">
           <FeedbackCtas rating={rating} />
           <p className="text-[11px] uppercase tracking-wide text-slate-400">
-            {step === 2 ? "Step 2 of 2" : "Step 1 of 2"} · Required fields marked with *
+            Required fields marked with *
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -33,11 +38,17 @@ export function DrawerFooter({
           >
             Close
           </Button>
-          {rating !== null && rating >= 4 && (
-            <Button type="button" variant="outline" size="sm" onClick={onLeaveReview}>
-              Leave a review
-            </Button>
-          )}
+          <Button
+            type="button"
+            disabled={!canSubmit || isSubmitting}
+            onClick={onSubmit}
+            className={cn(
+              "text-white shadow-[0_15px_35px_-15px_rgba(15,23,42,0.9)] transition disabled:bg-slate-400 disabled:shadow-none",
+              hasSubmitted ? "bg-emerald-600 hover:bg-emerald-600" : "bg-slate-900 hover:bg-slate-800",
+            )}
+          >
+            {hasSubmitted ? "Submitted" : isSubmitting ? "Submitting..." : "Submit feedback"}
+          </Button>
         </div>
       </div>
     </div>

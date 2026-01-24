@@ -1,6 +1,5 @@
 import { Controller } from "react-hook-form";
 
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -21,19 +20,12 @@ import {
   WTP_RANGE_OPTIONS,
 } from "@/components/feedback/feedbackOptions";
 import { UNSET_OPTION } from "@/components/feedback/FeedbackDrawer/types";
-import { cn } from "@/lib/utils";
-
 interface StepTwoDetailsProps {
   control: any;
   register: any;
   showWatermarkText: boolean;
   showTestimonialConsent: boolean;
   canPublishTestimonial: boolean;
-  isSubmitting: boolean;
-  isDetailsSubmitDisabled: boolean;
-  onSubmitDetails: () => void;
-  detailsSaved: boolean;
-  basicsSaved: boolean;
 }
 
 export function StepTwoDetails({
@@ -42,11 +34,6 @@ export function StepTwoDetails({
   showWatermarkText,
   showTestimonialConsent,
   canPublishTestimonial,
-  isSubmitting,
-  isDetailsSubmitDisabled,
-  onSubmitDetails,
-  detailsSaved,
-  basicsSaved,
 }: StepTwoDetailsProps) {
   return (
     <section className="space-y-6 rounded-lg bg-slate-50 p-4">
@@ -57,9 +44,6 @@ export function StepTwoDetails({
             Helps us tailor the roadmap and follow up if needed.
           </p>
         </div>
-        {detailsSaved && (
-          <span className="text-xs font-medium text-emerald-600">Saved</span>
-        )}
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -264,7 +248,7 @@ export function StepTwoDetails({
                   onCheckedChange={(checked) => field.onChange(Boolean(checked))}
                 />
                 <Label htmlFor="feedback-testimonial" className="text-sm font-normal">
-                  RoomStager can publish my comments as a testimonial.
+                  RoomStager may publish my feedback as a testimonial.
                 </Label>
               </div>
             )}
@@ -281,7 +265,16 @@ export function StepTwoDetails({
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="testimonial-company">Company</Label>
+                <Label htmlFor="testimonial-email">Email</Label>
+                <Input
+                  id="testimonial-email"
+                  type="email"
+                  placeholder="you@email.com"
+                  {...register("email")}
+                />
+              </div>
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="testimonial-company">Company (optional)</Label>
                 <Input
                   id="testimonial-company"
                   placeholder="Acme Realty Group"
@@ -299,7 +292,7 @@ export function StepTwoDetails({
                       onCheckedChange={(checked) => field.onChange(Boolean(checked))}
                     />
                     <Label htmlFor="testimonial-media" className="text-sm font-normal">
-                      You may share my before/after renders alongside the quote.
+                      You may share my before and after images.
                     </Label>
                   </div>
                 )}
@@ -308,30 +301,6 @@ export function StepTwoDetails({
           )}
         </div>
       )}
-
-      <div className="flex flex-wrap items-center gap-3 border-t border-slate-200 pt-4">
-        <Button
-          type="button"
-          size="sm"
-          disabled={isDetailsSubmitDisabled || !basicsSaved}
-          onClick={onSubmitDetails}
-          className={cn(
-            "text-white shadow-[0_15px_35px_-15px_rgba(15,23,42,0.9)] transition disabled:bg-slate-400 disabled:shadow-none",
-            detailsSaved
-              ? "bg-emerald-600 hover:bg-emerald-700"
-              : "bg-slate-900 hover:bg-slate-800",
-          )}
-        >
-          {detailsSaved
-            ? "Optional details saved"
-            : isSubmitting
-              ? "Submitting..."
-              : "Submit optional details"}
-        </Button>
-        <p className="text-xs text-muted-foreground">
-          {basicsSaved ? "Optional insights are a bonus." : "Submit basics first."}
-        </p>
-      </div>
     </section>
   );
 }

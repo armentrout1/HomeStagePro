@@ -78,9 +78,7 @@ export const WATERMARK_PREF_OPTIONS: Option[] = [
 ];
 
 export const WATERMARK_TEXT_OPTIONS: Option[] = [
-  { value: "agent_name", label: "Agent name" },
-  { value: "team_or_brokerage", label: "Team or brokerage name" },
-  { value: "website_url", label: "Website / URL" },
-  { value: "phone", label: "Phone number" },
-  { value: "custom_logo", label: "Custom logo or upload" },
+  { value: "virtually_staged", label: "Show “Virtually staged” on the image" },
+  { value: "custom_text", label: "Use my custom watermark text" },
+  { value: "none", label: "No watermark text" },
 ];
