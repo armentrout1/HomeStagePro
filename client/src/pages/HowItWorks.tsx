@@ -32,7 +32,7 @@ const HowItWorks = () => {
           Workflow Overview
         </p>
         <h1 className="text-4xl font-semibold text-foreground">
-          How HomeStage Pro Delivers Turnkey Virtual Staging
+          How RoomStagerPro Delivers Turnkey Virtual Staging
         </h1>
         <p className="mx-auto max-w-3xl text-lg text-muted-foreground">
           Upload, select a room type, approve, and publish staged rooms in a single

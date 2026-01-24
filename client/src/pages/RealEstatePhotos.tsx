@@ -79,6 +79,10 @@ export default function RealEstatePhotos() {
                   </p>
                 </div>
                 
+                <p className="mb-4">
+                  Once you have strong listing photos, <Link href="/virtual-staging" className="text-primary underline">virtual staging</Link> is the next step to maximize their impact—helping buyers visualize furnished spaces without the cost or logistics of traditional staging.
+                </p>
+                
                 <h3 className="text-xl font-semibold mt-6 mb-3">Comprehensive Visual Tour</h3>
                 <p className="mb-4">
                   Professional photographers know how to capture a property from multiple angles to give potential buyers a comprehensive understanding of the space. This reduces surprises during in-person viewings and attracts more serious buyers.
