@@ -1,10 +1,11 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { stripePurchases, type InsertStripePurchase } from "@shared/schema";
+import { stripePurchases, type InsertStripePurchase, feedbackSubmissions } from "@shared/schema";
 import { db } from "./db";
 import { getOrCreateUsageEntitlement, ensureDbUsageOnSuccess, grantPaidCredits } from "./usageEntitlements";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
+import { z } from "zod";
 import {
   generateStagedRoom,
   saveStagedImage,
@@ -156,6 +157,100 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Database routes for staged images
   app.post('/api/staged-images', saveStagedImage);
   app.get('/api/users/:userId/staged-images', getUserStagedImages);
+
+  const feedbackSchema = z
+    .object({
+      rating: z.number().int().min(1).max(5),
+      goal: z.string().min(1),
+      issue: z.string().optional().nullable(),
+      freeformFeedback: z.string().optional().nullable(),
+      source: z
+        .enum(["post_render", "post_download", "post_purchase", "nav_tab"])
+        .optional(),
+      requestedFeature: z.string().optional().nullable(),
+      persona: z.string().optional().nullable(),
+      usageFrequency: z.string().optional().nullable(),
+      pricingPreference: z.string().optional().nullable(),
+      willingnessToPayRange: z.string().optional().nullable(),
+      watermarkPreference: z.string().optional().nullable(),
+      watermarkTextPreference: z.string().optional().nullable(),
+      canPublishTestimonial: z.boolean().optional(),
+      testimonialName: z.string().optional().nullable(),
+      testimonialCompany: z.string().optional().nullable(),
+      canShareBeforeAfter: z.boolean().optional(),
+      jobId: z.string().optional().nullable(),
+      planType: z.string().optional().nullable(),
+      roomType: z.string().optional().nullable(),
+      styleSelected: z.string().optional().nullable(),
+      deviceType: z.string().optional().nullable(),
+      country: z.string().optional().nullable(),
+      email: z.string().email().optional().nullable(),
+      userId: z.number().int().optional().nullable(),
+    })
+    .transform((data) => ({
+      rating: data.rating,
+      goal: data.goal,
+      issue: data.issue ?? null,
+      freeformFeedback: data.freeformFeedback ?? null,
+      source: data.source ?? "nav_tab",
+      requestedFeature: data.requestedFeature ?? null,
+      persona: data.persona ?? null,
+      usageFrequency: data.usageFrequency ?? null,
+      pricingPreference: data.pricingPreference ?? null,
+      willingnessToPayRange: data.willingnessToPayRange ?? null,
+      watermarkPreference: data.watermarkPreference ?? null,
+      watermarkTextPreference: data.watermarkTextPreference ?? null,
+      canPublishTestimonial: data.canPublishTestimonial ?? false,
+      testimonialName: data.testimonialName ?? null,
+      testimonialCompany: data.testimonialCompany ?? null,
+      canShareBeforeAfter: data.canShareBeforeAfter ?? false,
+      jobId: data.jobId ?? null,
+      planType: data.planType ?? null,
+      roomType: data.roomType ?? null,
+      styleSelected: data.styleSelected ?? null,
+      deviceType: data.deviceType ?? null,
+      country: data.country ?? null,
+      email: data.email ?? null,
+      userId: data.userId ?? null,
+    }));
+
+  app.post("/api/feedback", async (req, res) => {
+    try {
+      const parsed = feedbackSchema.parse(req.body);
+
+      const [inserted] = await db
+        .insert(feedbackSubmissions)
+        .values(parsed)
+        .returning({ id: feedbackSubmissions.id });
+
+      return res.json({ success: true, id: inserted.id });
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid feedback payload", details: err.issues });
+      }
+      console.error("Failed to save feedback", err);
+      return res.status(500).json({ error: "Failed to save feedback" });
+    }
+  });
+
+  app.get("/api/feedback", async (_req, res) => {
+    if (process.env.NODE_ENV === "production") {
+      return res.status(404).json({ error: "Not found" });
+    }
+
+    try {
+      const results = await db
+        .select()
+        .from(feedbackSubmissions)
+        .orderBy(desc(feedbackSubmissions.createdAt))
+        .limit(200);
+
+      return res.json(results);
+    } catch (err) {
+      console.error("Failed to fetch feedback", err);
+      return res.status(500).json({ error: "Failed to fetch feedback" });
+    }
+  });
   
   // Stripe checkout session creation
   app.post('/api/create-checkout-session', checkoutSessionLimiter, async (req, res) => {

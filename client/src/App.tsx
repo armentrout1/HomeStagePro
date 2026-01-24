@@ -8,6 +8,8 @@ import Home from "./pages/Home";
 import NotFound from "@/pages/not-found";
 import { SeoHead } from "@/seo/SeoHead";
 import { trackPageView } from "./analytics/gtag";
+import { FeedbackDrawer } from "@/components/feedback/FeedbackDrawer";
+import { FeedbackTabButton } from "@/components/feedback/FeedbackTabButton";
 
 const HomeStagingTips = lazy(() => import("./pages/HomeStagingTips"));
 const RealEstatePhotos = lazy(() => import("./pages/RealEstatePhotos"));
@@ -37,6 +39,7 @@ const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const About = lazy(() => import("./pages/About"));
 const Contact = lazy(() => import("./pages/Contact"));
+const FeedbackInbox = lazy(() => import("./pages/FeedbackInbox"));
 
 const GalleryRouteContent = () => (
   <>
@@ -187,6 +190,14 @@ function Router() {
               <ThankYou />
             </>
           </Route>
+          {import.meta.env.DEV && (
+            <Route path="/dev/feedback">
+              <>
+                <SeoHead path="/dev/feedback" />
+                <FeedbackInbox />
+              </>
+            </Route>
+          )}
           <Route component={NotFound} />
         </Switch>
       </Suspense>
@@ -198,6 +209,8 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Router />
+      <FeedbackDrawer />
+      <FeedbackTabButton />
       <Toaster />
     </QueryClientProvider>
   );
