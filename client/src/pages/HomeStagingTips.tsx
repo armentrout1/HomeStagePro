@@ -114,13 +114,13 @@ export default function HomeStagingTips() {
             <div className="bg-blue-50 rounded-lg shadow-sm p-6">
               <h3 className="text-xl font-semibold mb-4">Need Professional Help?</h3>
               <p className="text-gray-700 mb-4">
-                Our network of certified home stagers can transform your property for maximum appeal.
+                Short on time or budget? Use AI virtual staging to create market-ready listing photos without moving furniture.
               </p>
               <Link
                 href="/virtual-staging"
                 className="bg-primary hover:bg-blue-600 text-white font-medium py-2 px-4 rounded inline-block transition"
               >
-                Find a Stager
+                Try Virtual Staging
               </Link>
             </div>
           </div>
