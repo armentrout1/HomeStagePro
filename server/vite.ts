@@ -217,7 +217,7 @@ export function serveStatic(app: Express) {
         }
 
         if (
-          urlPath.startsWith("/gallery/") ||
+          urlPath.startsWith("/staging-examples/") ||
           urlPath.startsWith("/sample-images/")
         ) {
           res.setHeader("Cache-Control", "public, max-age=604800");

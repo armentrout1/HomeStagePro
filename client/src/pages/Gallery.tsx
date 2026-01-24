@@ -5,16 +5,16 @@ const galleryItems = [
   {
     id: "living-1",
     title: "Modern living room reset",
-    beforeSrc: "/gallery/living-1-before.webp",
-    afterSrc: "/gallery/living-1-after",
+    beforeSrc: "/staging-examples/living-1-before.webp",
+    afterSrc: "/staging-examples/living-1-after",
     description:
       "Vacant condo space transformed with layered neutrals, sculptural lighting, and art direction that lifts perceived value.",
   },
   {
     id: "bed-1",
     title: "Primary bedroom retreat",
-    beforeSrc: "/gallery/bed-1-before.webp",
-    afterSrc: "/gallery/bed-1-after",
+    beforeSrc: "/staging-examples/bed-1-before.webp",
+    afterSrc: "/staging-examples/bed-1-after",
     description:
       "Muted staging palette introduces warmth, textured bedding, and accent lighting to inspire move-in imagination.",
   },
