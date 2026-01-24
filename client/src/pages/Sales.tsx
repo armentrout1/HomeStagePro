@@ -142,11 +142,12 @@ export default function Sales() {
         <div className="container px-4 mx-auto max-w-6xl">
           <div className="text-center mb-16">
             <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Transform Empty Spaces into Selling Opportunities
+              Affordable Virtual Staging That Helps Homes Sell Faster
             </h1>
             <p className="text-xl text-gray-600 mb-4 max-w-3xl mx-auto">
-              Professional staging can help listings look more market-ready and increase interest. 
-              Our AI staging delivers professional results at a fraction of the cost.
+              Professional staging helps listings look more market-ready and attract buyers faster.
+              RoomStagerPro offers affordable virtual staging powered by AI, delivering polished,
+              realistic results at a fraction of the cost of traditional staging.
             </p>
 
             <p className="text-base text-gray-700 mb-8">Try 2 free stagings — no login required.</p>

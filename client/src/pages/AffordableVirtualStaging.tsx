@@ -120,6 +120,9 @@ export default function AffordableVirtualStaging() {
         </section>
 
         <section className="mb-16">
+          <p className="text-center text-base text-slate-600 mb-6">
+            When you're ready to move forward, view all affordable virtual staging plans and pricing.
+          </p>
           <h2 className="text-center text-2xl font-semibold text-slate-900">Pricing packs</h2>
           <p className="mt-3 text-center text-sm text-slate-500">No subscription required. Just grab the credits you need.</p>
           <div className="mt-8 grid gap-6 sm:grid-cols-3">
