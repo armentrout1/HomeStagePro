@@ -186,6 +186,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       country: z.string().optional().nullable(),
       email: z.string().email().optional().nullable(),
       userId: z.number().int().optional().nullable(),
+      clientSubmissionId: z.string().optional().nullable(),
     })
     .transform((data) => ({
       rating: data.rating,
@@ -212,16 +213,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       country: data.country ?? null,
       email: data.email ?? null,
       userId: data.userId ?? null,
+      clientSubmissionId: data.clientSubmissionId ?? null,
     }));
 
   app.post("/api/feedback", async (req, res) => {
     try {
       const parsed = feedbackSchema.parse(req.body);
+      const { clientSubmissionId, ...rest } = parsed;
 
-      const [inserted] = await db
-        .insert(feedbackSubmissions)
-        .values(parsed)
-        .returning({ id: feedbackSubmissions.id });
+      const updatePayload = {
+        ...rest,
+        clientSubmissionId,
+      };
+
+      const insertQuery = clientSubmissionId
+        ? db
+            .insert(feedbackSubmissions)
+            .values(parsed)
+            .onConflictDoUpdate({
+              target: feedbackSubmissions.clientSubmissionId,
+              set: updatePayload,
+            })
+        : db.insert(feedbackSubmissions).values(parsed);
+
+      const [inserted] = await insertQuery.returning({ id: feedbackSubmissions.id });
 
       return res.json({ success: true, id: inserted.id });
     } catch (err) {

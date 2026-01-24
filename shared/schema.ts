@@ -193,34 +193,43 @@ export const ipFreeUsage = pgTable(
 export type IpFreeUsage = typeof ipFreeUsage.$inferSelect;
 export type InsertIpFreeUsage = typeof ipFreeUsage.$inferInsert;
 
-export const feedbackSubmissions = pgTable("feedback_submissions", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-  userId: integer("user_id").references(() => users.id),
-  email: text("email"),
-  source: text("source").notNull().default("nav_tab"),
-  goal: text("goal").notNull(),
-  rating: integer("rating").notNull(),
-  issue: text("issue"),
-  requestedFeature: text("requested_feature"),
-  persona: text("persona"),
-  usageFrequency: text("usage_frequency"),
-  pricingPreference: text("pricing_preference"),
-  willingnessToPayRange: text("willingness_to_pay_range"),
-  watermarkPreference: text("watermark_preference"),
-  watermarkTextPreference: text("watermark_text_preference"),
-  freeformFeedback: text("freeform_feedback"),
-  canPublishTestimonial: boolean("can_publish_testimonial").notNull().default(false),
-  testimonialName: text("testimonial_name"),
-  testimonialCompany: text("testimonial_company"),
-  canShareBeforeAfter: boolean("can_share_before_after").notNull().default(false),
-  jobId: text("job_id"),
-  planType: text("plan_type"),
-  roomType: text("room_type"),
-  styleSelected: text("style_selected"),
-  deviceType: text("device_type"),
-  country: text("country"),
-});
+export const feedbackSubmissions = pgTable(
+  "feedback_submissions",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+    userId: integer("user_id").references(() => users.id),
+    email: text("email"),
+    source: text("source").notNull().default("nav_tab"),
+    goal: text("goal").notNull(),
+    rating: integer("rating").notNull(),
+    issue: text("issue"),
+    requestedFeature: text("requested_feature"),
+    persona: text("persona"),
+    usageFrequency: text("usage_frequency"),
+    pricingPreference: text("pricing_preference"),
+    willingnessToPayRange: text("willingness_to_pay_range"),
+    watermarkPreference: text("watermark_preference"),
+    watermarkTextPreference: text("watermark_text_preference"),
+    freeformFeedback: text("freeform_feedback"),
+    canPublishTestimonial: boolean("can_publish_testimonial").notNull().default(false),
+    testimonialName: text("testimonial_name"),
+    testimonialCompany: text("testimonial_company"),
+    canShareBeforeAfter: boolean("can_share_before_after").notNull().default(false),
+    jobId: text("job_id"),
+    planType: text("plan_type"),
+    roomType: text("room_type"),
+    styleSelected: text("style_selected"),
+    deviceType: text("device_type"),
+    country: text("country"),
+    clientSubmissionId: text("client_submission_id"),
+  },
+  (table) => ({
+    uxClientSubmissionId: uniqueIndex("ux_feedback_submissions_client_submission_id").on(
+      table.clientSubmissionId,
+    ),
+  }),
+);
 
 export type FeedbackSubmission = typeof feedbackSubmissions.$inferSelect;
 export type InsertFeedbackSubmission = typeof feedbackSubmissions.$inferInsert;

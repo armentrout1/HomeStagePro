@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import {
@@ -8,21 +8,15 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { submitFeedback, type FeedbackPayload } from "@/api/feedback";
 import { useToast } from "@/hooks/use-toast";
 import { useFeedbackContext } from "@/state/feedbackContext";
-import { FEATURE_OPTIONS } from "./feedbackOptions";
 import { REVIEW_URL } from "@/components/feedback/FeedbackCtas";
 import {
-  UNSET_OPTION,
   defaultValues,
   type FormValues,
   type ExtendedFeedbackPayload,
 } from "@/components/feedback/FeedbackDrawer/types";
 import { useFeedbackDrawer } from "@/components/feedback/FeedbackDrawer/useFeedbackDrawer";
-import { buildFeedbackPayload } from "@/components/feedback/FeedbackDrawer/buildFeedbackPayload";
 import { submitFeedbackWithToast } from "@/components/feedback/FeedbackDrawer/submitFeedbackWithToast";
 import { DrawerFooter } from "@/components/feedback/FeedbackDrawer/components/DrawerFooter";
 import { StepOneBasic } from "@/components/feedback/FeedbackDrawer/components/StepOneBasic";
@@ -32,6 +26,8 @@ export function FeedbackDrawer() {
   const { toast } = useToast();
   const context = useFeedbackContext();
   const { isOpen, step, setStep, handleClose, handleSheetChange } = useFeedbackDrawer();
+  const [basicsSaved, setBasicsSaved] = useState(false);
+  const [detailsSaved, setDetailsSaved] = useState(false);
 
   const {
     control,
@@ -62,6 +58,8 @@ export function FeedbackDrawer() {
   const closeAndReset = () => {
     handleClose();
     reset(defaultValues);
+    setBasicsSaved(false);
+    setDetailsSaved(false);
   };
 
   const handleDrawerOpenChange = (open: boolean) => {
@@ -76,30 +74,112 @@ export function FeedbackDrawer() {
     window.open(REVIEW_URL, "_blank", "noopener,noreferrer");
   };
 
-  const onSubmit = async (values: FormValues, { shouldClose = true } = {}) => {
+  const normalize = (value?: string) => {
+    if (typeof value !== "string") return null;
+    const trimmed = value.trim();
+    return trimmed.length ? trimmed : null;
+  };
+
+  const getContextFields = () => ({
+    source: context.source ?? "nav_tab",
+    jobId: context.jobId,
+    planType: context.planType,
+    roomType: context.roomType,
+    styleSelected: context.styleSelected,
+    deviceType: context.deviceType,
+    country: context.country,
+  });
+
+  const buildBasePayload = (
+    values: FormValues,
+    overrides: Partial<ExtendedFeedbackPayload> = {},
+  ): ExtendedFeedbackPayload => {
+    const contextFields = getContextFields();
+
+    return {
+      rating: values.rating!,
+      goal: values.goal,
+      issue: null,
+      freeformFeedback: null,
+      requestedFeature: null,
+      persona: null,
+      usageFrequency: null,
+      pricingPreference: null,
+      willingnessToPayRange: null,
+      watermarkPreference: null,
+      watermarkTextPreference: null,
+      canPublishTestimonial: false,
+      testimonialName: null,
+      testimonialCompany: null,
+      canShareBeforeAfter: false,
+      email: null,
+      ...contextFields,
+      ...overrides,
+    };
+  };
+
+  const onSubmitBasics = async (values: FormValues) => {
     if (!values.rating || !values.goal) {
       return;
     }
 
-    const payload: ExtendedFeedbackPayload = buildFeedbackPayload({
-      values,
-      context,
-      showWatermarkText,
+    const payload = buildBasePayload(values, {
+      issue: normalize(values.issue),
+      freeformFeedback: normalize(values.freeformFeedback),
     });
 
     await submitFeedbackWithToast({
       payload,
       toast,
       onSuccess: () => {
-        if (shouldClose) {
-          closeAndReset();
-        }
+        setBasicsSaved(true);
       },
     });
   };
 
-  const handleBasicsSubmit = handleSubmit((values) => onSubmit(values, { shouldClose: false }));
-  const handleDetailsSubmit = handleSubmit((values) => onSubmit(values, { shouldClose: false }));
+  const onSubmitDetails = async (values: FormValues) => {
+    if (!basicsSaved) {
+      toast({
+        title: "Submit basics first",
+        description: "Send rating & goal before optional details.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!values.rating || !values.goal) {
+      return;
+    }
+
+    const payload = buildBasePayload(values, {
+      requestedFeature: normalize(values.requestedFeature),
+      persona: normalize(values.persona),
+      usageFrequency: normalize(values.usageFrequency),
+      pricingPreference: normalize(values.pricingPreference),
+      willingnessToPayRange: normalize(values.willingnessToPayRange),
+      watermarkPreference: normalize(values.watermarkPreference),
+      watermarkTextPreference: showWatermarkText
+        ? normalize(values.watermarkTextPreference)
+        : null,
+      canPublishTestimonial: values.canPublishTestimonial,
+      testimonialName: values.canPublishTestimonial
+        ? normalize(values.testimonialName)
+        : null,
+      testimonialCompany: values.canPublishTestimonial
+        ? normalize(values.testimonialCompany)
+        : null,
+      canShareBeforeAfter:
+        values.canPublishTestimonial && values.canShareBeforeAfter ? true : false,
+    });
+
+    await submitFeedbackWithToast({
+      payload,
+      toast,
+      onSuccess: () => {
+        setDetailsSaved(true);
+      },
+    });
+  };
 
   return (
     <Sheet open={isOpen} onOpenChange={handleDrawerOpenChange}>
@@ -129,7 +209,8 @@ export function FeedbackDrawer() {
                 onSetRating={(value) => setValue("rating", value, { shouldValidate: true })}
                 onTellUsMore={() => setStep(2)}
                 onBackToBasics={() => setStep(1)}
-                onSubmitBasics={handleBasicsSubmit}
+                onSubmitBasics={() => handleSubmit(onSubmitBasics)()}
+                basicsSaved={basicsSaved}
                 isShowingMore={step === 2}
               />
 
@@ -142,7 +223,9 @@ export function FeedbackDrawer() {
                   canPublishTestimonial={canPublishTestimonial}
                   isSubmitting={isSubmitting}
                   isDetailsSubmitDisabled={isDetailsSubmitDisabled}
-                  onSubmitDetails={handleDetailsSubmit}
+                  onSubmitDetails={() => handleSubmit(onSubmitDetails)()}
+                  detailsSaved={detailsSaved}
+                  basicsSaved={basicsSaved}
                 />
               )}
             </div>
@@ -152,6 +235,7 @@ export function FeedbackDrawer() {
             rating={rating}
             step={step}
             onLeaveReview={handleReviewClick}
+            onClose={closeAndReset}
           />
         </form>
       </SheetContent>

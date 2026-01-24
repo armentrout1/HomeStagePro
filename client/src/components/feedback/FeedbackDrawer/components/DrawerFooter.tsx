@@ -5,12 +5,14 @@ type DrawerFooterProps = {
   rating: number | null;
   step: 1 | 2;
   onLeaveReview: () => void;
+  onClose: () => void;
 };
 
 export function DrawerFooter({
   rating,
   step,
   onLeaveReview,
+  onClose,
 }: DrawerFooterProps) {
   return (
     <div className="border-t border-slate-200 bg-white px-6 py-3">
@@ -22,6 +24,15 @@ export function DrawerFooter({
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="sm:hidden"
+            onClick={onClose}
+          >
+            Close
+          </Button>
           {rating !== null && rating >= 4 && (
             <Button type="button" variant="outline" size="sm" onClick={onLeaveReview}>
               Leave a review

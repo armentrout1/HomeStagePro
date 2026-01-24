@@ -21,6 +21,7 @@ import {
   WTP_RANGE_OPTIONS,
 } from "@/components/feedback/feedbackOptions";
 import { UNSET_OPTION } from "@/components/feedback/FeedbackDrawer/types";
+import { cn } from "@/lib/utils";
 
 interface StepTwoDetailsProps {
   control: any;
@@ -31,6 +32,8 @@ interface StepTwoDetailsProps {
   isSubmitting: boolean;
   isDetailsSubmitDisabled: boolean;
   onSubmitDetails: () => void;
+  detailsSaved: boolean;
+  basicsSaved: boolean;
 }
 
 export function StepTwoDetails({
@@ -42,14 +45,21 @@ export function StepTwoDetails({
   isSubmitting,
   isDetailsSubmitDisabled,
   onSubmitDetails,
+  detailsSaved,
+  basicsSaved,
 }: StepTwoDetailsProps) {
   return (
     <section className="space-y-6 rounded-lg bg-slate-50 p-4">
-      <div>
-        <p className="text-sm font-semibold text-slate-900">Optional details</p>
-        <p className="text-xs text-muted-foreground">
-          Helps us tailor the roadmap and follow up if needed.
-        </p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-sm font-semibold text-slate-900">Optional details</p>
+          <p className="text-xs text-muted-foreground">
+            Helps us tailor the roadmap and follow up if needed.
+          </p>
+        </div>
+        {detailsSaved && (
+          <span className="text-xs font-medium text-emerald-600">Saved</span>
+        )}
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -303,13 +313,24 @@ export function StepTwoDetails({
         <Button
           type="button"
           size="sm"
-          disabled={isDetailsSubmitDisabled}
+          disabled={isDetailsSubmitDisabled || !basicsSaved}
           onClick={onSubmitDetails}
-          className="bg-slate-900 text-white shadow-[0_15px_35px_-15px_rgba(15,23,42,0.9)] transition hover:bg-slate-800 disabled:bg-slate-400 disabled:shadow-none"
+          className={cn(
+            "text-white shadow-[0_15px_35px_-15px_rgba(15,23,42,0.9)] transition disabled:bg-slate-400 disabled:shadow-none",
+            detailsSaved
+              ? "bg-emerald-600 hover:bg-emerald-700"
+              : "bg-slate-900 hover:bg-slate-800",
+          )}
         >
-          {isSubmitting ? "Submitting..." : "Submit optional details"}
+          {detailsSaved
+            ? "Optional details saved"
+            : isSubmitting
+              ? "Submitting..."
+              : "Submit optional details"}
         </Button>
-        <p className="text-xs text-muted-foreground">Closes the drawer once everything saves.</p>
+        <p className="text-xs text-muted-foreground">
+          {basicsSaved ? "Optional insights are a bonus." : "Submit basics first."}
+        </p>
       </div>
     </section>
   );
