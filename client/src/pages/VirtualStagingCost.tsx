@@ -114,6 +114,9 @@ const VirtualStagingCost = () => {
         <p className="text-lg text-muted-foreground">
           Start with two free stagings (no login required), then add credits as you need them: 5 for $9, 20 for $25, or 50 monthly for $49. Each render uses one credit and usually finishes within a few minutes.
         </p>
+        <p className="text-sm text-muted-foreground">
+          For a full breakdown of plans and to purchase credits, see our virtual staging pricing and plans.
+        </p>
         <div className="flex flex-wrap gap-3">
           <Button asChild size="lg">
             <Link href="/#ai-stager">Try 2 Free Stagings</Link>
