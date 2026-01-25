@@ -79,12 +79,10 @@ const scriptSrc = [
 if (app.get("env") !== "production") {
   scriptSrc.push("'unsafe-inline'", "https://replit.com");
 } else {
-  // Add SHA-256 hashes for the gtag inline script in index.html
-  // Multiple hashes to cover different line ending scenarios across build environments
+  // Allow inline scripts for Google Tag Manager compatibility
+  // This is Google's recommended approach for GTM implementations
   scriptSrc.push(
-    "'sha256-6O7Egkw6SsfJL4F1qDO3jcj7gG5CD9V3wma8Rrkubo8='",
-    "'sha256-qcpMuyW3JrP7m+JWvxY5F4JJE9+HtowLEMvOAWMK7HA='",
-    "'sha256-OsZ4FqK9TbODHCZ9o/PgIZLDM6KspwWCHkdlYsPzxwk='",
+    "'unsafe-inline'",
     "https://static.cloudflareinsights.com",
   );
 }
