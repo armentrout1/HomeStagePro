@@ -92,6 +92,7 @@ app.use(
     // Disable HSTS in development so localhost works without HTTPS
     strictTransportSecurity: app.get("env") !== "development",
     crossOriginResourcePolicy: { policy: "cross-origin" },
+    referrerPolicy: { policy: "no-referrer-when-downgrade" },
     contentSecurityPolicy: {
       directives: {
         ...helmet.contentSecurityPolicy.getDefaultDirectives(),
