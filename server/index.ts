@@ -84,6 +84,7 @@ if (app.get("env") !== "production") {
   scriptSrc.push(
     "'sha256-6O7Egkw6SsfJL4F1qDO3jcj7gG5CD9V3wma8Rrkubo8='",
     "'sha256-qcpMuyW3JrP7m+JWvxY5F4JJE9+HtowLEMvOAWMK7HA='",
+    "'sha256-OsZ4FqK9TbODHCZ9o/PgIZLDM6KspwWCHkdlYsPzxwk='",
     "https://static.cloudflareinsights.com",
   );
 }
