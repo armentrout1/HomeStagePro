@@ -72,6 +72,7 @@ const scriptSrc = [
   "'self'",
   "https://js.stripe.com",
   "https://www.googletagmanager.com",
+  "https://www.google-analytics.com",
   "https://googleads.g.doubleclick.net",
   "https://www.googleadservices.com",
 ];
@@ -118,6 +119,7 @@ app.use(
           "https://www.google.com",
           "https://tagassistant.google.com",
           "https://www.googletagmanager.com",
+          "https://googleads.g.doubleclick.net",
         ],
         "connect-src": [
           "'self'",
@@ -126,6 +128,7 @@ app.use(
           "https://region1.google-analytics.com",
           "https://www.googletagmanager.com",
           "https://stats.g.doubleclick.net",
+          "https://googleads.g.doubleclick.net",
           "https://analytics.google.com",
           "https://tagassistant.google.com",
           "https://www.google.com",
