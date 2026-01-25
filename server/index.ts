@@ -92,6 +92,7 @@ app.use(
   helmet({
     // Disable HSTS in development so localhost works without HTTPS
     strictTransportSecurity: app.get("env") !== "development",
+    crossOriginResourcePolicy: { policy: "cross-origin" },
     contentSecurityPolicy: {
       directives: {
         ...helmet.contentSecurityPolicy.getDefaultDirectives(),
