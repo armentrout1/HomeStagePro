@@ -82,9 +82,9 @@ if (app.get("env") !== "production") {
   // Add SHA-256 hashes for the gtag inline script in index.html
   // Multiple hashes to cover different line ending scenarios across build environments
   scriptSrc.push(
-    "'sha256-CkLZ17YGr5CcHZ6hFClRQVEB0MQzzEJEuZTbGSUvRS0='",
-    "'sha256-a5/4LESxLxxYh6mBEAsjCui0e3VpaYN8SV/OK9fNX+o='",
-    "'sha256-ofOD6fiAsejiBDJU1dPJkX4m6Wo64Uy/F0UgyaBisMo='",
+    "'sha256-6O7Egkw6SsfJL4F1qDO3jcj7gG5CD9V3wma8Rrkubo8='",
+    "'sha256-qcpMuyW3JrP7m+JWvxY5F4JJE9+HtowLEMvOAWMK7HA='",
+    "https://static.cloudflareinsights.com",
   );
 }
 
