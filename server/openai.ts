@@ -211,6 +211,14 @@ const detectImageType = (
 
 export const generateStagedRoom = async (req: Request, res: Response) => {
   const reqId = `stage_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+  const t0 = Date.now();
+  const mark = (label: string) => {
+    if (process.env.NODE_ENV === "production") {
+      return;
+    }
+    const delta = Date.now() - t0;
+    log(`[${reqId}] t+${delta}ms ${label}`);
+  };
   try {
     if (!req.body.image) {
       return res.status(400).json({ error: "No image provided" });
@@ -224,6 +232,7 @@ export const generateStagedRoom = async (req: Request, res: Response) => {
     }
 
     const decodedImage = decodeBase64Image(req.body.image);
+    mark("decodeDone");
     const originalBase64 = Buffer.from(decodedImage.bytes).toString("base64");
     const originalStoragePath = buildStoragePath(
       reqId,
@@ -236,6 +245,7 @@ export const generateStagedRoom = async (req: Request, res: Response) => {
       decodedImage.bytes,
       decodedImage.mime,
     );
+    mark("uploadOriginalDone");
 
     const { layoutPrompt, layoutConstraints } = await (async () => {
       try {
@@ -296,6 +306,7 @@ Layout constraints (MUST FOLLOW):
         };
       }
     })();
+    mark("layoutAnalysisDone");
 
     const finalPrompt = `${buildStagingPrompt(req.body.roomType || "Unknown", {
       layoutConstraints,
@@ -319,12 +330,44 @@ Layout constraints (MUST FOLLOW):
       { type: decodedImage.mime }
     );
 
-    const response = await openai.images.edit({
-      model: "gpt-image-1",
-      image: inputFile,
-      prompt: finalPrompt,
-      input_fidelity: openAiQuality,
-    } as ImageEditParamsWithFidelity);
+    const openAiTimeoutMs = 110_000;
+    mark("openaiEditStart");
+    type ImageEditResponse = Awaited<ReturnType<typeof openai.images.edit>>;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    let response: ImageEditResponse;
+    try {
+      const timeoutPromise = new Promise<ImageEditResponse>((_, reject) => {
+        timeoutId = setTimeout(
+          () => reject(new Error("OPENAI_TIMEOUT")),
+          openAiTimeoutMs,
+        );
+      });
+
+      response = await Promise.race([
+        openai.images.edit({
+          model: "gpt-image-1",
+          image: inputFile,
+          prompt: finalPrompt,
+          input_fidelity: openAiQuality,
+        } as ImageEditParamsWithFidelity),
+        timeoutPromise,
+      ]);
+    } catch (error) {
+      if ((error as Error)?.message === "OPENAI_TIMEOUT") {
+        log(`[${reqId}] openaiEditTimeout after ${openAiTimeoutMs}ms`);
+        return res.status(504).json({
+          success: false,
+          code: "STAGING_TIMEOUT",
+          error: "Staging took longer than expected. Please try again.",
+        });
+      }
+      throw error;
+    } finally {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    }
+    mark("openaiEditDone");
 
     const imageData = response.data?.[0] as (typeof response.data)[number] & {
       mime_type?: string;
@@ -341,6 +384,7 @@ Layout constraints (MUST FOLLOW):
 
     const stagedStoragePath = buildStoragePath(reqId, "staged", stagedExtension);
     await uploadToStorage(stagedStoragePath, stagedBytes, outputMime);
+    mark("uploadStagedDone");
 
     const originalDataUrl = `data:${decodedImage.mime};base64,${originalBase64}`;
     const stagedDataUrl = `data:${outputMime};base64,${b64}`;
@@ -353,7 +397,11 @@ Layout constraints (MUST FOLLOW):
       ),
       tryCreateSignedUrl(STORAGE_BUCKET, stagedStoragePath, stagedDataUrl),
     ]);
+    mark("signedUrlsDone");
 
+    if (process.env.NODE_ENV !== "production") {
+      log(`[${reqId}] total=${Date.now() - t0}ms`);
+    }
     return res.json({
       success: true,
       requestId: reqId,
