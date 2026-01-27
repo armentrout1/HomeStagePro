@@ -27,6 +27,15 @@ import { determineOfficeProfile } from "./stagingPrompt/profiles/officeProfile";
 import { determineOutdoorProfile } from "./stagingPrompt/profiles/outdoorProfile";
 import { determineEntryProfile } from "./stagingPrompt/profiles/entryProfile";
 
+const STRUCTURE_LOCK = [
+  "STRUCTURE LOCK (NON-NEGOTIABLE):",
+  "Do NOT change walls, ceiling, floor, windows, doors, trim, built-ins, cabinetry, fixtures, or room geometry.",
+  "Do NOT change camera angle, perspective, lens, framing, or viewpoint.",
+  "Do NOT add/remove/resize openings, windows, doors, or architectural features.",
+  "Preserve lighting positions and shadows as they are; match existing lighting.",
+  "ONLY add or replace movable furniture, rugs, curtains, decor, and wall art.",
+].join(" ");
+
 export type RoomType = string;
 
 type BuildPromptOptions = {
@@ -168,7 +177,14 @@ export const buildStagingPrompt = (
     forbiddenBlock = blocks.forbidden;
   }
 
-  return [prefixBlock, baseInstructions, guardrails.join(" "), suffixBlock, forbiddenBlock]
+  return [
+    STRUCTURE_LOCK,
+    prefixBlock,
+    baseInstructions,
+    guardrails.join(" "),
+    suffixBlock,
+    forbiddenBlock,
+  ]
     .filter(Boolean)
     .join(" ");
 };
