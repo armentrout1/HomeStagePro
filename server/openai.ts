@@ -281,8 +281,18 @@ Layout constraints (MUST FOLLOW):
           `Layout analyzer failed: ${err.message || "Unknown error"}. Proceeding without layout constraints.`
         );
         return {
-          layoutConstraints: null,
-          layoutPrompt: "",
+          layoutConstraints: {
+            noFurnitureZones: [],
+            preferredPlacements: [],
+            notes: [],
+          },
+          layoutPrompt: `
+
+Layout constraints (MUST FOLLOW):
+- No-furniture zones: Doors, door swings, entry path, windows, vents/returns must stay fully clear.
+- Preferred placements: Place furniture along solid walls; keep walkways open; do not obstruct openings.
+- Notes: Keep existing architectural features and circulation unchanged; only add movable decor/furniture.
+`,
         };
       }
     })();
