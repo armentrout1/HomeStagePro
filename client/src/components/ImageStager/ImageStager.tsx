@@ -213,7 +213,7 @@ export default function ImageStager() {
               onDownloadClick={handleDownload}
             />
 
-            {requestId && promptHash && (
+            {import.meta.env.DEV && requestId && promptHash && (
               <div className="text-center text-xs text-slate-500">
                 <p className="font-medium text-slate-600">Support Info</p>
                 <p className="font-mono">Request ID: {requestId}</p>

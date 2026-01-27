@@ -77,7 +77,7 @@ export function UsageStatusBanner({ usageStatus, isLoadingUsage }: UsageStatusBa
                 </>
               )}
             </div>
-            {usageStatus.status === 'unlimited' && (
+            {import.meta.env.DEV && usageStatus.status === 'unlimited' && (
               <div className="text-xs mt-1 text-yellow-600">Dev mode: usage limits disabled</div>
             )}
           </div>
