@@ -150,10 +150,10 @@ export default function Sales() {
               realistic results at a fraction of the cost of traditional staging.
             </p>
 
-            <p className="text-base text-gray-700 mb-8">Try 2 free stagings — no login required.</p>
-            <Link href="/#ai-stager">
+            <p className="text-base text-gray-700 mb-8">Purchase a credit pack to unlock AI staging instantly—no scheduling or account setup.</p>
+            <Link href="/upgrade">
               <Button size="lg" className="text-lg px-8 py-6">
-                Start Staging Now
+                Choose a Pack
               </Button>
             </Link>
           </div>

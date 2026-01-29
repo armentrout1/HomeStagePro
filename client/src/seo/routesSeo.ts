@@ -96,14 +96,14 @@ export const ROUTE_SEO: Record<string, RouteSeo> = {
   "/affordable-virtual-staging": {
     title: "Affordable Virtual Staging | 5 for $9 | RoomStagerPro",
     description:
-      "Affordable AI virtual staging with 2 free stagings, no login required, and packs starting at 5 for $9. Fast results and instant downloads.",
+      "Affordable AI virtual staging with credit packs starting at 5 for $9. Fast results, instant downloads, and no scheduling delays.",
     canonicalPath: "/affordable-virtual-staging",
     ogImage: "/images/meta-preview.png",
   },
   "/sales": {
     title: "RoomStagerPro Sales | Plans & Pricing",
     description:
-      "Explore virtual staging plans built for agents and property teams, including free and premium options.",
+      "Explore virtual staging plans built for agents and property teams, from quick packs to high-volume options.",
     canonicalPath: "/sales",
     ogImage: "/images/meta-preview.png",
   },

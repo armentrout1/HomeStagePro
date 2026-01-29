@@ -250,7 +250,7 @@ export default function Upgrade() {
             Upgrade Your Staging Experience
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            You've reached your free usage limit. Choose a plan below to continue staging rooms and transforming your real estate listings.
+            Purchase a credit pack below to keep staging rooms and transforming your real estate listings.
           </p>
         </div>
 

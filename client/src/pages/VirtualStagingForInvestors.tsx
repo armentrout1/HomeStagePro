@@ -10,7 +10,7 @@ const investorBenefits = [
   {
     title: "Budget-first staging",
     body:
-      "Two free stagings help you test the look on a live project. Paid packs start at 5 renders for $9, so holding costs stay predictable.",
+      "Grab a starter pack to test the look on a live project. Credits start at 5 renders for $9, so holding costs stay predictable.",
   },
   {
     title: "Control your own disclosures",
@@ -39,17 +39,6 @@ const workflowSteps = [
 
 const planOptions = [
   {
-    name: "Free Trial",
-    price: "$0",
-    description: "2 stagings · no login required",
-    bullets: [
-      "Great for proving the concept on an active deal",
-      "See renders in minutes",
-      "Exports ready for your own overlays",
-    ],
-    cta: { href: "/#ai-stager", label: "Launch uploader" },
-  },
-  {
     name: "Quick Pack",
     price: "$9",
     description: "5 stagings to use anytime",
@@ -59,6 +48,17 @@ const planOptions = [
       "Works for every supported room type",
     ],
     cta: { href: "/sales", label: "Get this pack" },
+  },
+  {
+    name: "Value Pack",
+    price: "$25",
+    description: "20 stagings ready for acquisition updates",
+    bullets: [
+      "Stretch credits across multiple listings",
+      "Secure token-based access",
+      "Great for mid-sized portfolios",
+    ],
+    cta: { href: "/sales", label: "View pricing" },
   },
   {
     name: "Pro Monthly",
@@ -164,10 +164,10 @@ const VirtualStagingForInvestors = () => {
         </p>
         <div className="flex flex-wrap gap-3">
           <Button asChild size="lg">
-            <Link href="/#ai-stager">Try 2 Free Stagings</Link>
+            <Link href="/sales">Choose a Pack</Link>
           </Button>
           <Button asChild size="lg" variant="secondary">
-            <Link href="/sales">See Paid Packs</Link>
+            <Link href="/#ai-stager">Launch AI Stager</Link>
           </Button>
         </div>
       </header>
@@ -203,7 +203,7 @@ const VirtualStagingForInvestors = () => {
       <section className="space-y-6">
         <h2 className="text-3xl font-semibold">Credits that flex with your pipeline</h2>
         <p className="text-muted-foreground">
-          Start free, then add packs when you need more renders. All downloads are high-res files you can drop into MLS, lender packets, or OTA galleries once you add disclosures.
+          Purchase the pack that fits your next project and scale up as needed. All downloads are high-res files you can drop into MLS, lender packets, or OTA galleries once you add disclosures.
         </p>
         <div className="grid gap-6 md:grid-cols-3">
           {planOptions.map((plan) => (
@@ -235,11 +235,11 @@ const VirtualStagingForInvestors = () => {
         <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground">CTA</p>
         <h3 className="mt-2 text-2xl font-semibold">Have a flip or rental launching soon?</h3>
         <p className="mt-3 text-muted-foreground">
-          Use the free credits for your first rooms or grab a pack so every acquisition, refi, or STR refresh has staging ready on day one.
+          Purchase a pack so every acquisition, refi, or STR refresh has staging ready on day one.
         </p>
         <div className="flex flex-wrap justify-center gap-3">
           <Button asChild size="lg" variant="secondary">
-            <Link href="/">Try AI Stager</Link>
+            <Link href="/#ai-stager">Launch AI Stager</Link>
           </Button>
           <Button asChild size="lg">
             <Link href="/sales">See Packages &amp; Pricing</Link>

@@ -56,9 +56,9 @@ const faqs = [
       "The current MVP supports room-type selection (living, bedroom, dining, kitchen, flex). Style presets are on the roadmap, so feel free to note requests when you upload.",
   },
   {
-    question: "Do I need an account to try it?",
+    question: "Do I need an account to use it?",
     answer:
-      "No. You get two free stagings with no login required. Paid packs unlock more credits and high-res downloads when you're ready.",
+      "Your purchase instantly grants an access token via secure cookie, so you can stage rooms without managing usernames or passwords.",
   },
 ];
 
@@ -97,7 +97,7 @@ const VirtualStaging = () => {
         </p>
         <div className="mt-8 flex flex-wrap items-center gap-4">
           <div className="rounded-xl border border-white/20 px-4 py-3 text-sm text-slate-200">
-            2 free stagings · no login required
+            Purchase credits whenever you need staging
           </div>
           <div className="rounded-xl border border-white/20 px-4 py-3 text-sm text-slate-200">
             Paid packs unlock high-res downloads
@@ -105,10 +105,10 @@ const VirtualStaging = () => {
         </div>
         <div className="mt-10 flex flex-wrap gap-3">
           <Button asChild size="lg" className="bg-white text-slate-900 hover:bg-slate-100">
-            <Link href="/#ai-stager">Try 2 Free Stagings</Link>
+            <Link href="/sales">Choose a Pack</Link>
           </Button>
           <Button asChild size="lg" variant="secondary" className="text-white border-white/40">
-            <Link href="/sales">See Paid Plans</Link>
+            <Link href="/#ai-stager">Launch AI Stager</Link>
           </Button>
         </div>
       </section>
@@ -171,7 +171,7 @@ const VirtualStaging = () => {
       <section className="space-y-8">
         <h2 className="text-3xl font-semibold">Plans & credits</h2>
         <p className="text-muted-foreground">
-          Start with two free stagings (no login). When you need more credits or higher resolutions, choose the pack that fits your pipeline.
+          Purchase a credit pack to unlock staging. Choose the bundle that fits your pipeline and use the uploader any time.
         </p>
         <div className="grid gap-6 md:grid-cols-3">
           {plans.map((plan) => (
@@ -204,10 +204,10 @@ const VirtualStaging = () => {
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <Button asChild size="lg">
-            <Link href="/#ai-stager">Try 2 Free Stagings</Link>
+            <Link href="/sales">Choose a Pack</Link>
           </Button>
           <Button asChild size="lg" variant="secondary">
-            <Link href="/sales">Talk about packs</Link>
+            <Link href="/#ai-stager">Launch AI Stager</Link>
           </Button>
         </div>
       </section>

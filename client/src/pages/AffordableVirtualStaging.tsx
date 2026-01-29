@@ -1,8 +1,8 @@
 import { Link } from "wouter";
 
 const whyItWorks = [
-  "Priced for every listing — pay only when you need it.",
-  "No login or account setup required for the free stagings.",
+  "Priced for every listing — buy credits only when you need them.",
+  "Secure cookie-based access means no user accounts to manage.",
   "Fast AI rendering so you aren't waiting on designers.",
   "Instant downloads in high-resolution formats.",
   "Simple guided steps anyone on your team can follow.",
@@ -26,34 +26,34 @@ const howItWorks = [
 const pricing = [
   {
     name: "Quick Pack",
-    price: "2 free",
-    blurb: "Perfect for testing the workflow or staging a single highlight room.",
-    note: "No credit card required.",
-  },
-  {
-    name: "Value Pack",
     price: "$9",
     blurb: "5 stagings that cover living, kitchen, and a bedroom marketing set.",
     note: "One-time pack. No subscription.",
   },
   {
-    name: "Pro Monthly",
+    name: "Value Pack",
     price: "$25",
-    blurb: "20 stagings for busy agents who refresh multiple listings weekly.",
-    note: "Add-on option: $49 for 50.",
+    blurb: "20 stagings for active sellers who need fast refreshes.",
+    note: "Bulk savings with flexible usage.",
+  },
+  {
+    name: "Pro Monthly",
+    price: "$49",
+    blurb: "50 stagings that refill every month for busy teams.",
+    note: "Great for ongoing listing pipelines.",
   },
 ];
 
 const faqs = [
   {
-    question: "Is it really free?",
+    question: "How do I get started?",
     answer:
-      "Yes. You get two complimentary stagings with instant downloads to try the tool before paying anything.",
+      "Purchase a credit pack, then launch the AI uploader. Credits are stored in a secure cookie so the tool recognizes your access instantly.",
   },
   {
     question: "Do I need an account?",
     answer:
-      "No login is required for the free stagings or credit-pack purchases. Sign up only if you want ongoing tracking.",
+      "No usernames or passwords. Paid tokens give you access without managing logins.",
   },
   {
     question: "How fast is it?",
@@ -68,31 +68,30 @@ export default function AffordableVirtualStaging() {
       <div className="mx-auto max-w-5xl px-4 py-16 sm:px-6 lg:px-8">
         <header className="mb-14 space-y-5 text-center">
           <p className="inline-flex items-center rounded-full bg-emerald-50 px-4 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-700">
-            Intro Offer
+            Self-Serve Packs
           </p>
           <div className="space-y-4">
             <h1 className="text-4xl font-semibold text-slate-900">Affordable AI Virtual Staging</h1>
             <p className="text-lg text-slate-600">
-              Get 2 free stagings with no login, then pick up 5 for $9 packs when you need more.
-              Fast, download-ready results built for Google Ads visitors who want proof first.
+              Purchase a small pack to test the workflow or scale up for active campaigns. Every credit unlocks a high-quality render in minutes.
             </p>
           </div>
           <div className="flex flex-wrap justify-center gap-3">
             <Link
-              href="/#ai-stager"
+              href="/sales"
               className="rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
             >
-              Try 2 Free Stagings
+              Choose a Pack
             </Link>
             <Link
-              href="/sales"
+              href="/#ai-stager"
               className="rounded-full border border-slate-200 px-6 py-3 text-sm font-semibold text-slate-900 hover:border-slate-300"
             >
-              View Plans
+              Launch AI Stager
             </Link>
           </div>
           <p className="text-sm text-slate-500">
-            2 free stagings — no login required · 5 for $9 packs · Instant download · Fast results (usually within a few minutes)
+            Credits start at $9 for 5 stagings · Instant download · Fast results (usually within a few minutes)
           </p>
         </header>
 

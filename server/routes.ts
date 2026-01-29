@@ -11,13 +11,13 @@ import {
   saveStagedImage,
   getUserStagedImages,
 } from "./openai";
-import { ipLimiter, getIpUsageStatus } from "./ipLimiter";
 import Stripe from "stripe";
 import cookieParser from "cookie-parser";
 import {
   generateToken,
   verifyToken,
   checkAccessToken,
+  requirePaidAccess,
   setAccessTokenCookie,
   attachEntitlement,
   getTokenIdFromRequest,
@@ -59,26 +59,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // IP / token usage status endpoint
   app.get('/api/usage-status', checkAccessToken, async (req, res) => {
+    if (!req.accessTokenPayload) {
+      return res.status(402).json({
+        status: "payment_required",
+        message: "Paid access required.",
+      });
+    }
+
     const tokenId = getTokenIdFromRequest(req);
 
     if (!tokenId) {
-      return getIpUsageStatus(req, res);
+      return res.status(500).json({ error: "Failed to determine token identifier" });
     }
 
     try {
       const entitlement = await getOrCreateUsageEntitlement(tokenId);
-      const freeRemaining = Math.max(0, entitlement.freeGranted - entitlement.freeUsed);
       const paidRemaining = Math.max(0, entitlement.paidGranted - entitlement.paidUsed);
-      const totalRemaining = freeRemaining + paidRemaining;
 
       return res.json({
-        freeLimit: entitlement.freeGranted,
-        freeUsed: entitlement.freeUsed,
-        freeRemaining,
+        status: "premium" as const,
         paidGranted: entitlement.paidGranted,
         paidUsed: entitlement.paidUsed,
         paidRemaining,
-        totalRemaining,
+        totalRemaining: paidRemaining,
+        planId: req.accessTokenPayload.planId,
+        quality: req.accessTokenPayload.quality,
+        expiresAt: new Date(req.accessTokenPayload.expiresAt * 1000).toISOString(),
       });
     } catch (error) {
       console.error("Failed to load usage entitlement", error);
@@ -125,9 +131,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post(
     "/api/generate-staged-room",
     checkAccessToken,
+    requirePaidAccess,
     attachEntitlement,
     stagingRateLimiter,
-    ipLimiter,
     ensureDbUsageOnSuccess,
     generateStagedRoom,
   );

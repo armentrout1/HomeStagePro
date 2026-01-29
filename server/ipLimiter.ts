@@ -150,36 +150,12 @@ export const getIpUsage = async (ip: string): Promise<number> => {
  * Also includes information about any active access token
  */
 export const getIpUsageStatus = async (req: Request, res: Response) => {
-  const clientIp = getClientIp(req);
-  const ipHash = hashIp(clientIp);
-  
-  let freeUsed = 0;
-  let freeRemaining = FREE_USAGE_LIMIT;
-  
-  try {
-    const usage = await getOrCreateIpFreeUsage(ipHash);
-    freeUsed = usage.freeUsed;
-    freeRemaining = Math.max(0, usage.freeLimit - usage.freeUsed);
-  } catch (err) {
-    log(`Error fetching IP usage: ${err}`);
-  }
-  
-  const freeUsageSummary = {
-    freeLimit: FREE_USAGE_LIMIT,
-    freeUsed,
-    freeRemaining,
-  };
-
-  // Check for valid access token first
   if (hasValidAccess(req) && req.accessTokenPayload) {
-    // User has a valid access token
     const payload = req.accessTokenPayload;
     const now = Math.floor(Date.now() / 1000);
-
     const timeRemaining = Math.max(payload.expiresAt - now, 0);
 
-    const response = {
-      // Basic status
+    return res.json({
       usageCount: payload.totalUses - payload.usesLeft,
       limit: payload.totalUses,
       remaining: payload.usesLeft,
@@ -188,30 +164,11 @@ export const getIpUsageStatus = async (req: Request, res: Response) => {
       quality: payload.quality,
       expiresAt: new Date(payload.expiresAt * 1000).toISOString(),
       timeRemainingSeconds: timeRemaining,
-      ...freeUsageSummary,
-    };
-
-    return res.json(response);
-  }
-
-  if (DISABLE_USAGE_LIMITS) {
-    return res.json({
-      usageCount: 0,
-      limit: UNLIMITED_USAGE_LIMIT,
-      remaining: UNLIMITED_USAGE_LIMIT,
-      status: "unlimited",
-      quality: FREE_QUALITY,
-      ...freeUsageSummary,
     });
   }
 
-  // If no token, use IP-based limiting
-  return res.json({
-    usageCount: freeUsed,
-    limit: FREE_USAGE_LIMIT,
-    remaining: freeRemaining,
-    status: freeRemaining === 0 ? "exceeded" : "active",
-    quality: FREE_QUALITY,
-    ...freeUsageSummary,
+  return res.status(402).json({
+    status: "payment_required",
+    message: "Paid access required.",
   });
 };

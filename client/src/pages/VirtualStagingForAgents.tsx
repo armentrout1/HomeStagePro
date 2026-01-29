@@ -5,7 +5,7 @@ const agentBenefits = [
   {
     title: "Win the listing presentation",
     body:
-      "Show sellers an instant preview of what their empty rooms could look like. Two free stagings give you a demo asset before you ever talk budgets.",
+      "Show sellers an instant preview of what their empty rooms could look like. Buy a small pack to generate demo assets before you ever talk budgets.",
   },
   {
     title: "Move faster with less overhead",
@@ -39,17 +39,6 @@ const workflowSteps = [
 
 const planOptions = [
   {
-    name: "Free Trial",
-    price: "$0",
-    description: "2 stagings · no login required",
-    bullets: [
-      "See results in minutes",
-      "Great for listing presentations",
-      "Exports ready for your own disclosure text",
-    ],
-    cta: { href: "/#ai-stager", label: "Launch uploader" },
-  },
-  {
     name: "Quick Pack",
     price: "$9",
     description: "5 stagings to use anytime",
@@ -59,6 +48,17 @@ const planOptions = [
       "Works for every supported room type",
     ],
     cta: { href: "/sales", label: "Get this pack" },
+  },
+  {
+    name: "Value Pack",
+    price: "$25",
+    description: "20 stagings ready for active listings",
+    bullets: [
+      "More credits for busier teams",
+      "Use anytime with secure token access",
+      "Great for refreshes before new launches",
+    ],
+    cta: { href: "/sales", label: "View pricing" },
   },
   {
     name: "Pro Monthly",
@@ -131,10 +131,10 @@ const VirtualStagingForAgents = () => {
         </p>
         <div className="flex flex-wrap gap-3">
           <Button asChild size="lg">
-            <Link href="/#ai-stager">Try 2 Free Stagings</Link>
+            <Link href="/sales">Choose a Pack</Link>
           </Button>
           <Button asChild size="lg" variant="secondary">
-            <Link href="/sales">View Paid Packs</Link>
+            <Link href="/#ai-stager">Launch AI Stager</Link>
           </Button>
         </div>
       </header>
@@ -170,7 +170,7 @@ const VirtualStagingForAgents = () => {
       <section className="space-y-6">
         <h2 className="text-3xl font-semibold">Plans that match your pipeline</h2>
         <p className="text-muted-foreground">
-          Start with the free trial, then add credits as listings ramp up. All downloads are high-res files you can drop into MLS, brochures, and social after adding your disclosures.
+          Buy a pack of credits as listings ramp up. All downloads are high-res files you can drop into MLS, brochures, and social after adding your disclosures.
         </p>
         <div className="grid gap-6 md:grid-cols-3">
           {planOptions.map((plan) => (
@@ -206,10 +206,10 @@ const VirtualStagingForAgents = () => {
         </p>
         <div className="mt-5 flex flex-wrap justify-center gap-3">
           <Button asChild size="lg">
-            <Link href="/#ai-stager">Try 2 Free Stagings</Link>
+            <Link href="/sales">Choose a Pack</Link>
           </Button>
           <Button asChild size="lg" variant="secondary">
-            <Link href="/sales">See Pack Pricing</Link>
+            <Link href="/#ai-stager">Launch AI Stager</Link>
           </Button>
         </div>
       </section>

@@ -10,7 +10,7 @@ const benefits = [
   {
     title: "No concierges required",
     body:
-      "Everything happens inside the AI uploader. Two free stagings let you test the look before purchasing packs that fit your booking cadence.",
+      "Everything happens inside the AI uploader. Purchase a starter pack to test the look, then scale credits to match your booking cadence.",
   },
   {
     title: "You control disclosures",
@@ -38,11 +38,6 @@ const workflowSteps = [
 ];
 
 const packOptions = [
-  {
-    name: "Free Trial",
-    price: "$0",
-    description: "2 stagings · no login required",
-  },
   {
     name: "Quick Pack",
     price: "$9",
@@ -99,10 +94,10 @@ const VirtualStagingForShortTermRentals = () => {
         </p>
         <div className="flex flex-wrap gap-3">
           <Button asChild size="lg">
-            <Link href="/#ai-stager">Try 2 Free Stagings</Link>
+            <Link href="/sales">Choose a Pack</Link>
           </Button>
           <Button asChild size="lg" variant="secondary">
-            <Link href="/sales">See Packs</Link>
+            <Link href="/#ai-stager">Launch AI Stager</Link>
           </Button>
         </div>
         <p className="text-sm text-muted-foreground">No discovery calls, no concierge—just a self-serve tool built for hosts who need fast visuals.</p>
@@ -156,10 +151,10 @@ const VirtualStagingForShortTermRentals = () => {
         </p>
         <div className="mt-5 flex flex-wrap justify-center gap-3">
           <Button asChild size="lg">
-            <Link href="/#ai-stager">Try 2 Free Stagings</Link>
+            <Link href="/sales">Choose a Pack</Link>
           </Button>
           <Button asChild size="lg" variant="secondary">
-            <Link href="/sales">Buy Credits</Link>
+            <Link href="/#ai-stager">Launch AI Stager</Link>
           </Button>
         </div>
       </section>

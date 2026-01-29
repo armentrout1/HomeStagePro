@@ -160,6 +160,21 @@ export function checkAccessToken(
   next();
 }
 
+export function requirePaidAccess(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  if (hasValidAccess(req)) {
+    return next();
+  }
+
+  return res.status(402).json({
+    error: "payment_required",
+    message: "Paid access required.",
+  });
+}
+
 export function ensureTokenUsageOnSuccess(
   req: Request,
   res: Response,

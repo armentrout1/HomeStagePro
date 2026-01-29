@@ -21,11 +21,6 @@ const costDrivers = [
 
 const packOptions = [
   {
-    name: "2 free stagings",
-    price: "$0",
-    description: "No login required — perfect for testing",
-  },
-  {
     name: "Quick Pack",
     price: "$9",
     description: "5 stagings to use whenever you need them",
@@ -64,7 +59,7 @@ const faq = [
   {
     question: "How much does virtual staging cost here?",
     answer:
-      "You can try two rooms for free, then buy packs: 5 for $9, 20 for $25, or 50 monthly for $49. Each render consumes one credit.",
+      "Credit packs start at 5 for $9, with larger bundles at 20 for $25 or 50 monthly for $49. Each render consumes one credit.",
   },
   {
     question: "How fast are the results?",
@@ -112,17 +107,17 @@ const VirtualStagingCost = () => {
         <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Pricing Guide</p>
         <h1 className="text-4xl font-semibold">Virtual staging costs for the HomeStage Pro MVP</h1>
         <p className="text-lg text-muted-foreground">
-          Start with two free stagings (no login required), then add credits as you need them: 5 for $9, 20 for $25, or 50 monthly for $49. Each render uses one credit and usually finishes within a few minutes.
+          Purchase the pack that fits your listing cadence: 5 for $9, 20 for $25, or 50 monthly for $49. Each render uses one credit and usually finishes within a few minutes.
         </p>
         <p className="text-sm text-muted-foreground">
           For a full breakdown of plans and to purchase credits, see our virtual staging pricing and plans.
         </p>
         <div className="flex flex-wrap gap-3">
           <Button asChild size="lg">
-            <Link href="/#ai-stager">Try 2 Free Stagings</Link>
+            <Link href="/sales">Choose a Pack</Link>
           </Button>
           <Button asChild size="lg" variant="secondary">
-            <Link href="/sales">View Pack Pricing</Link>
+            <Link href="/#ai-stager">Launch AI Stager</Link>
           </Button>
         </div>
       </header>
@@ -173,15 +168,15 @@ const VirtualStagingCost = () => {
       <section className="rounded-2xl border border-border bg-muted/40 p-8 text-center">
         <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground">CTA</p>
         <h3 className="mt-2 text-2xl font-semibold">Plan your next upload</h3>
-        <p className="mt-3 text-muted-foreground">
-          Launch the uploader to spend your free credits or grab a paid pack before the next listing cycle hits.
+        <p className="text-sm text-muted-foreground">
+          Launch the uploader with your purchased credits or grab another pack before the next listing cycle hits.
         </p>
         <div className="mt-5 flex flex-wrap justify-center gap-3">
           <Button asChild size="lg">
-            <Link href="/#ai-stager">Try 2 Free Stagings</Link>
+            <Link href="/sales">Buy Credits</Link>
           </Button>
           <Button asChild size="lg" variant="secondary">
-            <Link href="/sales">Buy Credits</Link>
+            <Link href="/#ai-stager">Launch AI Stager</Link>
           </Button>
         </div>
       </section>

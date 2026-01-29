@@ -37,7 +37,7 @@ export async function generateStagedRoom(
         return {
           ok: false,
           status: response.status,
-          errorMessage: "Free usage limit reached. Please upgrade to continue staging rooms."
+          errorMessage: "Paid access required. Please choose a pack to continue."
         };
       } else {
         return {
