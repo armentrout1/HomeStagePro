@@ -6,6 +6,95 @@ import { nanoid } from "nanoid";
 
 const SITE_ORIGIN = "https://roomstagerpro.com";
 
+/**
+ * Check if request is a legitimate SPA navigation request
+ */
+function isSpaNavigationRequest(req: express.Request): boolean {
+  // Must be GET request
+  if (req.method !== "GET") return false;
+  
+  // Must accept HTML content
+  const acceptHeader = req.headers.accept || "";
+  if (!acceptHeader.includes("text/html")) return false;
+  
+  const pathname = req.path;
+  
+  // Exclude API routes
+  if (pathname.startsWith("/api")) return false;
+  
+  // Exclude assets
+  if (pathname.startsWith("/assets")) return false;
+  
+  // Exclude known public files with extensions
+  const publicFiles = ["/robots.txt", "/favicon.ico", "/sitemap.xml", "/ads.txt"];
+  if (publicFiles.some(file => pathname === file)) return false;
+  
+  // Exclude paths with file extensions (likely static files)
+  const lastSegment = pathname.split("/").pop() || "";
+  if (lastSegment.includes(".")) return false;
+  
+  return true;
+}
+
+/**
+ * Check if path is a blocked probe path
+ */
+function isBlockedProbePath(pathname: string): boolean {
+  // Block any segment starting with dot
+  if (pathname.split("/").some(segment => segment.startsWith("."))) {
+    return true;
+  }
+  
+  // Block sensitive prefixes
+  const blockedPrefixes = [
+    "/config",
+    "/configs", 
+    "/secrets",
+    "/secret",
+    "/storage",
+    "/backend",
+    "/admin/config",
+    "/.aws",
+    "/.github",
+    "/.circleci",
+    "/.travis",
+    "/.gitlab",
+    "/.bitbucket"
+  ];
+  
+  if (blockedPrefixes.some(prefix => pathname.startsWith(prefix))) {
+    return true;
+  }
+  
+  // Block common sensitive filenames and extensions
+  const blockedPatterns = [
+    /(^|\/)\.env(\.|$)/i,
+    /(^|\/)\.aws(\/|$)/i,
+    /(^|\/)\.git(\/|$)/i,
+    /(^|\/)credentials(\.|$)/i,
+    /(^|\/)id_rsa(\.|$)/i,
+    /(^|\/)stripe\.key(\.|$)/i,
+    /(^|\/)secrets\.yml(\.|$)/i,
+    /(^|\/)config\.php(\.|$)/i,
+    /(^|\/)parameters\.yml(\.|$)/i,
+    /\.yml$/i,
+    /\.yaml$/i,
+    /\.ini$/i,
+    /\.log$/i,
+    /\.sql$/i,
+    /\.bak$/i,
+    /\.zip$/i,
+    /\.tar$/i,
+    /\.gz$/i,
+    /\.key$/i,
+    /\.pem$/i,
+    /\.crt$/i,
+    /\.p12$/i
+  ];
+  
+  return blockedPatterns.some(pattern => pattern.test(pathname));
+}
+
 // Canonical paths for SEO - must match client/src/seo/routesSeo.ts
 const CANONICAL_PATHS: Record<string, string> = {
   "/": "/",
@@ -154,10 +243,28 @@ export async function setupVite(app: Express, server: Server) {
     appType: "custom",
   });
 
+  // Block probe paths BEFORE Vite middleware (otherwise Vite returns index.html with 200)
+  app.use((req, res, next) => {
+    if (isBlockedProbePath(req.path)) {
+      return res.status(404).send("Not found");
+    }
+    next();
+  });
+
   app.use(vite.middlewares);
   app.use("*", async (req, res, next) => {
     const url = req.originalUrl;
     const requestPath = url.split("?")[0]; // Remove query string
+
+    // Block probe paths
+    if (isBlockedProbePath(req.path)) {
+      return res.status(404).send("Not found");
+    }
+
+    // Only serve SPA for legitimate navigation requests
+    if (!isSpaNavigationRequest(req)) {
+      return res.status(404).send("Not found");
+    }
 
     try {
       const clientTemplate = path.resolve(
@@ -233,6 +340,17 @@ export function serveStatic(app: Express) {
   // Inject correct canonical and robots meta based on the request path
   app.use("*", (req, res) => {
     const requestPath = req.originalUrl.split("?")[0]; // Remove query string
+
+    // Block probe paths
+    if (isBlockedProbePath(req.path)) {
+      return res.status(404).send("Not found");
+    }
+
+    // Only serve SPA for legitimate navigation requests
+    if (!isSpaNavigationRequest(req)) {
+      return res.status(404).send("Not found");
+    }
+
     const indexPath = path.resolve(distPath, "index.html");
     
     fs.readFile(indexPath, "utf-8", (err, html) => {
