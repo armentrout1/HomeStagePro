@@ -20,14 +20,22 @@ export async function generateStagedRoom(
 ): Promise<{ ok: true; data: GenerateStagedRoomResponse } | { ok: false; status: number; errorMessage: string }> {
   try {
     console.log("🚀 Starting generateStagedRoom request");
-    console.log("📸 Request data:", { 
-      hasImage: !!req.image, 
-      imageLength: req.image?.length,
+    
+    // Create clean request object to avoid circular references
+    const cleanRequest = {
+      image: req.image,
       roomType: req.roomType,
-      hasMask: !!req.mask 
+      mask: req.mask || undefined
+    };
+    
+    console.log("📸 Request data:", { 
+      hasImage: !!cleanRequest.image, 
+      imageLength: cleanRequest.image?.length,
+      roomType: cleanRequest.roomType,
+      hasMask: !!cleanRequest.mask 
     });
     
-    const requestBody = JSON.stringify(req);
+    const requestBody = JSON.stringify(cleanRequest);
     console.log("📦 Request body size:", requestBody.length, "bytes");
     
     console.log("🌐 Sending fetch to /api/generate-staged-room");
