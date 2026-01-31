@@ -28,6 +28,7 @@ import { checkoutSessionLimiter } from "./middleware/checkoutSessionLimiter";
 import { stagingRateLimiter } from "./middleware/stagingRateLimiter";
 import { feedbackRateLimiter } from "./middleware/feedbackRateLimiter";
 import { logSecurityEvent } from "./securityEvents";
+import { ipLimiter, getIpUsageStatus } from "./ipLimiter";
 
 const isProd = process.env.NODE_ENV === "production";
 const debugLog = (...args: any[]) => {
@@ -60,10 +61,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // IP / token usage status endpoint
   app.get('/api/usage-status', checkAccessToken, async (req, res) => {
     if (!req.accessTokenPayload) {
-      return res.status(402).json({
-        status: "payment_required",
-        message: "Paid access required.",
-      });
+      // If no token, check IP-based usage status
+      return getIpUsageStatus(req, res);
     }
 
     const tokenId = getTokenIdFromRequest(req);
@@ -131,7 +130,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post(
     "/api/generate-staged-room",
     checkAccessToken,
-    requirePaidAccess,
+    ipLimiter, // Use ipLimiter instead of requirePaidAccess to respect DISABLE_USAGE_LIMITS and IP bypass
     attachEntitlement,
     stagingRateLimiter,
     ensureDbUsageOnSuccess,
