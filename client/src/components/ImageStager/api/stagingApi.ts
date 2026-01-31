@@ -58,7 +58,7 @@ export async function generateStagedRoom(
     const cleanRequest = {
       image: req.image,
       roomType: req.roomType,
-      mask: req.mask || undefined
+      mask: (typeof req.mask === 'string' && req.mask.length > 0) ? req.mask : undefined
     };
     
     console.log("📸 Request data:", { 

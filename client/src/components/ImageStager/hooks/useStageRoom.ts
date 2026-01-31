@@ -101,7 +101,7 @@ export function useStageRoom(args: UseStageRoomArgs) {
       const result = await generateStagedRoom({
         image: base64Image,
         roomType: selectedRoomTypeLabel,
-        mask: maskBase64 ?? undefined,
+        mask: (typeof maskBase64 === 'string' && maskBase64.length > 0) ? maskBase64 : undefined,
       });
 
       if (!result.ok) {
