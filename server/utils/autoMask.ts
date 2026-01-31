@@ -9,9 +9,9 @@ export type AutoMaskOptions = {
 };
 
 const DEFAULT_OPTIONS: Required<AutoMaskOptions> = {
-  topPct: 0.3,
+  topPct: 0.38,
   bottomPct: 0.08,
-  sidePct: 0.1,
+  sidePct: 0.16,
   cornerRadiusPct: 0.04,
 };
 

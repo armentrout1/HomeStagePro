@@ -19,7 +19,7 @@ import { openai } from "./openaiClient";
 import { analyzeRoomLayout } from "./prompting/layoutAnalyzer";
 import { FREE_QUALITY, ImageQuality } from "./plans";
 import { supabase, getSignedImageUrl } from "./supabase";
-import { generateAutoMaskPng } from "./utils/autoMask";
+import { generateAutoMaskPng, type AutoMaskOptions } from "./utils/autoMask";
 import { assertSameDimensions, getImageSize } from "./utils/imageDimensions";
 
 const STORAGE_BUCKET = "roomstager-images";
@@ -278,7 +278,20 @@ export const generateStagedRoom = async (req: Request, res: Response) => {
 
     if (!maskDecoded) {
       const { width, height } = await getImageSize(decodedImage.bytes);
-      const autoMaskBuffer = await generateAutoMaskPng(width, height);
+      const rt = String(req.body.roomType || "").toLowerCase();
+      const opts: AutoMaskOptions | undefined = (() => {
+        if (rt.includes("living")) {
+          return { topPct: 0.4, sidePct: 0.18, bottomPct: 0.08 };
+        }
+        if (rt.includes("bed")) {
+          return { topPct: 0.34, sidePct: 0.14, bottomPct: 0.08 };
+        }
+        if (rt.includes("kitchen")) {
+          return { topPct: 0.42, sidePct: 0.2, bottomPct: 0.1 };
+        }
+        return undefined;
+      })();
+      const autoMaskBuffer = await generateAutoMaskPng(width, height, opts);
       maskDecoded = {
         bytes: autoMaskBuffer,
         mime: "image/png",
@@ -286,7 +299,11 @@ export const generateStagedRoom = async (req: Request, res: Response) => {
       };
 
       if (process.env.NODE_ENV !== "production") {
-        log(`[${reqId}] autoMask=generated`);
+        log(
+          `[${reqId}] autoMask=generated rt=${rt || "unknown"} opts=${JSON.stringify(
+            opts ?? "default",
+          )}`,
+        );
       }
     }
 
