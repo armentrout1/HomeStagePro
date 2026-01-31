@@ -19,18 +19,33 @@ export async function generateStagedRoom(
   req: GenerateStagedRoomRequest
 ): Promise<{ ok: true; data: GenerateStagedRoomResponse } | { ok: false; status: number; errorMessage: string }> {
   try {
+    console.log("🚀 Starting generateStagedRoom request");
+    console.log("📸 Request data:", { 
+      hasImage: !!req.image, 
+      imageLength: req.image?.length,
+      roomType: req.roomType,
+      hasMask: !!req.mask 
+    });
+    
+    const requestBody = JSON.stringify(req);
+    console.log("📦 Request body size:", requestBody.length, "bytes");
+    
+    console.log("🌐 Sending fetch to /api/generate-staged-room");
     const response = await fetch('/api/generate-staged-room', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(req),
+      body: requestBody,
     });
+    
+    console.log("✅ Received response:", response.status, response.statusText);
+    console.log("📄 Response headers:", Object.fromEntries(response.headers.entries()));
 
     const data = await response.json();
+    console.log("📊 Response data:", data);
 
     if (!response.ok) {
-      // Check specifically for payment required (402) status
       if (response.status === 402) {
         return {
           ok: false,
@@ -51,6 +66,11 @@ export async function generateStagedRoom(
       data: data
     };
   } catch (error) {
+    console.error("❌ Fetch error details:", error);
+    console.error("❌ Error name:", error instanceof Error ? error.name : 'Unknown');
+    console.error("❌ Error message:", error instanceof Error ? error.message : String(error));
+    console.error("❌ Error stack:", error instanceof Error ? error.stack : 'No stack trace');
+    
     return {
       ok: false,
       status: 0,
