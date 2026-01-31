@@ -19,6 +19,8 @@ import { openai } from "./openaiClient";
 import { analyzeRoomLayout } from "./prompting/layoutAnalyzer";
 import { FREE_QUALITY, ImageQuality } from "./plans";
 import { supabase, getSignedImageUrl } from "./supabase";
+import { generateAutoMaskPng } from "./utils/autoMask";
+import { assertSameDimensions, getImageSize } from "./utils/imageDimensions";
 
 const STORAGE_BUCKET = "roomstager-images";
 const SIGNED_URL_EXPIRATION_SECONDS = 60 * 60 * 24 * 7;
@@ -67,7 +69,7 @@ const formatYearMonth = (date = new Date()): string => {
 
 const buildStoragePath = (
   reqId: string,
-  variant: "original" | "staged",
+  variant: "original" | "staged" | "mask",
   extension: string,
   date = new Date(),
 ): string => {
@@ -240,6 +242,54 @@ export const generateStagedRoom = async (req: Request, res: Response) => {
       decodedImage.extension,
     );
 
+    // Handle optional mask
+    let maskDecoded: DecodedImage | null = null;
+    let maskStoragePath: string | null = null;
+    let maskSignedUrl: string | null = null;
+    
+    if (req.body.mask) {
+      try {
+        maskDecoded = decodeBase64Image(req.body.mask);
+        if (maskDecoded.mime !== "image/png") {
+          return res.status(400).json({
+            success: false,
+            error: "Mask must be a PNG image",
+          });
+        }
+        await assertSameDimensions(decodedImage.bytes, maskDecoded.bytes);
+        
+        if (process.env.NODE_ENV !== "production") {
+          log(`[${reqId}] mask=present mime=${maskDecoded.mime}`);
+        }
+      } catch (maskError) {
+        const error = maskError as Error;
+        if (error.message === "MASK_DIMENSION_MISMATCH") {
+          return res.status(400).json({
+            success: false,
+            error: "Mask dimensions must match image dimensions"
+          });
+        }
+        return res.status(400).json({
+          success: false,
+          error: "Invalid mask provided"
+        });
+      }
+    }
+
+    if (!maskDecoded) {
+      const { width, height } = await getImageSize(decodedImage.bytes);
+      const autoMaskBuffer = await generateAutoMaskPng(width, height);
+      maskDecoded = {
+        bytes: autoMaskBuffer,
+        mime: "image/png",
+        extension: "png",
+      };
+
+      if (process.env.NODE_ENV !== "production") {
+        log(`[${reqId}] autoMask=generated`);
+      }
+    }
+
     await uploadToStorage(
       originalStoragePath,
       decodedImage.bytes,
@@ -330,6 +380,15 @@ Layout constraints (MUST FOLLOW):
       { type: decodedImage.mime }
     );
 
+    let maskFile: Awaited<ReturnType<typeof toFile>> | undefined;
+    if (maskDecoded) {
+      maskFile = await toFile(
+        Buffer.from(maskDecoded.bytes),
+        `mask.${maskDecoded.extension}`,
+        { type: maskDecoded.mime }
+      );
+    }
+
     const openAiTimeoutMs = 110_000;
     mark("openaiEditStart");
     type ImageEditResponse = Awaited<ReturnType<typeof openai.images.edit>>;
@@ -343,13 +402,19 @@ Layout constraints (MUST FOLLOW):
         );
       });
 
+      const editParams: ImageEditParamsWithFidelity = {
+        model: "gpt-image-1",
+        image: inputFile,
+        prompt: finalPrompt,
+        input_fidelity: openAiQuality,
+      };
+      
+      if (maskFile) {
+        editParams.mask = maskFile;
+      }
+      
       response = await Promise.race([
-        openai.images.edit({
-          model: "gpt-image-1",
-          image: inputFile,
-          prompt: finalPrompt,
-          input_fidelity: openAiQuality,
-        } as ImageEditParamsWithFidelity),
+        openai.images.edit(editParams),
         timeoutPromise,
       ]);
     } catch (error) {
@@ -397,12 +462,22 @@ Layout constraints (MUST FOLLOW):
       ),
       tryCreateSignedUrl(STORAGE_BUCKET, stagedStoragePath, stagedDataUrl),
     ]);
+    
+    // Handle mask storage in dev mode
+    if (process.env.NODE_ENV !== "production" && maskDecoded) {
+      maskStoragePath = buildStoragePath(reqId, "mask", maskDecoded.extension);
+      await uploadToStorage(maskStoragePath, maskDecoded.bytes, maskDecoded.mime);
+      
+      const maskDataUrl = `data:${maskDecoded.mime};base64,${Buffer.from(maskDecoded.bytes).toString("base64")}`;
+      maskSignedUrl = await tryCreateSignedUrl(STORAGE_BUCKET, maskStoragePath, maskDataUrl);
+    }
+    
     mark("signedUrlsDone");
 
     if (process.env.NODE_ENV !== "production") {
       log(`[${reqId}] total=${Date.now() - t0}ms`);
     }
-    return res.json({
+    const responseJson: any = {
       success: true,
       requestId: reqId,
       promptHash,
@@ -412,7 +487,15 @@ Layout constraints (MUST FOLLOW):
       originalStoragePath,
       stagedStoragePath,
       storageBucket: STORAGE_BUCKET,
-    });
+    };
+    
+    // Include mask fields in dev mode only
+    if (process.env.NODE_ENV !== "production" && maskStoragePath && maskSignedUrl) {
+      responseJson.maskStoragePath = maskStoragePath;
+      responseJson.maskSignedUrl = maskSignedUrl;
+    }
+    
+    return res.json(responseJson);
   } catch (err) {
     const error = err as Error;
     log(`OpenAI API error: ${error.message || 'Unknown error'}`);

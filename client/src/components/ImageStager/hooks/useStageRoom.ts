@@ -78,7 +78,7 @@ export function useStageRoom(args: UseStageRoomArgs) {
     ifMounted,
   ]);
 
-  const stageRoom = useCallback(async () => {
+  const stageRoom = useCallback(async (maskBase64?: string | null) => {
     if (!originalImage) {
       toast.error("No image selected", "Please upload an image before staging");
       return;
@@ -99,8 +99,9 @@ export function useStageRoom(args: UseStageRoomArgs) {
 
       ifMounted(() => setProgressPhase("Generating staged image…"));
       const result = await generateStagedRoom({
-        imageBase64: base64Image,
-        roomTypeLabel: selectedRoomTypeLabel
+        image: base64Image,
+        roomType: selectedRoomTypeLabel,
+        mask: maskBase64 ?? undefined,
       });
 
       if (!result.ok) {

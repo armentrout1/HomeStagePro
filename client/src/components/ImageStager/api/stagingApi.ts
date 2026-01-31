@@ -1,6 +1,7 @@
 export type GenerateStagedRoomRequest = {
-  imageBase64: string;
-  roomTypeLabel: string;
+  image: string;
+  roomType: string;
+  mask?: string;
 };
 
 export type GenerateStagedRoomResponse = {
@@ -23,10 +24,7 @@ export async function generateStagedRoom(
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ 
-        image: req.imageBase64,
-        roomType: req.roomTypeLabel 
-      }),
+      body: JSON.stringify(req),
     });
 
     const data = await response.json();
