@@ -19,11 +19,6 @@ export const DISABLE_USAGE_LIMITS = process.env.DISABLE_USAGE_LIMITS === "true";
 // IP bypass list - comma-separated IPs to bypass usage limits
 const BYPASS_IPS = process.env.BYPASS_IPS?.split(',').map(ip => ip.trim()).filter(Boolean) || [];
 
-// Debug logging
-log(`BYPASS_IPS configured: ${BYPASS_IPS.join(', ')}`);
-log(`NODE_ENV: ${process.env.NODE_ENV}`);
-log(`DISABLE_USAGE_LIMITS: ${DISABLE_USAGE_LIMITS}`);
-
 if (process.env.NODE_ENV === "production" && DISABLE_USAGE_LIMITS) {
   throw new Error("DISABLE_USAGE_LIMITS must not be enabled in production");
 }
@@ -164,13 +159,7 @@ export const getIpUsage = async (ip: string): Promise<number> => {
  * Also includes information about any active access token
  */
 export const getIpUsageStatus = async (req: Request, res: Response) => {
-  // Debug: Log all IP-related info
   const clientIp = getClientIp(req);
-  log(`getIpUsageStatus called - Client IP: ${clientIp}`);
-  log(`getIpUsageStatus called - req.ip: ${req.ip}`);
-  log(`getIpUsageStatus called - x-forwarded-for: ${req.headers["x-forwarded-for"]}`);
-  log(`getIpUsageStatus called - BYPASS_IPS: ${BYPASS_IPS.join(', ')}`);
-  log(`getIpUsageStatus called - IP in bypass list: ${BYPASS_IPS.includes(clientIp)}`);
 
   if (hasValidAccess(req) && req.accessTokenPayload) {
     const payload = req.accessTokenPayload;
@@ -201,7 +190,6 @@ export const getIpUsageStatus = async (req: Request, res: Response) => {
     });
   }
 
-  log(`IP ${clientIp} not in bypass list, returning 402`);
   return res.status(402).json({
     status: "payment_required",
     message: "Paid access required.",

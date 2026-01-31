@@ -101,6 +101,7 @@ app.use(
         "img-src": [
           "'self'",
           "data:",
+          "blob:",
           "https://images.openai.com",
           "https://images.unsplash.com",
           "https://www.googletagmanager.com",
