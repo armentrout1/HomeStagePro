@@ -10,6 +10,19 @@ const app = express();
 // Trust proxy for Railway/production environments (required for secure cookies behind reverse proxy)
 app.set("trust proxy", 1);
 
+// Preview environments remain crawlable so crawlers can see this noindex header.
+// Keep the production sitemap out of their robots response as well.
+if (process.env.SEARCH_INDEXING === "disabled") {
+  app.use((_req, res, next) => {
+    res.set("X-Robots-Tag", "noindex, nofollow, noarchive");
+    next();
+  });
+  app.get("/robots.txt", (_req, res) => {
+    res.type("text/plain").send("User-agent: *\nAllow: /\n");
+  });
+}
+
+
 // Canonical host + HTTPS + trailing slash normalization (non-API routes)
 // Only apply in production - skip in development so localhost works
 app.use((req, res, next) => {
