@@ -14,7 +14,8 @@ export default function Contact() {
           </p>
           <h1 className="text-4xl font-semibold text-slate-900">Contact</h1>
           <p className="text-lg text-slate-600">
-            Reach out when you need help with RoomStagerPro. We respond to most requests within 1–2 business days.
+            Reach out when you need help with RoomStagerPro. We respond to most
+            requests within 1–2 business days.
           </p>
         </header>
 
@@ -27,14 +28,16 @@ export default function Contact() {
                 href="mailto:aaron@aprkc.com"
                 className="font-semibold text-amber-600 hover:text-amber-700"
               >
-                info@roomstagerpro.com
+                aaron@aprkc.com
               </a>
               .
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-slate-900">How We Can Help</h2>
+            <h2 className="text-2xl font-semibold text-slate-900">
+              How We Can Help
+            </h2>
             <ul className="mt-3 list-disc space-y-2 pl-6">
               {supportAreas.map((item) => (
                 <li key={item}>{item}</li>
@@ -46,7 +49,10 @@ export default function Contact() {
             <h2 className="text-2xl font-semibold text-slate-900">Phone</h2>
             <p className="mt-3">
               Prefer to talk it through? Call us at{" "}
-              <a href="tel:+18167287548" className="font-semibold text-amber-600 hover:text-amber-700">
+              <a
+                href="tel:+18167287548"
+                className="font-semibold text-amber-600 hover:text-amber-700"
+              >
                 (816) 728-7548
               </a>
               .
@@ -54,9 +60,12 @@ export default function Contact() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-slate-900">Response Time</h2>
+            <h2 className="text-2xl font-semibold text-slate-900">
+              Response Time
+            </h2>
             <p className="mt-3">
-              Our support inbox is monitored Monday through Friday. Expect a reply within 1–2 business days.
+              Our support inbox is monitored Monday through Friday. Expect a
+              reply within 1–2 business days.
             </p>
           </section>
         </div>

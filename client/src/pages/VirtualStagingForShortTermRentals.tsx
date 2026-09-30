@@ -4,36 +4,30 @@ import { Button } from "@/components/ui/button";
 const benefits = [
   {
     title: "Refresh galleries fast",
-    body:
-      "Upload a current photo, pick the room type, and download a staged version usually within a few minutes—perfect for OTA refreshes between guests.",
+    body: "Upload a current photo, pick the room type, and download a staged version usually within a few minutes—perfect for OTA refreshes between guests.",
   },
   {
     title: "No concierges required",
-    body:
-      "Everything happens inside the AI uploader. Purchase a starter pack to test the look, then scale credits to match your booking cadence.",
+    body: "Everything happens inside the AI uploader. Purchase a starter pack to test the look, then scale credits to match your booking cadence.",
   },
   {
     title: "You control disclosures",
-    body:
-      "Files download untouched so you can add the exact “virtually staged” caption each platform expects before publishing.",
+    body: "Files download untouched so you can add the exact “virtually staged” caption each platform expects before publishing.",
   },
 ];
 
 const workflowSteps = [
   {
     title: "Upload room photos",
-    body:
-      "Use clutter-free shots of living rooms, bedrooms, kitchens, or flex areas. Each angle consumes one credit.",
+    body: "Use clutter-free shots of living rooms, bedrooms, kitchens, or flex areas. Each angle consumes one credit.",
   },
   {
     title: "Select the room type",
-    body:
-      "Choose from the supported room list (living, bedroom, dining, kitchen, flex/office). There are no style presets yet, but you can note ideas for yourself.",
+    body: "Choose from the supported room list (living, bedroom, dining, kitchen, flex/office). There are no style presets yet, but you can note ideas for yourself.",
   },
   {
     title: "Download & rerun",
-    body:
-      "Grab the JPG/PNG, add your disclosure overlay, and drop it into Airbnb or VRBO. Want a different vibe? Spend another credit and rerun the room.",
+    body: "Grab the JPG/PNG, add your disclosure overlay, and drop it into Airbnb or VRBO. Want a different vibe? Spend another credit and rerun the room.",
   },
 ];
 
@@ -49,9 +43,9 @@ const packOptions = [
     description: "20 stagings for host teams",
   },
   {
-    name: "Pro Monthly",
+    name: "Pro Pack",
     price: "$49",
-    description: "50 stagings refreshed each month",
+    description: "50 stagings, valid for 30 days",
   },
 ];
 
@@ -79,7 +73,7 @@ const faq = [
   {
     question: "Do credits expire?",
     answer:
-      "One-off packs never expire. Pro Monthly refreshes every 30 days so active hosts always have credits on hand.",
+      "Quick and Value packs are valid for 365 days. Pro Pack includes 50 credits valid for 30 days. All packs are one-time purchases with no automatic renewal.",
   },
 ];
 
@@ -87,10 +81,16 @@ const VirtualStagingForShortTermRentals = () => {
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-16 px-4 py-16">
       <header className="space-y-5">
-        <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Use Case · Short-Term Rentals</p>
-        <h1 className="text-4xl font-semibold">Virtual staging for Airbnb, VRBO, and boutique stays</h1>
+        <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
+          Use Case · Short-Term Rentals
+        </p>
+        <h1 className="text-4xl font-semibold">
+          Virtual staging for Airbnb, VRBO, and boutique stays
+        </h1>
         <p className="text-lg text-muted-foreground">
-          Show guests what the stay feels like before they arrive. Upload a photo, pick the room type, and get a staged version back—usually within a few minutes.
+          Show guests what the stay feels like before they arrive. Upload a
+          photo, pick the room type, and get a staged version back—usually
+          within a few minutes.
         </p>
         <div className="flex flex-wrap gap-3">
           <Button asChild size="lg">
@@ -100,54 +100,90 @@ const VirtualStagingForShortTermRentals = () => {
             <Link href="/#ai-stager">Launch AI Stager</Link>
           </Button>
         </div>
-        <p className="text-sm text-muted-foreground">No discovery calls, no concierge—just a self-serve tool built for hosts who need fast visuals.</p>
+        <p className="text-sm text-muted-foreground">
+          No discovery calls, no concierge—just a self-serve tool built for
+          hosts who need fast visuals.
+        </p>
       </header>
 
       <section className="space-y-6">
         <h2 className="text-3xl font-semibold">Why hosts use the AI stager</h2>
         <div className="grid gap-4 md:grid-cols-3">
           {benefits.map((benefit) => (
-            <article key={benefit.title} className="rounded-2xl border border-border p-4">
+            <article
+              key={benefit.title}
+              className="rounded-2xl border border-border p-4"
+            >
               <h3 className="text-lg font-semibold">{benefit.title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{benefit.body}</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {benefit.body}
+              </p>
             </article>
           ))}
         </div>
       </section>
 
       <section className="space-y-6">
-        <h2 className="text-3xl font-semibold">MVP workflow for STR hosts</h2>
+        <h2 className="text-3xl font-semibold">
+          Staging workflow for STR hosts
+        </h2>
         <div className="grid gap-4 md:grid-cols-3">
           {workflowSteps.map((step, index) => (
-            <article key={step.title} className="rounded-2xl border border-border p-4">
-              <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Step {index + 1}</p>
+            <article
+              key={step.title}
+              className="rounded-2xl border border-border p-4"
+            >
+              <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
+                Step {index + 1}
+              </p>
               <h3 className="mt-2 text-lg font-semibold">{step.title}</h3>
               <p className="mt-2 text-sm text-muted-foreground">{step.body}</p>
             </article>
           ))}
         </div>
-        <p className="text-sm text-muted-foreground">No human stylists, discovery calls, or approval loops. Everything is self-serve, and reruns simply use another credit.</p>
+        <p className="text-sm text-muted-foreground">
+          No human stylists, discovery calls, or approval loops. Everything is
+          self-serve, and reruns simply use another credit.
+        </p>
       </section>
 
       <section className="space-y-6">
-        <h2 className="text-3xl font-semibold">Pack options for STR refreshes</h2>
+        <h2 className="text-3xl font-semibold">
+          Pack options for STR refreshes
+        </h2>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {packOptions.map((pack) => (
-            <article key={pack.name} className="rounded-2xl border border-border p-4">
-              <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground">{pack.name}</p>
+            <article
+              key={pack.name}
+              className="rounded-2xl border border-border p-4"
+            >
+              <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground">
+                {pack.name}
+              </p>
               <p className="mt-2 text-2xl font-bold">{pack.price}</p>
-              <p className="text-sm text-muted-foreground">{pack.description}</p>
+              <p className="text-sm text-muted-foreground">
+                {pack.description}
+              </p>
             </article>
           ))}
         </div>
-        <p className="text-sm text-muted-foreground">Credits never expire unless you opt into the monthly plan. Monthly packs refresh automatically so you’re ready for seasonal updates.</p>
+        <p className="text-sm text-muted-foreground">
+          Quick and Value packs are valid for 365 days. Pro Pack includes 50
+          credits valid for 30 days. All packs are one-time purchases with no
+          automatic renewal.
+        </p>
       </section>
 
       <section className="rounded-2xl border border-border bg-muted/40 p-8 text-center">
-        <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground">CTA</p>
-        <h3 className="mt-2 text-2xl font-semibold">Update your gallery before peak season</h3>
+        <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground">
+          CTA
+        </p>
+        <h3 className="mt-2 text-2xl font-semibold">
+          Update your gallery before peak season
+        </h3>
         <p className="mt-3 text-muted-foreground">
-          Launch the uploader now, or grab a pack so every listing refresh comes with polished visuals and accurate disclosures you control.
+          Launch the uploader now, or grab a pack so every listing refresh comes
+          with polished visuals and accurate disclosures you control.
         </p>
         <div className="mt-5 flex flex-wrap justify-center gap-3">
           <Button asChild size="lg">
@@ -170,8 +206,9 @@ const VirtualStagingForShortTermRentals = () => {
             </h3>
             <p>
               Adding too many pieces makes small footprints feel cramped and can
-              invite poor reviews. We keep scale accurate, use realistic shadows, and
-              provide disclosure language so no guest feels misled when they arrive.
+              invite poor reviews. We keep scale accurate, use realistic
+              shadows, and provide disclosure language so no guest feels misled
+              when they arrive.
             </p>
           </div>
           <div>
@@ -179,10 +216,10 @@ const VirtualStagingForShortTermRentals = () => {
               Inconsistent Branding Across Listings
             </h3>
             <p>
-              Operators running across multiple markets need cohesive styling. We
-              maintain palette, props, and typography cues so your entire portfolio
-              feels intentional whether guests discover you via social ads or the
-              main site at{" "}
+              Operators running across multiple markets need cohesive styling.
+              We maintain palette, props, and typography cues so your entire
+              portfolio feels intentional whether guests discover you via social
+              ads or the main site at{" "}
               <Link href="/virtual-staging" className="text-primary underline">
                 /virtual-staging
               </Link>
@@ -196,9 +233,14 @@ const VirtualStagingForShortTermRentals = () => {
         <h2 className="text-3xl font-semibold">FAQ</h2>
         <div className="space-y-4">
           {faq.map((item) => (
-            <article key={item.question} className="rounded-2xl border border-border p-5">
+            <article
+              key={item.question}
+              className="rounded-2xl border border-border p-5"
+            >
               <h3 className="text-xl font-semibold">{item.question}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{item.answer}</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {item.answer}
+              </p>
             </article>
           ))}
         </div>

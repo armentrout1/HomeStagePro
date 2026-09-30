@@ -1,15 +1,14 @@
+import { checkStagingQuality } from "./prompting/qualityCheck";
 /**
  * STAGING RULES SOURCE OF TRUTH:
  * See docs/staging/staging-profiles.md
  * If you change staging behavior, update the MD in the same change.
  */
 import crypto from "crypto";
+import { preserveProtectedPixels } from "./utils/preservePixels";
 import { toFile } from "openai";
 import { z } from "zod";
-import {
-  type Request,
-  type Response,
-} from "express";
+import { type Request, type Response } from "express";
 
 import { log } from "./vite";
 import { storage } from "./storage";
@@ -137,7 +136,8 @@ const decodeBase64Image = (base64: string): DecodedImage => {
     throw new Error("Invalid base64 image data");
   }
 
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
   const charToIndex = (char: string): number => {
     if (char === "=") return 0;
     const index = chars.indexOf(char);
@@ -147,7 +147,11 @@ const decodeBase64Image = (base64: string): DecodedImage => {
     return index;
   };
 
-  const padding = sanitized.endsWith("==") ? 2 : sanitized.endsWith("=") ? 1 : 0;
+  const padding = sanitized.endsWith("==")
+    ? 2
+    : sanitized.endsWith("=")
+      ? 1
+      : 0;
   const outputLength = (sanitized.length * 3) / 4 - padding;
   const bytes = new Uint8Array(outputLength);
 
@@ -174,9 +178,14 @@ const decodeBase64Image = (base64: string): DecodedImage => {
 };
 
 const detectImageType = (
-  bytes: Uint8Array
+  bytes: Uint8Array,
 ): { mime: string; extension: string } => {
-  if (bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
+  if (
+    bytes.length >= 3 &&
+    bytes[0] === 0xff &&
+    bytes[1] === 0xd8 &&
+    bytes[2] === 0xff
+  ) {
     return { mime: "image/jpeg", extension: "jpg" };
   }
 
@@ -212,7 +221,7 @@ const detectImageType = (
 };
 
 export const generateStagedRoom = async (req: Request, res: Response) => {
-  const reqId = `stage_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+  const reqId = req.body.requestId || crypto.randomUUID();
   const t0 = Date.now();
   const mark = (label: string) => {
     if (process.env.NODE_ENV === "production") {
@@ -246,7 +255,7 @@ export const generateStagedRoom = async (req: Request, res: Response) => {
     let maskDecoded: DecodedImage | null = null;
     let maskStoragePath: string | null = null;
     let maskSignedUrl: string | null = null;
-    
+
     if (req.body.mask) {
       try {
         maskDecoded = decodeBase64Image(req.body.mask);
@@ -257,7 +266,7 @@ export const generateStagedRoom = async (req: Request, res: Response) => {
           });
         }
         await assertSameDimensions(decodedImage.bytes, maskDecoded.bytes);
-        
+
         if (process.env.NODE_ENV !== "production") {
           log(`[${reqId}] mask=present mime=${maskDecoded.mime}`);
         }
@@ -266,12 +275,12 @@ export const generateStagedRoom = async (req: Request, res: Response) => {
         if (error.message === "MASK_DIMENSION_MISMATCH") {
           return res.status(400).json({
             success: false,
-            error: "Mask dimensions must match image dimensions"
+            error: "Mask dimensions must match image dimensions",
           });
         }
         return res.status(400).json({
           success: false,
-          error: "Invalid mask provided"
+          error: "Invalid mask provided",
         });
       }
     }
@@ -281,13 +290,13 @@ export const generateStagedRoom = async (req: Request, res: Response) => {
       const rt = String(req.body.roomType || "").toLowerCase();
       const opts: AutoMaskOptions | undefined = (() => {
         if (rt.includes("living")) {
-          return { topPct: 0.4, sidePct: 0.18, bottomPct: 0.08 };
+          return { topPct: 0.4, sidePct: 0.18, bottomPct: 0 };
         }
         if (rt.includes("bed")) {
-          return { topPct: 0.34, sidePct: 0.14, bottomPct: 0.08 };
+          return { topPct: 0.34, sidePct: 0.14, bottomPct: 0 };
         }
         if (rt.includes("kitchen")) {
-          return { topPct: 0.42, sidePct: 0.2, bottomPct: 0.1 };
+          return { topPct: 0.42, sidePct: 0.2, bottomPct: 0 };
         }
         return undefined;
       })();
@@ -326,16 +335,14 @@ export const generateStagedRoom = async (req: Request, res: Response) => {
           log(
             `[${reqId}] layout.noFurnitureZones=${
               layout.noFurnitureZones?.join(" | ") || "None"
-            }`
+            }`,
           );
           log(
             `[${reqId}] layout.preferredPlacements=${
               layout.preferredPlacements?.join(" | ") || "None"
-            }`
+            }`,
           );
-          log(
-            `[${reqId}] layout.notes=${layout.notes?.join(" | ") || "None"}`
-          );
+          log(`[${reqId}] layout.notes=${layout.notes?.join(" | ") || "None"}`);
         }
 
         const safeJoin = (items: string[]): string =>
@@ -355,7 +362,7 @@ Layout constraints (MUST FOLLOW):
         const err = analysisError as Error;
         log(`[${reqId}] layoutAnalyzerFailed: ${err.message}`);
         log(
-          `Layout analyzer failed: ${err.message || "Unknown error"}. Proceeding without layout constraints.`
+          `Layout analyzer failed: ${err.message || "Unknown error"}. Proceeding without layout constraints.`,
         );
         return {
           layoutConstraints: {
@@ -375,11 +382,22 @@ Layout constraints (MUST FOLLOW):
     })();
     mark("layoutAnalysisDone");
 
-    const finalPrompt = `${buildStagingPrompt(req.body.roomType || "Unknown", {
-      layoutConstraints,
-    })}${layoutPrompt}`;
+    const taskPrompt =
+      req.body.mode === "remove"
+        ? `Edit this same photograph. Remove only movable furniture and clutter inside the transparent mask area, leaving the room empty. Reconstruct only the exposed wall or floor behind removed objects to match adjacent surfaces. Preserve camera, lighting, geometry, doors, windows, built-ins and permanent fixtures. Do not add furniture, decor or architectural features. The opaque mask area is protected.`
+        : `${buildStagingPrompt(req.body.roomType || "Unknown", {
+            layoutConstraints,
+          })}${layoutPrompt}
+Editing task: ${req.body.mode === "remove" ? "Remove movable furniture and clutter in the selected area; leave a clean empty room. Do not add furniture." : req.body.mode === "replace" ? "Remove existing movable furniture and clutter in the selected area, then replace it with a coherent professionally staged furniture arrangement." : "Add furnishings only within the selected editable area."}
+Keep the same room, camera, walls, windows, doors, flooring, built-ins and permanent fixtures. Never remodel or invent architecture. Respect the original perspective and lighting. The mask's transparent area is editable; its opaque area must remain untouched.`;
 
-    const promptHashFull = crypto.createHash("sha256").update(finalPrompt).digest("hex");
+    const finalPrompt = `${taskPrompt}
+CRITICAL PHOTOGRAPH PRESERVATION: Retain the exact visible floor material, wood-grain texture, plank/tile joints, wall finish and photographic sharpness wherever a new object does not cover them, including within the editable selection. The transparent mask permits object edits; it is not a request to repaint or blur the entire area. No vignette, artificial depth-of-field blur, smooth gray floor, dramatic relighting or broad dark shadow. Add only physically plausible localized contact shadows beneath furniture. Keep all furniture and rugs complete within the editable region; reduce their size or omit optional pieces rather than intersecting a protected mask boundary.`;
+
+    const promptHashFull = crypto
+      .createHash("sha256")
+      .update(finalPrompt)
+      .digest("hex");
     const promptHash = promptHashFull.slice(0, 16);
 
     if (process.env.NODE_ENV !== "production") {
@@ -394,7 +412,7 @@ Layout constraints (MUST FOLLOW):
     const inputFile = await toFile(
       Buffer.from(decodedImage.bytes),
       `room.${decodedImage.extension}`,
-      { type: decodedImage.mime }
+      { type: decodedImage.mime },
     );
 
     let maskFile: Awaited<ReturnType<typeof toFile>> | undefined;
@@ -402,56 +420,33 @@ Layout constraints (MUST FOLLOW):
       maskFile = await toFile(
         Buffer.from(maskDecoded.bytes),
         `mask.${maskDecoded.extension}`,
-        { type: maskDecoded.mime }
+        { type: maskDecoded.mime },
       );
     }
 
-    const openAiTimeoutMs = 110_000;
+    const model = process.env.STAGING_IMAGE_MODEL || "gpt-image-2.5-sunburst";
     mark("openaiEditStart");
-    type ImageEditResponse = Awaited<ReturnType<typeof openai.images.edit>>;
-    let timeoutId: ReturnType<typeof setTimeout> | undefined;
-    let response: ImageEditResponse;
-    try {
-      const timeoutPromise = new Promise<ImageEditResponse>((_, reject) => {
-        timeoutId = setTimeout(
-          () => reject(new Error("OPENAI_TIMEOUT")),
-          openAiTimeoutMs,
-        );
-      });
-
-      const editParams: ImageEditParamsWithFidelity = {
-        model: "gpt-image-1",
-        image: inputFile,
-        prompt: finalPrompt,
-        input_fidelity: openAiQuality,
-      };
-      
-      if (maskFile) {
-        editParams.mask = maskFile;
-      }
-      
-      response = await Promise.race([
-        openai.images.edit(editParams),
-        timeoutPromise,
-      ]);
-    } catch (error) {
-      if ((error as Error)?.message === "OPENAI_TIMEOUT") {
-        log(`[${reqId}] openaiEditTimeout after ${openAiTimeoutMs}ms`);
-        return res.status(504).json({
-          success: false,
-          code: "STAGING_TIMEOUT",
-          error: "Staging took longer than expected. Please try again.",
-        });
-      }
-      throw error;
-    } finally {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-    }
+    const editParams: ImageEditParamsWithFidelity = {
+      model,
+      image: inputFile,
+      prompt: finalPrompt,
+      mask: maskFile,
+      ...(model.startsWith("gpt-image-1")
+        ? { input_fidelity: "high" as const }
+        : {}),
+      quality: "high",
+      size: "auto",
+    };
+    // Abort the HTTP request and disable automatic retries of expensive image edits.
+    const response = await openai.images.edit(
+      { ...editParams, stream: false },
+      { timeout: 240_000, maxRetries: 0 },
+    );
     mark("openaiEditDone");
 
-    const imageData = response.data?.[0] as (typeof response.data)[number] & {
+    const imageData = response.data?.[0] as NonNullable<
+      typeof response.data
+    >[number] & {
       mime_type?: string;
     };
 
@@ -460,35 +455,60 @@ Layout constraints (MUST FOLLOW):
       throw new Error("No image returned from OpenAI edits");
     }
 
-    const outputMime = imageData?.mime_type || "image/png";
+    const outputMime = "image/png";
     const stagedExtension = mimeToExtension(outputMime);
-    const stagedBytes = Buffer.from(b64, "base64");
+    const stagedBytes = await preserveProtectedPixels(
+      Buffer.from(decodedImage.bytes),
+      Buffer.from(b64, "base64"),
+      Buffer.from(maskDecoded!.bytes),
+    );
 
-    const stagedStoragePath = buildStoragePath(reqId, "staged", stagedExtension);
+    const verdict = await checkStagingQuality(
+      Buffer.from(decodedImage.bytes),
+      decodedImage.mime,
+      stagedBytes,
+      req.body.mode || "furnish",
+    );
+    if (!verdict.acceptable)
+      return res.status(422).json({
+        success: false,
+        code: "QUALITY_REVIEW_FAILED",
+        error:
+          "The result did not pass the image check. Your credit was restored. Adjust the editable area to include the full furniture area and try again.",
+      });
+    const stagedStoragePath = buildStoragePath(
+      reqId,
+      "staged",
+      stagedExtension,
+    );
     await uploadToStorage(stagedStoragePath, stagedBytes, outputMime);
     mark("uploadStagedDone");
 
     const originalDataUrl = `data:${decodedImage.mime};base64,${originalBase64}`;
-    const stagedDataUrl = `data:${outputMime};base64,${b64}`;
+    const stagedDataUrl = `data:${outputMime};base64,${stagedBytes.toString("base64")}`;
 
     const [originalSignedUrl, stagedSignedUrl] = await Promise.all([
-      tryCreateSignedUrl(
-        STORAGE_BUCKET,
-        originalStoragePath,
-        originalDataUrl,
-      ),
+      tryCreateSignedUrl(STORAGE_BUCKET, originalStoragePath, originalDataUrl),
       tryCreateSignedUrl(STORAGE_BUCKET, stagedStoragePath, stagedDataUrl),
     ]);
-    
+
     // Handle mask storage in dev mode
     if (process.env.NODE_ENV !== "production" && maskDecoded) {
       maskStoragePath = buildStoragePath(reqId, "mask", maskDecoded.extension);
-      await uploadToStorage(maskStoragePath, maskDecoded.bytes, maskDecoded.mime);
-      
+      await uploadToStorage(
+        maskStoragePath,
+        maskDecoded.bytes,
+        maskDecoded.mime,
+      );
+
       const maskDataUrl = `data:${maskDecoded.mime};base64,${Buffer.from(maskDecoded.bytes).toString("base64")}`;
-      maskSignedUrl = await tryCreateSignedUrl(STORAGE_BUCKET, maskStoragePath, maskDataUrl);
+      maskSignedUrl = await tryCreateSignedUrl(
+        STORAGE_BUCKET,
+        maskStoragePath,
+        maskDataUrl,
+      );
     }
-    
+
     mark("signedUrlsDone");
 
     if (process.env.NODE_ENV !== "production") {
@@ -505,20 +525,24 @@ Layout constraints (MUST FOLLOW):
       stagedStoragePath,
       storageBucket: STORAGE_BUCKET,
     };
-    
+
     // Include mask fields in dev mode only
-    if (process.env.NODE_ENV !== "production" && maskStoragePath && maskSignedUrl) {
+    if (
+      process.env.NODE_ENV !== "production" &&
+      maskStoragePath &&
+      maskSignedUrl
+    ) {
       responseJson.maskStoragePath = maskStoragePath;
       responseJson.maskSignedUrl = maskSignedUrl;
     }
-    
+
     return res.json(responseJson);
   } catch (err) {
     const error = err as Error;
-    log(`OpenAI API error: ${error.message || 'Unknown error'}`);
+    log(`OpenAI API error: ${error.message || "Unknown error"}`);
     return res.status(500).json({
       success: false,
-      error: `Error generating image: ${error.message || 'Unknown error'}`,
+      error: "We couldn’t finish this image. Please try again.",
     });
   }
 };
@@ -544,7 +568,9 @@ export const saveStagedImage = async (req: Request, res: Response) => {
   } catch (err) {
     const error = err as Error;
     if (err instanceof z.ZodError) {
-      return res.status(400).json({ error: "Invalid payload", details: err.issues });
+      return res
+        .status(400)
+        .json({ error: "Invalid payload", details: err.issues });
     }
     log(`Database error: ${error.message || "Unknown error"}`);
     return res.status(500).json({
@@ -557,7 +583,7 @@ export const saveStagedImage = async (req: Request, res: Response) => {
 export const getUserStagedImages = async (req: Request, res: Response) => {
   try {
     const userId = parseInt(req.params.userId);
-    
+
     if (isNaN(userId)) {
       return res.status(400).json({ error: "Invalid user ID" });
     }
@@ -570,19 +596,19 @@ export const getUserStagedImages = async (req: Request, res: Response) => {
     if (authedUserId !== userId) {
       return res.status(403).json({ error: "Access denied" });
     }
-    
+
     const images = await storage.getStagedImagesByUserId(userId);
-    
+
     return res.json({
       success: true,
       images,
     });
   } catch (err) {
     const error = err as Error;
-    log(`Database error: ${error.message || 'Unknown error'}`);
+    log(`Database error: ${error.message || "Unknown error"}`);
     return res.status(500).json({
       success: false,
-      error: `Error retrieving staged images: ${error.message || 'Unknown error'}`,
+      error: `Error retrieving staged images: ${error.message || "Unknown error"}`,
     });
   }
 };

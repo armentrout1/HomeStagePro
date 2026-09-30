@@ -40,12 +40,12 @@ export const PLAN_CONFIGS: Record<PlanId, PlanConfig> = {
     uses: 50,
     durationDays: 30,
     quality: "high",
-    tokenType: "subscription",
+    tokenType: "pack",
   },
 };
 
 export function isPlanId(value: string): value is PlanId {
-  return (PLAN_CONFIGS as Record<string, PlanConfig>)[value] !== undefined;
+  return Object.prototype.hasOwnProperty.call(PLAN_CONFIGS, value);
 }
 
 export function resolvePlanId(planId?: string | null): PlanId | null {
@@ -61,6 +61,9 @@ export function getPlanConfig(planId?: string | null): PlanConfig | null {
   return canonical ? PLAN_CONFIGS[canonical] : null;
 }
 
-export function getExpirationTimestamp(durationDays: number, nowSeconds: number): number {
+export function getExpirationTimestamp(
+  durationDays: number,
+  nowSeconds: number,
+): number {
   return nowSeconds + durationDays * 24 * 60 * 60;
 }

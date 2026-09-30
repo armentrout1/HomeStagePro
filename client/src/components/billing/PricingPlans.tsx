@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useMemo, type KeyboardEventHandler } from "react";
+import { useMemo } from "react";
 
 export type PricingPlan = {
   id: string;
@@ -36,23 +36,13 @@ export function PricingPlans(props: {
     <div className="mb-12 grid grid-cols-1 gap-8 md:grid-cols-3">
       {renderedPlans.map((plan) => {
         const handleCardSelect = () => onSelectPlan(plan.id);
-        const handleKeyDown: KeyboardEventHandler<HTMLDivElement> = (event) => {
-          if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            onSelectPlan(plan.id);
-          }
-        };
         const normalizedLabel = plan.ctaLabel.toLowerCase();
         const isProcessing = normalizedLabel.includes("processing");
 
         return (
           <Card
             key={plan.id}
-            role="button"
-            tabIndex={0}
-            aria-pressed={plan.isSelected}
             onClick={handleCardSelect}
-            onKeyDown={handleKeyDown}
             className={`relative flex flex-col rounded-2xl border-2 p-6 transition-transform duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
               plan.isSelected
                 ? "border-primary shadow-xl md:scale-[1.03]"
@@ -71,7 +61,10 @@ export function PricingPlans(props: {
 
             <ul className="mb-6 flex-grow space-y-3">
               {plan.features.map((feature) => (
-                <li key={feature} className="flex items-center text-sm text-gray-900">
+                <li
+                  key={feature}
+                  className="flex items-center text-sm text-gray-900"
+                >
                   <svg
                     className="mr-2 h-5 w-5 text-green-500"
                     fill="none"
@@ -94,6 +87,7 @@ export function PricingPlans(props: {
             <Button
               type="button"
               className="w-full"
+              aria-label={`${plan.ctaLabel}: ${plan.name}, ${plan.price}`}
               disabled={isProcessing}
               onClick={(event) => {
                 event.stopPropagation();

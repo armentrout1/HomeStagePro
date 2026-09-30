@@ -24,7 +24,7 @@ export function ActionButtons({
   onDownloadClick,
 }: ActionButtonsProps) {
   const requiresUpgrade =
-    usageStatus && usageStatus.status !== "premium" && usageStatus.remaining === 0;
+    usageStatus && (usageStatus.paidRemaining ?? usageStatus.remaining) === 0;
 
   return (
     <>

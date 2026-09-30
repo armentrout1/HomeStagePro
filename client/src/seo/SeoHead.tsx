@@ -6,7 +6,13 @@ type SeoHeadProps = {
 };
 
 export function SeoHead({ path }: SeoHeadProps) {
-  const seo = ROUTE_SEO[path] ?? ROUTE_SEO["/"];
+  const seo = ROUTE_SEO[path] ?? {
+    title: "Page not found | RoomStagerPro",
+    description: "This page could not be found.",
+    canonicalPath: path,
+    robots: "noindex, follow",
+    ogImage: undefined,
+  };
   const canonicalUrl = `${SITE_ORIGIN}${seo.canonicalPath}`;
   const ogImageUrl = seo.ogImage ? `${SITE_ORIGIN}${seo.ogImage}` : undefined;
 
@@ -19,7 +25,7 @@ export function SeoHead({ path }: SeoHeadProps) {
       <meta property="og:description" content={seo.description} />
       <meta property="og:url" content={canonicalUrl} />
       <meta property="og:type" content="website" />
-      {seo.robots && <meta name="robots" content={seo.robots} />}
+      <meta name="robots" content={seo.robots || "index, follow"} />
       {ogImageUrl && <meta property="og:image" content={ogImageUrl} />}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={seo.title} />

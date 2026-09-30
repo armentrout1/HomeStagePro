@@ -364,3 +364,18 @@ Future ideas / roadmap: [`docs/staging/staging-roadmap.md`](./staging-roadmap.md
 5. **Bedroom — Large keyword hits**: notes with "open" and "expansive"; expect Large profile.
 6. **Bedroom — Secondary zone**: notes include "reading corner"; expect Large profile even if only one size keyword.
 7. **Bedroom — Constrained**: notes include "limited wall space" + "closet doors"; expect Standard profile with constrained instructions and log.
+
+
+## September 2026 editing and access changes
+- Default image model: gpt-image-2.5-sunburst; override with STAGING_IMAGE_MODEL after testing.
+- Transparent mask pixels are editable. Opaque pixels are restored from the original after inference and saved as lossless PNG.
+- Customers can paint/protect regions and choose furnish, replace, or remove. The default center selection is only a starting point; protect windows, doors and fixtures.
+- The selected area still requires visual review. Do not claim structural perfection, MLS compliance, human review, or guaranteed sales results.
+- A database job reserves one credit before generation, persists the result, refunds failure once, and supports reload/recovery from My access.
+- Image requests have a 240-second timeout with no automatic API retries. Layout analysis has a separate 30-second limit.
+- Existing plan IDs, prices and durations remain compatible; Pro Pack is one payment for 50 credits valid 30 days, not a recurring subscription.
+
+- Post-edit review uses GPT-6 Luna with low reasoning effort to check obvious architecture changes and cut-off furniture. Review failures restore the reserved credit. Automated review is imperfect; customers must review the final image.
+- Live tests: GPT-4o-mini accepted an intentionally clipped result; GPT-6 Luna rejected it. A subsequent complete pipeline test (edit, composite, review, private storage, signed download) succeeded with a larger, fixture-aware selection.
+
+- Preserve exposed flooring grain, joints, wall finishes and sharpness inside the edit selection. The secondary review rejects obvious surface changes, broad blur patches and artificial vignettes as well as geometry changes and clipped objects.

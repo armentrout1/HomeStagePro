@@ -1,9 +1,24 @@
+import {
+  fulfillCheckout,
+  activateGrant,
+  registerAccessRoutes,
+  appOrigin,
+} from "./access";
+import { registerStagingJobs } from "./stagingJobs";
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { stripePurchases, type InsertStripePurchase, feedbackSubmissions } from "@shared/schema";
-import { db } from "./db";
-import { getOrCreateUsageEntitlement, ensureDbUsageOnSuccess, grantPaidCredits } from "./usageEntitlements";
+import {
+  stripePurchases,
+  type InsertStripePurchase,
+  feedbackSubmissions,
+} from "@shared/schema";
+import { db, client } from "./db";
+import {
+  getOrCreateUsageEntitlement,
+  ensureDbUsageOnSuccess,
+  grantPaidCredits,
+} from "./usageEntitlements";
 import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import {
@@ -40,68 +55,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use(cookieParser());
 
   // Health check endpoint for custom domain validation
-  app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok' });
+  app.get("/api/health", async (_req, res) => {
+    try {
+      const [ready] =
+        await client`SELECT to_regclass('public.access_grants') IS NOT NULL AND to_regclass('public.staging_jobs') IS NOT NULL AND to_regclass('public.access_email_outbox') IS NOT NULL AS ready`;
+      res
+        .status(ready.ready ? 200 : 503)
+        .json({ status: ready.ready ? "ok" : "migration_required" });
+    } catch {
+      res.status(503).json({ status: "database_unavailable" });
+    }
   });
 
   // Client routes handled client-side; no server-side redirects needed
   const clientRoutes = [
-    '/home-staging-tips',
-    '/real-estate-photos',
-    '/virtual-vs-traditional',
-    '/selling-tips'
+    "/home-staging-tips",
+    "/real-estate-photos",
+    "/virtual-vs-traditional",
+    "/selling-tips",
   ];
-  clientRoutes.forEach(route => {
+  clientRoutes.forEach((route) => {
     app.get(route, (_req, _res, next) => next());
   });
-  
+
   // put application routes here
   // prefix all routes with /api
 
   // IP / token usage status endpoint
-  app.get('/api/usage-status', checkAccessToken, async (req, res) => {
+  app.get("/api/usage-status", checkAccessToken, async (req, res) => {
     if (!req.accessTokenPayload) {
       // If no token, check IP-based usage status
-      return getIpUsageStatus(req, res);
+      return res.json({
+        status: "payment_required",
+        remaining: 0,
+        totalRemaining: 0,
+        message: "Choose a credit pack or reopen your email access link.",
+      });
     }
 
     const tokenId = getTokenIdFromRequest(req);
 
     if (!tokenId) {
-      return res.status(500).json({ error: "Failed to determine token identifier" });
+      return res
+        .status(500)
+        .json({ error: "Failed to determine token identifier" });
     }
 
     try {
       const entitlement = await getOrCreateUsageEntitlement(tokenId);
-      const paidRemaining = Math.max(0, entitlement.paidGranted - entitlement.paidUsed);
+      const paidRemaining = Math.max(
+        0,
+        entitlement.paidGranted - entitlement.paidUsed,
+      );
 
       return res.json({
-        status: "premium" as const,
+        status: paidRemaining > 0 ? "premium" : "payment_required",
         paidGranted: entitlement.paidGranted,
         paidUsed: entitlement.paidUsed,
         paidRemaining,
         totalRemaining: paidRemaining,
         planId: req.accessTokenPayload.planId,
         quality: req.accessTokenPayload.quality,
-        expiresAt: new Date(req.accessTokenPayload.expiresAt * 1000).toISOString(),
+        expiresAt: new Date(
+          req.accessTokenPayload.expiresAt * 1000,
+        ).toISOString(),
       });
     } catch (error) {
       console.error("Failed to load usage entitlement", error);
-      return res.status(500).json({ error: "Failed to load usage entitlement" });
+      return res
+        .status(500)
+        .json({ error: "Failed to load usage entitlement" });
     }
   });
-  
-  app.get('/api/public-config', (req, res) => {
+
+  app.get("/api/public-config", (req, res) => {
     const stripePublicKey = process.env.VITE_STRIPE_PUBLIC_KEY ?? null;
     res.json({ stripePublicKey });
   });
-  
+
   // Initialize Stripe
-  const stripe = process.env.STRIPE_SECRET_KEY 
+  const stripe = process.env.STRIPE_SECRET_KEY
     ? new Stripe(process.env.STRIPE_SECRET_KEY)
     : null;
-  
-  app.get('/api/stripe/status', (req, res) => {
+
+  app.get("/api/stripe/status", (req, res) => {
     if (process.env.NODE_ENV === "production") {
       return res.status(404).json({ error: "Not found" });
     }
@@ -126,19 +163,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  // OpenAI image generation endpoint with IP-based usage limiting
-  app.post(
-    "/api/generate-staged-room",
-    checkAccessToken,
-    ipLimiter, // Use ipLimiter instead of requirePaidAccess to respect DISABLE_USAGE_LIMITS and IP bypass
-    attachEntitlement,
-    stagingRateLimiter,
-    ensureDbUsageOnSuccess,
-    generateStagedRoom,
-  );
-  
+  registerAccessRoutes(app);
+  registerStagingJobs(app);
+
   // Add a test endpoint to check token status
-  app.get('/api/check-token', (req, res) => {
+  app.get("/api/check-token", (req, res) => {
     if (process.env.NODE_ENV === "production") {
       return res.status(404).json({ error: "Not found" });
     }
@@ -157,13 +186,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
     }
-    
+
     return res.json({ valid: false });
   });
-  
+
   // Database routes for staged images
-  app.post('/api/staged-images', checkAccessToken, saveStagedImage);
-  app.get('/api/users/:userId/staged-images', checkAccessToken, getUserStagedImages);
+  app.post("/api/staged-images", checkAccessToken, (_req, res) =>
+    res
+      .status(410)
+      .json({ error: "Images are saved automatically during staging." }),
+  );
+  app.get(
+    "/api/users/:userId/staged-images",
+    checkAccessToken,
+    getUserStagedImages,
+  );
 
   const feedbackSchema = z
     .object({
@@ -258,12 +295,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
             })
         : db.insert(feedbackSubmissions).values(parsed);
 
-      const [inserted] = await insertQuery.returning({ id: feedbackSubmissions.id });
+      const [inserted] = await insertQuery.returning({
+        id: feedbackSubmissions.id,
+      });
 
       return res.json({ success: true, id: inserted.id });
     } catch (err) {
       if (err instanceof z.ZodError) {
-        return res.status(400).json({ error: "Invalid feedback payload", details: err.issues });
+        return res
+          .status(400)
+          .json({ error: "Invalid feedback payload", details: err.issues });
       }
       console.error("Failed to save feedback", err);
       return res.status(500).json({ error: "Failed to save feedback" });
@@ -288,83 +329,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({ error: "Failed to fetch feedback" });
     }
   });
-  
+
   // Stripe checkout session creation
-  app.post('/api/create-checkout-session', checkoutSessionLimiter, async (req, res) => {
-    if (!stripe) {
-      return res.status(500).json({ error: "Stripe is not configured" });
-    }
-    
-    try {
-      const { planId, planName } = req.body;
-      if (!planId) {
-        return res.status(400).json({ error: "Missing required parameters" });
+  app.post(
+    "/api/create-checkout-session",
+    checkoutSessionLimiter,
+    async (req, res) => {
+      if (!stripe) {
+        return res.status(500).json({ error: "Stripe is not configured" });
       }
 
-      if (!resolvePlanId(planId)) {
-        return res.status(400).json({
-          error: "Unknown plan ID",
-          allowedPlanIds: ["quick-pack", "value-pack", "pro-monthly"],
-        });
-      }
+      try {
+        const { planId, planName } = req.body;
+        if (!planId) {
+          return res.status(400).json({ error: "Missing required parameters" });
+        }
 
-      const planConfig = getPlanConfig(planId);
-      if (!planConfig) {
-        return res.status(400).json({ error: "Unsupported plan" });
-      }
-      
-      let successUrl = `${req.protocol}://${req.get('host')}/thank-you?session_id={CHECKOUT_SESSION_ID}`;
-      let cancelUrl = `${req.protocol}://${req.get('host')}/upgrade`;
-      
-      const planLabel = planName ?? `HomeStagePro ${planId}`;
-      const expiresAt =
-        planConfig.durationDays === 365
-          ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
-          : new Date(
-              Date.now() + planConfig.durationDays * 24 * 60 * 60 * 1000,
-            );
+        if (!resolvePlanId(planId)) {
+          return res.status(400).json({
+            error: "Unknown plan ID",
+            allowedPlanIds: ["quick-pack", "value-pack", "pro-monthly"],
+          });
+        }
 
-      const metadata: Stripe.Checkout.SessionCreateParams["metadata"] = {
-        planId,
-        planLabel,
-        usesAllowed: String(planConfig.uses),
-        quality: planConfig.quality,
-      };
+        const planConfig = getPlanConfig(planId);
+        if (!planConfig) {
+          return res.status(400).json({ error: "Unsupported plan" });
+        }
 
-      if (planConfig.durationDays) {
-        metadata.expiresAt = expiresAt.toISOString();
-      }
+        let successUrl = `${appOrigin()}/thank-you?session_id={CHECKOUT_SESSION_ID}`;
+        let cancelUrl = `${appOrigin()}/upgrade`;
 
-      const session = await stripe.checkout.sessions.create({
-        payment_method_types: ['card'],
-        line_items: [
-          {
-            price_data: {
-              currency: 'usd',
-              product_data: {
-                name: planName,
-                description: `AI Room Staging - ${planName}`,
+        const planLabel =
+          planId === "pro-monthly"
+            ? "Pro Pack (30 days)"
+            : planId === "value-pack"
+              ? "Value Pack"
+              : "Quick Pack";
+        const expiresAt =
+          planConfig.durationDays === 365
+            ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
+            : new Date(
+                Date.now() + planConfig.durationDays * 24 * 60 * 60 * 1000,
+              );
+
+        const metadata: Stripe.Checkout.SessionCreateParams["metadata"] = {
+          planId,
+          planLabel,
+          usesAllowed: String(planConfig.uses),
+          quality: planConfig.quality,
+        };
+
+        if (planConfig.durationDays) {
+          metadata.expiresAt = expiresAt.toISOString();
+        }
+
+        const session = await stripe.checkout.sessions.create({
+          payment_method_types: ["card"],
+          line_items: [
+            {
+              price_data: {
+                currency: "usd",
+                product_data: {
+                  name: planLabel,
+                  description: `AI Room Staging - ${planLabel}`,
+                },
+                unit_amount: planConfig.price * 100,
               },
-              unit_amount: planConfig.price * 100,
+              quantity: 1,
             },
-            quantity: 1,
-          },
-        ],
-        mode: 'payment',
-        success_url: successUrl,
-        cancel_url: cancelUrl,
-        metadata,
-      });
-      
-      res.json({ id: session.id, url: session.url });
-    } catch (error) {
-      console.error('Error creating checkout session:', error);
-      res.status(500).json({ error: 'Failed to create checkout session' });
-    }
-  });
-  
+          ],
+          mode: "payment",
+          success_url: successUrl,
+          cancel_url: cancelUrl,
+          metadata,
+        });
+
+        res.json({ id: session.id, url: session.url });
+      } catch (error) {
+        console.error("Error creating checkout session:", error);
+        res.status(500).json({ error: "Failed to create checkout session" });
+      }
+    },
+  );
+
   // Stripe webhook for payment events
-  app.post('/api/webhook', async (req, res) => {
+  app.post("/api/webhook", async (req, res) => {
     if (!stripe) {
       return res.status(500).json({ error: "Stripe is not configured" });
     }
@@ -394,7 +444,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         webhookSecret,
       );
     } catch (err) {
-      console.error("Webhook signature verification failed:", err);
+      console.error("Webhook signature verification failed");
       logSecurityEvent({
         type: "STRIPE_WEBHOOK_ERROR",
         status: 400,
@@ -405,7 +455,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     try {
       switch (event.type) {
-        case "checkout.session.completed": {
+        case "checkout.session.completed":
+        case "checkout.session.async_payment_succeeded": {
           const session = event.data.object as Stripe.Checkout.Session;
 
           if (session.payment_status !== "paid") {
@@ -427,9 +478,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             livemode: Boolean(event.livemode),
             environment: event.livemode ? "live" : "test",
             customerEmail:
-              session.customer_details?.email ??
-              session.customer_email ??
-              null,
+              session.customer_details?.email ?? session.customer_email ?? null,
             cardBrand: null,
             cardLast4: null,
             receiptUrl: null,
@@ -444,7 +493,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             );
           } catch (err) {
             const dbError = err as { code?: string };
-            if (dbError?.code === "23505") {
+            if ((dbError?.code || (err as any)?.cause?.code) === "23505") {
               console.warn(
                 `Stripe purchase already recorded for event ${event.id}`,
               );
@@ -459,12 +508,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           }
 
-          const { planId } = session.metadata || {};
-          // Generate JWT token based on the plan
-          if (planId) {
-            debugLog(`Processing completed payment for plan: ${planId}`);
-            // Token will be set on session status check
-          }
+          const grant = await fulfillCheckout(session);
+          // The return page can win the race before the webhook purchase row exists.
+          await client`UPDATE stripe_purchases SET token_id=${grant.token_id} WHERE checkout_session_id=${session.id}`;
           break;
         }
         default:
@@ -483,149 +529,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).send(`Webhook Error: ${error.message}`);
     }
   });
-  
+
   // Check checkout session status and set token in cookie
-  app.get('/api/checkout-status', checkAccessToken, async (req, res) => {
+  app.get("/api/checkout-status", checkAccessToken, async (req, res) => {
     if (!stripe) {
       return res.status(500).json({ error: "Stripe is not configured" });
     }
-    
+
     const { session_id } = req.query;
-    
+
     if (!session_id) {
       return res.status(400).json({ error: "Missing session ID" });
     }
-    
+
     try {
-      const session = await stripe.checkout.sessions.retrieve(session_id as string);
-      
+      const session = await stripe.checkout.sessions.retrieve(
+        session_id as string,
+      );
+
       if (session.payment_status === "paid") {
-        const { planId, planLabel } = session.metadata || {};
-
-        if (!planId) {
-          console.warn(`[entitlements] missing_or_invalid_plan session=${session_id}`);
-          return res
-            .status(400)
-            .json({ error: "Missing plan ID in session metadata" });
-        }
-
-        const planConfig = getPlanConfig(planId);
-        if (!planConfig) {
-          console.warn(`[entitlements] missing_or_invalid_plan session=${session_id}`);
-          return res
-            .status(400)
-            .json({ error: "Invalid plan ID in session metadata" });
-        }
-
-        // Check if credits already granted for this session (idempotency)
-        const [existingPurchase] = await db
-          .select({ tokenId: stripePurchases.tokenId })
-          .from(stripePurchases)
-          .where(eq(stripePurchases.checkoutSessionId, session_id as string))
-          .limit(1);
-
-        let creditsGranted = false;
-        
-        // Priority for tokenId:
-        // 1. If this session already has a tokenId (idempotency for same session)
-        // 2. If user already has a valid token cookie (accumulate credits)
-        // 3. Generate new tokenId
-        const existingCookieTokenId = getTokenIdFromRequest(req);
-        const existingTokenId = existingPurchase?.tokenId || existingCookieTokenId;
-
-        const tokenResult = existingTokenId
-          ? generateToken(planId, existingTokenId)
-          : generateToken(planId);
-
-        const { token, payload } = tokenResult;
-        const decoded = verifyToken(token);
-        const tokenId = decoded?.jti ?? decoded?.sub ?? null;
-
-        if (!tokenId) {
-          console.warn(`[checkout-status] tokenId_missing session=${session.id} plan=${planId}`);
-          setAccessTokenCookie(res, tokenResult);
-
-          const expirationDate = new Date(payload.expiresAt * 1000);
-          return res.json({
-            status: "complete",
-            planName: planLabel ?? planId,
-            accessUntil: expirationDate.toISOString(),
-            usageAllowed: payload.totalUses,
-            usesLeft: payload.usesLeft,
-            planId: payload.planId,
-            quality: payload.quality,
-            creditsGranted,
-            price: planConfig.price,
-            sessionId: session.id,
+        const grant = await fulfillCheckout(session);
+        if (!activateGrant(res, grant))
+          return res.status(410).json({
+            error:
+              "This pack has expired. Open your latest access link or choose a new pack.",
           });
-        }
-
-        if (!existingPurchase?.tokenId) {
-          // Only grant credits if this specific session hasn't already granted them
-          try {
-            await getOrCreateUsageEntitlement(tokenId);
-            await grantPaidCredits(tokenId, planConfig.uses);
-
-            const updated = await db
-              .update(stripePurchases)
-              .set({ tokenId })
-              .where(eq(stripePurchases.checkoutSessionId, session.id))
-              .returning();
-
-            if (!updated?.length) {
-              console.warn("[entitlements] purchase_row_missing", {
-                session: session.id,
-                tokenId: tokenId.slice(0, 8),
-              });
-            }
-
-            const isAccumulating = Boolean(existingCookieTokenId);
-            debugLog("[entitlements] granted", {
-              plan: planId,
-              credits: planConfig.uses,
-              session: session.id,
-              tokenId: tokenId.slice(0, 8),
-              accumulated: isAccumulating,
-            });
-            creditsGranted = true;
-          } catch (err) {
-            console.error("[checkout-status] entitlement_grant_failed", {
-              session: session.id,
-              tokenId: tokenId.slice(0, 8),
-              error: err,
-            });
-          }
-        }
-
-        setAccessTokenCookie(res, tokenResult);
-        const expirationDate = new Date(payload.expiresAt * 1000);
-
+        const entitlement = await getOrCreateUsageEntitlement(grant.token_id);
+        const plan = getPlanConfig(grant.plan_id)!;
+        res.set("Cache-Control", "no-store");
         return res.json({
           status: "complete",
-          planName: planLabel ?? planId,
-          accessUntil: expirationDate.toISOString(),
-          usageAllowed: payload.totalUses,
-          usesLeft: payload.usesLeft,
-          planId: payload.planId,
-          quality: payload.quality,
-          creditsGranted,
-          price: planConfig.price,
+          planName: session.metadata?.planLabel || grant.plan_id,
+          accessUntil: new Date(grant.expires_at).toISOString(),
+          usageAllowed: Math.max(
+            0,
+            entitlement.paidGranted - entitlement.paidUsed,
+          ),
+          planId: grant.plan_id,
+          price: plan.price,
           sessionId: session.id,
+          emailDeliveryConfigured: Boolean(
+            process.env.RESEND_API_KEY && process.env.ACCESS_EMAIL_FROM,
+          ),
         });
-      } else if (session.status === 'open') {
-        return res.json({ status: 'processing' });
+      } else if (session.status === "open") {
+        return res.json({ status: "processing" });
       } else {
-        return res.json({ status: 'canceled' });
+        return res.json({ status: "canceled" });
       }
     } catch (err) {
       const error = err as Error;
-      console.error('Error checking session status:', error);
-      return res.status(500).json({ error: 'Failed to check payment status' });
+      console.error("Error checking session status:", error);
+      return res.status(500).json({ error: "Failed to check payment status" });
     }
   });
-  
+
   // User routes
-  app.get('/api/users/:id', checkAccessToken, async (req, res) => {
+  app.get("/api/users/:id", checkAccessToken, async (req, res) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
       return res.status(400).json({ error: "Invalid user ID" });
@@ -639,83 +599,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (authedUserId !== id) {
       return res.status(403).json({ error: "Access denied" });
     }
-    
+
     const user = await storage.getUser(id);
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-    
+
     // Don't send password back to client
     const { password, ...userData } = user;
     return res.json(userData);
   });
-  
+
   // Property routes
-  app.get('/api/properties/user/:userId', checkAccessToken, async (req, res) => {
-    const userId = parseInt(req.params.userId);
-    if (isNaN(userId)) {
-      return res.status(400).json({ error: "Invalid user ID" });
-    }
+  app.get(
+    "/api/properties/user/:userId",
+    checkAccessToken,
+    async (req, res) => {
+      const userId = parseInt(req.params.userId);
+      if (isNaN(userId)) {
+        return res.status(400).json({ error: "Invalid user ID" });
+      }
 
-    const authedUserId = requireAuthedUserId(req);
-    if (authedUserId === null) {
-      return res.status(401).json({ error: "Authentication required" });
-    }
+      const authedUserId = requireAuthedUserId(req);
+      if (authedUserId === null) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
 
-    if (authedUserId !== userId) {
-      return res.status(403).json({ error: "Access denied" });
-    }
-    
-    const properties = await storage.getPropertiesByUserId(userId);
-    return res.json(properties);
-  });
-  
-  app.get('/api/properties/:id', async (req, res) => {
+      if (authedUserId !== userId) {
+        return res.status(403).json({ error: "Access denied" });
+      }
+
+      const properties = await storage.getPropertiesByUserId(userId);
+      return res.json(properties);
+    },
+  );
+
+  app.get("/api/properties/:id", checkAccessToken, async (req, res) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
       return res.status(400).json({ error: "Invalid property ID" });
     }
-    
+
     const property = await storage.getProperty(id);
     if (!property) {
       return res.status(404).json({ error: "Property not found" });
     }
-    
+
+    if (
+      requireAuthedUserId(req) === null ||
+      property.userId !== requireAuthedUserId(req)
+    )
+      return res.status(403).json({ error: "Access denied" });
     return res.json(property);
   });
-  
-  app.post('/api/properties', checkAccessToken, async (req, res) => {
+
+  app.post("/api/properties", checkAccessToken, async (req, res) => {
     try {
       const parsed = createPropertySchema.parse(req.body);
+      const owner = requireAuthedUserId(req);
+      if (owner === null || parsed.userId !== owner)
+        return res.status(403).json({ error: "Access denied" });
       const property = await storage.createProperty(parsed);
       return res.json(property);
     } catch (err) {
       const error = err as Error;
       if (err instanceof z.ZodError) {
-        return res.status(400).json({ error: "Invalid payload", details: err.issues });
+        return res
+          .status(400)
+          .json({ error: "Invalid payload", details: err.issues });
       }
       return res.status(400).json({ error: error.message });
     }
   });
-  
-  app.put('/api/properties/:id', checkAccessToken, async (req, res) => {
+
+  app.put("/api/properties/:id", checkAccessToken, async (req, res) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
       return res.status(400).json({ error: "Invalid property ID" });
     }
-    
+
     try {
       const parsed = updatePropertySchema.parse(req.body);
-      const updatedProperty = await storage.updateProperty(id, parsed);
+      const owner = requireAuthedUserId(req);
+      const existing = await storage.getProperty(id);
+      if (owner === null || !existing || existing.userId !== owner)
+        return res.status(403).json({ error: "Access denied" });
+      const updatedProperty = await storage.updateProperty(id, {
+        ...parsed,
+        userId: owner,
+      });
       if (!updatedProperty) {
         return res.status(404).json({ error: "Property not found" });
       }
-      
+
       return res.json(updatedProperty);
     } catch (err) {
       const error = err as Error;
       if (err instanceof z.ZodError) {
-        return res.status(400).json({ error: "Invalid payload", details: err.issues });
+        return res
+          .status(400)
+          .json({ error: "Invalid payload", details: err.issues });
       }
       return res.status(400).json({ error: error.message });
     }

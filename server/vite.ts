@@ -1,3 +1,4 @@
+import { ROUTE_SEO } from "../client/src/seo/routesSeo";
 import express, { type Express } from "express";
 import fs from "fs";
 import path from "path";
@@ -12,27 +13,32 @@ const SITE_ORIGIN = "https://roomstagerpro.com";
 function isSpaNavigationRequest(req: express.Request): boolean {
   // Must be GET request
   if (req.method !== "GET") return false;
-  
+
   // Must accept HTML content
   const acceptHeader = req.headers.accept || "";
   if (!acceptHeader.includes("text/html")) return false;
-  
+
   const pathname = req.path;
-  
+
   // Exclude API routes
   if (pathname.startsWith("/api")) return false;
-  
+
   // Exclude assets
   if (pathname.startsWith("/assets")) return false;
-  
+
   // Exclude known public files with extensions
-  const publicFiles = ["/robots.txt", "/favicon.ico", "/sitemap.xml", "/ads.txt"];
-  if (publicFiles.some(file => pathname === file)) return false;
-  
+  const publicFiles = [
+    "/robots.txt",
+    "/favicon.ico",
+    "/sitemap.xml",
+    "/ads.txt",
+  ];
+  if (publicFiles.some((file) => pathname === file)) return false;
+
   // Exclude paths with file extensions (likely static files)
   const lastSegment = pathname.split("/").pop() || "";
   if (lastSegment.includes(".")) return false;
-  
+
   return true;
 }
 
@@ -41,14 +47,14 @@ function isSpaNavigationRequest(req: express.Request): boolean {
  */
 function isBlockedProbePath(pathname: string): boolean {
   // Block any segment starting with dot
-  if (pathname.split("/").some(segment => segment.startsWith("."))) {
+  if (pathname.split("/").some((segment) => segment.startsWith("."))) {
     return true;
   }
-  
+
   // Block sensitive prefixes
   const blockedPrefixes = [
     "/config",
-    "/configs", 
+    "/configs",
     "/secrets",
     "/secret",
     "/storage",
@@ -59,13 +65,13 @@ function isBlockedProbePath(pathname: string): boolean {
     "/.circleci",
     "/.travis",
     "/.gitlab",
-    "/.bitbucket"
+    "/.bitbucket",
   ];
-  
-  if (blockedPrefixes.some(prefix => pathname.startsWith(prefix))) {
+
+  if (blockedPrefixes.some((prefix) => pathname.startsWith(prefix))) {
     return true;
   }
-  
+
   // Block common sensitive filenames and extensions
   const blockedPatterns = [
     /(^|\/)\.env(\.|$)/i,
@@ -89,10 +95,10 @@ function isBlockedProbePath(pathname: string): boolean {
     /\.key$/i,
     /\.pem$/i,
     /\.crt$/i,
-    /\.p12$/i
+    /\.p12$/i,
   ];
-  
-  return blockedPatterns.some(pattern => pattern.test(pathname));
+
+  return blockedPatterns.some((pattern) => pattern.test(pathname));
 }
 
 // Canonical paths for SEO - must match client/src/seo/routesSeo.ts
@@ -104,8 +110,10 @@ const CANONICAL_PATHS: Record<string, string> = {
   "/virtual-staging": "/virtual-staging",
   "/virtual-staging-cost": "/virtual-staging-cost",
   "/virtual-staging-for-investors": "/virtual-staging-for-investors",
-  "/virtual-staging-for-real-estate-agents": "/virtual-staging-for-real-estate-agents",
-  "/virtual-staging-for-short-term-rentals": "/virtual-staging-for-short-term-rentals",
+  "/virtual-staging-for-real-estate-agents":
+    "/virtual-staging-for-real-estate-agents",
+  "/virtual-staging-for-short-term-rentals":
+    "/virtual-staging-for-short-term-rentals",
   "/gallery": "/gallery",
   "/how-it-works": "/how-it-works",
   "/selling-tips": "/selling-tips",
@@ -132,7 +140,7 @@ function getCanonicalUrl(requestPath: string): string {
   if (normalizedPath !== "/" && normalizedPath.endsWith("/")) {
     normalizedPath = normalizedPath.slice(0, -1);
   }
-  
+
   const canonicalPath = CANONICAL_PATHS[normalizedPath] ?? "/";
   return `${SITE_ORIGIN}${canonicalPath}`;
 }
@@ -151,24 +159,44 @@ function shouldNoindex(requestPath: string): boolean {
 /**
  * Inject correct canonical and robots meta into HTML based on the request path
  */
-function injectSeoTags(html: string, requestPath: string): string {
-  const canonicalUrl = getCanonicalUrl(requestPath);
-  
-  // Replace the hardcoded canonical with the correct one
-  let result = html.replace(
-    /<link rel="canonical" href="[^"]*" \/>/,
-    `<link rel="canonical" href="${canonicalUrl}" />`
-  );
-  
-  // If this is a noindex route, replace the robots meta tag
-  if (shouldNoindex(requestPath)) {
-    result = result.replace(
-      /<meta name="robots" content="[^"]*" \/>/,
-      `<meta name="robots" content="noindex, nofollow" />`
+export function injectSeoTags(html: string, requestPath: string): string {
+  const seo = ROUTE_SEO[requestPath] || {
+    title: "Page not found | RoomStagerPro",
+    description: "This page could not be found.",
+    canonicalPath: requestPath,
+    robots: "noindex, follow",
+    ogImage: "/images/meta-preview.png",
+  };
+  const escape = (s: string) =>
+    s.replace(
+      /[&<>"']/g,
+      (c) =>
+        ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        })[c]!,
     );
-  }
-  
-  return result;
+  const url = SITE_ORIGIN + seo.canonicalPath;
+  let result = html
+    .replace(/<title[^>]*>[\s\S]*?<\/title>/g, "")
+    .replace(
+      /<meta[^>]+(?:name="(?:description|robots|twitter:[^"]+)"|property="og:[^"]+")[^>]*>/g,
+      "",
+    )
+    .replace(/<link[^>]+rel="canonical"[^>]*>/g, "");
+  const tags = `<title data-rh="true">${escape(seo.title)}</title>
+    <meta data-rh="true" name="description" content="${escape(seo.description)}"/>
+    <meta data-rh="true" name="robots" content="${escape(seo.robots || "index, follow")}"/>
+    <link data-rh="true" rel="canonical" href="${escape(url)}"/>
+    <meta data-rh="true" property="og:title" content="${escape(seo.title)}"/>
+    <meta data-rh="true" property="og:description" content="${escape(seo.description)}"/>
+    <meta data-rh="true" property="og:url" content="${escape(url)}"/>
+    <meta data-rh="true" property="og:type" content="website"/>
+    <meta data-rh="true" property="og:image" content="${SITE_ORIGIN}${seo.ogImage || "/images/meta-preview.png"}"/>`;
+  return result.replace("</head>", tags + "</head>");
 }
 
 export function log(message: string, source = "express") {
@@ -183,21 +211,19 @@ export function log(message: string, source = "express") {
 }
 
 export async function setupVite(app: Express, server: Server) {
-  const { createServer: createViteServer, createLogger, defineConfig } =
-    await import("vite");
+  const {
+    createServer: createViteServer,
+    createLogger,
+    defineConfig,
+  } = await import("vite");
   const react = (await import("@vitejs/plugin-react")).default;
-  const themePlugin = (
-    await import("@replit/vite-plugin-shadcn-theme-json")
-  ).default;
+  const themePlugin = (await import("@replit/vite-plugin-shadcn-theme-json"))
+    .default;
   const runtimeErrorOverlay = (
     await import("@replit/vite-plugin-runtime-error-modal")
   ).default;
 
-  const plugins = [
-    react(),
-    runtimeErrorOverlay(),
-    themePlugin(),
-  ];
+  const plugins = [react(), runtimeErrorOverlay(), themePlugin()];
 
   if (
     process.env.NODE_ENV !== "production" &&
@@ -280,12 +306,17 @@ export async function setupVite(app: Express, server: Server) {
         `src="/src/main.tsx"`,
         `src="/src/main.tsx?v=${nanoid()}"`,
       );
-      
+
       // Inject correct canonical and robots meta for this route
       template = injectSeoTags(template, requestPath);
-      
+
       const page = await vite.transformIndexHtml(url, template);
-      res.status(200).set({ "Content-Type": "text/html" }).end(page);
+      res
+        .status(
+          ROUTE_SEO[requestPath] || requestPath === "/dev/feedback" ? 200 : 404,
+        )
+        .set({ "Content-Type": "text/html" })
+        .end(page);
     } catch (e) {
       vite.ssrFixStacktrace(e as Error);
       next(e);
@@ -304,22 +335,17 @@ export function serveStatic(app: Express) {
 
   app.use(
     express.static(distPath, {
+      index: false,
       setHeaders(res, _filePath) {
         const urlPath = res.req?.url ?? "";
 
         if (urlPath.startsWith("/assets/")) {
-          res.setHeader(
-            "Cache-Control",
-            "public, max-age=31536000, immutable",
-          );
+          res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
           return;
         }
 
         if (urlPath.startsWith("/hero/")) {
-          res.setHeader(
-            "Cache-Control",
-            "public, max-age=31536000, immutable",
-          );
+          res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
           return;
         }
 
@@ -351,16 +377,27 @@ export function serveStatic(app: Express) {
       return res.status(404).send("Not found");
     }
 
-    const indexPath = path.resolve(distPath, "index.html");
-    
+    const prebuilt = path.resolve(
+      distPath,
+      "../prerender",
+      encodeURIComponent(requestPath) + ".html",
+    );
+    const indexPath =
+      ROUTE_SEO[requestPath] && fs.existsSync(prebuilt)
+        ? prebuilt
+        : path.resolve(distPath, "index.html");
+
     fs.readFile(indexPath, "utf-8", (err, html) => {
       if (err) {
         res.status(500).send("Error loading page");
         return;
       }
-      
+
       const modifiedHtml = injectSeoTags(html, requestPath);
-      res.set("Content-Type", "text/html").send(modifiedHtml);
+      res
+        .status(ROUTE_SEO[requestPath] ? 200 : 404)
+        .set("Content-Type", "text/html")
+        .send(modifiedHtml);
     });
   });
 }

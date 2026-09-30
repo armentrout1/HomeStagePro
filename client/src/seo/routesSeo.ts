@@ -9,10 +9,16 @@ export type RouteSeo = {
 export const SITE_ORIGIN = "https://roomstagerpro.com";
 
 export const ROUTE_SEO: Record<string, RouteSeo> = {
+  "/access": {
+    title: "My access & saved images | RoomStagerPro",
+    description: "Reopen your RoomStagerPro pack without a password.",
+    canonicalPath: "/access",
+    robots: "noindex, nofollow",
+  },
   "/": {
     title: "RoomStagerPro - AI-Powered Virtual Room Staging",
     description:
-      "Transform empty rooms into beautifully staged spaces in seconds using RoomStagerPro's AI virtual staging platform.",
+      "AI virtual staging from $9 for 5 images. Furnish empty rooms or replace furniture, preserve protected areas, and download your staged photos.",
     canonicalPath: "/",
     ogImage: "/images/meta-preview.png",
   },
@@ -40,7 +46,7 @@ export const ROUTE_SEO: Record<string, RouteSeo> = {
   "/virtual-staging": {
     title: "Virtual Staging Services | RoomStagerPro",
     description:
-      "Modernize listings fast with AI virtual staging, before/after proof, and transparent packages from RoomStagerPro. Book a consult in minutes.",
+      "Modernize listings fast with AI virtual staging, before/after proof, and transparent packages from RoomStagerPro. Choose a credit pack and stage your first photo.",
     canonicalPath: "/virtual-staging",
     ogImage: "/images/meta-preview.png",
   },
@@ -68,7 +74,7 @@ export const ROUTE_SEO: Record<string, RouteSeo> = {
   "/virtual-staging-for-short-term-rentals": {
     title: "Virtual Staging for Short-Term Rentals | Boost Airbnb Bookings",
     description:
-      "Professional virtual staging for Airbnb and VRBO properties. Increase bookings by 40% with AI-powered furniture placement. Transform empty rentals into desirable stays.",
+      "Explore virtual staging for rental design concepts. Clearly label edited images and keep booking photos accurate to what guests will receive.",
     canonicalPath: "/virtual-staging-for-short-term-rentals",
     ogImage: "/images/meta-preview.png",
   },
@@ -82,7 +88,7 @@ export const ROUTE_SEO: Record<string, RouteSeo> = {
   "/how-it-works": {
     title: "How RoomStagerPro Works | Fast AI Staging Workflow",
     description:
-      "See the four-step RoomStagerPro workflow: upload photos, pick a style, get 24-hour AI turnarounds, and download MLS-ready files.",
+      "Learn how to upload a photo, select the furniture area, generate a staged image, and review it before publishing.",
     canonicalPath: "/how-it-works",
     ogImage: "/images/meta-preview.png",
   },

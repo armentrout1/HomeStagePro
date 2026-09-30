@@ -21,7 +21,7 @@ export function FeedbackTabButton() {
       <button
         type="button"
         onClick={handleOpen}
-        className="md:hidden fixed bottom-4 right-4 z-50 rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-slate-800"
+        className="md:hidden relative my-4 mx-4 rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-slate-800"
         aria-label="Open feedback drawer"
       >
         Feedback

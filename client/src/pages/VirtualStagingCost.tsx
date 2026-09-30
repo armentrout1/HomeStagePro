@@ -4,18 +4,15 @@ import { Button } from "@/components/ui/button";
 const costDrivers = [
   {
     title: "Photo prep",
-    copy:
-      "Bright, clutter-free photos reduce cleanup time. If a shot is dark or tilted, expect to spend an extra credit rerunning the room until it looks right.",
+    copy: "Bright, clutter-free photos reduce cleanup time. If a shot is dark or tilted, expect to spend an extra credit rerunning the room until it looks right.",
   },
   {
     title: "Room type",
-    copy:
-      "Living rooms and bedrooms usually stage fastest. Kitchens or flex/office spaces can need additional reruns to showcase appliances or workspace goals.",
+    copy: "Living rooms and bedrooms usually stage fastest. Kitchens or flex/office spaces can need additional reruns to showcase appliances or workspace goals.",
   },
   {
     title: "Number of angles",
-    copy:
-      "Each uploaded angle uses its own credit. Plan for one credit per final render you need in your listing set.",
+    copy: "Each uploaded angle uses its own credit. Plan for one credit per final render you need in your listing set.",
   },
 ];
 
@@ -31,27 +28,24 @@ const packOptions = [
     description: "20 stagings for active sellers or small teams",
   },
   {
-    name: "Pro Monthly",
+    name: "Pro Pack",
     price: "$49",
-    description: "50 stagings that refresh every month",
+    description: "50 stagings, valid for 30 days. One-time purchase.",
   },
 ];
 
 const budgetingTips = [
   {
     title: "Estimate credits per property",
-    body:
-      "Most listings use 3–6 rendered rooms. Multiply that by the pack that fits your cadence so you never run out mid-launch.",
+    body: "Most listings use 3–6 rendered rooms. Multiply that by the pack that fits your cadence so you never run out mid-launch.",
   },
   {
     title: "Build disclosure time into pricing",
-    body:
-      "Downloads are clean JPG/PNG files. Budget a few minutes to add your local “virtually staged” caption or overlay before uploading to MLS or OTAs.",
+    body: "Downloads are clean JPG/PNG files. Budget a few minutes to add your local “virtually staged” caption or overlay before uploading to MLS or OTAs.",
   },
   {
     title: "Use reruns instead of revisions",
-    body:
-      "If a render misses the mark, rerun the room with another credit. This keeps costs transparent and avoids waiting on manual edits.",
+    body: "If a render misses the mark, rerun the room with another credit. This keeps costs transparent and avoids waiting on manual edits.",
   },
 ];
 
@@ -59,7 +53,7 @@ const faq = [
   {
     question: "How much does virtual staging cost here?",
     answer:
-      "Credit packs start at 5 for $9, with larger bundles at 20 for $25 or 50 monthly for $49. Each render consumes one credit.",
+      "Credit packs start at 5 for $9, with larger bundles at 20 for $25 or 50 for $49 (valid for 30 days). Each render consumes one credit.",
   },
   {
     question: "How fast are the results?",
@@ -74,18 +68,18 @@ const faq = [
   {
     question: "Can I request revisions?",
     answer:
-      "The MVP is self-serve. Instead of a revision button, rerun the room with another credit until you like the result.",
+      "Choose an editable area and a furniture mode before generating. Each completed image uses one credit; failed generations restore the credit.",
   },
   {
     question: "What happens if I need more credits mid-month?",
     answer:
-      "You can buy another pack anytime. Monthly plans refresh automatically, while one-off packs never expire.",
+      "You can buy another pack anytime. Every pack is a one-time purchase. Quick and Value packs last 365 days; Pro packs last 30 days. There is no automatic renewal.",
   },
 ];
 
 const relatedResources = [
   { href: "/gallery", label: "AI staging gallery" },
-  { href: "/sales", label: "Sales & onboarding workspace" },
+  { href: "/sales", label: "Pricing and credit packs" },
   { href: "/virtual-staging", label: "Virtual staging overview" },
   { href: "/virtual-staging-cost", label: "Virtual staging cost breakdown" },
   {
@@ -104,13 +98,20 @@ const VirtualStagingCost = () => {
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-16 px-4 py-16">
       <header className="space-y-6">
-        <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Pricing Guide</p>
-        <h1 className="text-4xl font-semibold">Virtual staging costs for the HomeStage Pro MVP</h1>
+        <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
+          Pricing Guide
+        </p>
+        <h1 className="text-4xl font-semibold">
+          RoomStagerPro pricing: from $0.98 per image
+        </h1>
         <p className="text-lg text-muted-foreground">
-          Purchase the pack that fits your listing cadence: 5 for $9, 20 for $25, or 50 monthly for $49. Each render uses one credit and usually finishes within a few minutes.
+          Purchase the pack that fits your listing cadence: 5 for $9, 20 for
+          $25, or 50 for $49 (valid for 30 days). Each render uses one credit
+          and usually finishes within a few minutes.
         </p>
         <p className="text-sm text-muted-foreground">
-          For a full breakdown of plans and to purchase credits, see our virtual staging pricing and plans.
+          For a full breakdown of plans and to purchase credits, see our virtual
+          staging pricing and plans.
         </p>
         <div className="flex flex-wrap gap-3">
           <Button asChild size="lg">
@@ -123,17 +124,25 @@ const VirtualStagingCost = () => {
       </header>
 
       <section className="space-y-6">
-        <h2 className="text-3xl font-semibold">What drives your credit spend</h2>
+        <h2 className="text-3xl font-semibold">
+          What drives your credit spend
+        </h2>
         <div className="grid gap-4 md:grid-cols-3">
           {costDrivers.map((factor) => (
-            <article key={factor.title} className="rounded-2xl border border-border p-4">
+            <article
+              key={factor.title}
+              className="rounded-2xl border border-border p-4"
+            >
               <h3 className="text-lg font-semibold">{factor.title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{factor.copy}</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {factor.copy}
+              </p>
             </article>
           ))}
         </div>
         <p className="text-sm text-muted-foreground">
-          There are no rush tiers or built-in revisions. If you want a different look, just re-stage the room with another credit.
+          There are no rush tiers or built-in revisions. If you want a different
+          look, just re-stage the room with another credit.
         </p>
       </section>
 
@@ -141,15 +150,23 @@ const VirtualStagingCost = () => {
         <h2 className="text-3xl font-semibold">Pack options</h2>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {packOptions.map((pack) => (
-            <article key={pack.name} className="rounded-2xl border border-border p-4">
-              <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground">{pack.name}</p>
+            <article
+              key={pack.name}
+              className="rounded-2xl border border-border p-4"
+            >
+              <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground">
+                {pack.name}
+              </p>
               <p className="mt-2 text-2xl font-bold">{pack.price}</p>
-              <p className="text-sm text-muted-foreground">{pack.description}</p>
+              <p className="text-sm text-muted-foreground">
+                {pack.description}
+              </p>
             </article>
           ))}
         </div>
         <p className="text-sm text-muted-foreground">
-          One-off packs never expire. Pro Monthly refreshes to 50 credits every 30 days so teams with regular listings always have inventory.
+          Quick and Value packs are valid for 365 days. Pro Pack includes 50
+          credits valid for 30 days. No pack renews automatically.
         </p>
       </section>
 
@@ -157,7 +174,10 @@ const VirtualStagingCost = () => {
         <h2 className="text-3xl font-semibold">Budgeting tips</h2>
         <div className="space-y-4">
           {budgetingTips.map((tip) => (
-            <article key={tip.title} className="rounded-2xl border border-border p-4">
+            <article
+              key={tip.title}
+              className="rounded-2xl border border-border p-4"
+            >
               <h3 className="text-lg font-semibold">{tip.title}</h3>
               <p className="mt-2 text-sm text-muted-foreground">{tip.body}</p>
             </article>
@@ -166,10 +186,13 @@ const VirtualStagingCost = () => {
       </section>
 
       <section className="rounded-2xl border border-border bg-muted/40 p-8 text-center">
-        <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground">CTA</p>
+        <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground">
+          CTA
+        </p>
         <h3 className="mt-2 text-2xl font-semibold">Plan your next upload</h3>
         <p className="text-sm text-muted-foreground">
-          Launch the uploader with your purchased credits or grab another pack before the next listing cycle hits.
+          Launch the uploader with your purchased credits or grab another pack
+          before the next listing cycle hits.
         </p>
         <div className="mt-5 flex flex-wrap justify-center gap-3">
           <Button asChild size="lg">
@@ -185,14 +208,20 @@ const VirtualStagingCost = () => {
         <h2 className="text-3xl font-semibold">FAQ</h2>
         <div className="space-y-4">
           {faq.map((item) => (
-            <article key={item.question} className="rounded-2xl border border-border p-4">
+            <article
+              key={item.question}
+              className="rounded-2xl border border-border p-4"
+            >
               <h3 className="text-lg font-semibold">{item.question}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{item.answer}</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {item.answer}
+              </p>
             </article>
           ))}
         </div>
         <p className="text-sm text-muted-foreground">
-          Need more detail? Pair this cost guide with the workflow overview at {""}
+          Need more detail? Pair this cost guide with the workflow overview at{" "}
+          {""}
           <Link href="/virtual-staging" className="text-primary underline">
             /virtual-staging
           </Link>{" "}
@@ -203,12 +232,16 @@ const VirtualStagingCost = () => {
       <section className="rounded-2xl border border-border bg-muted/40 p-8">
         <h2 className="text-2xl font-semibold">Related resources</h2>
         <p className="mt-2 text-muted-foreground">
-          Explore complementary guides on workflow, pricing narratives, and visual proof to strengthen your cost breakdown.
+          Explore complementary guides on workflow, pricing narratives, and
+          visual proof to strengthen your cost breakdown.
         </p>
         <ul className="mt-6 grid gap-3 sm:grid-cols-2">
           {relatedResources.map((resource) => (
             <li key={resource.href}>
-              <Link href={resource.href} className="text-sm font-medium text-primary underline">
+              <Link
+                href={resource.href}
+                className="text-sm font-medium text-primary underline"
+              >
                 {resource.label}
               </Link>
             </li>

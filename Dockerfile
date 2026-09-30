@@ -1,4 +1,4 @@
-FROM node:20-slim AS builder
+FROM node:24-slim AS builder
 WORKDIR /app
 
 # Install all dependencies for building
@@ -9,7 +9,7 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-FROM node:20-slim AS runner
+FROM node:24-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
@@ -19,6 +19,7 @@ RUN npm ci --omit=dev
 
 # Copy built server output
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/migrations ./migrations
 
 # Allow overriding the exposed port (Railway injects PORT)
 EXPOSE 5000

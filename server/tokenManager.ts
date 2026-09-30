@@ -1,3 +1,4 @@
+import { client } from "./db";
 import { randomUUID } from "crypto";
 import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
@@ -39,8 +40,11 @@ export interface TokenResult {
 
 export const ACCESS_TOKEN_COOKIE_NAME = "access_token";
 
-export function generateToken(planIdRaw: string, existingJti?: string): TokenResult {
-
+export function generateToken(
+  planIdRaw: string,
+  existingJti?: string,
+  fixedExpiresAt?: number,
+): TokenResult {
   const planId = resolvePlanId(planIdRaw);
 
   if (!planId) {
@@ -59,7 +63,8 @@ export function generateToken(planIdRaw: string, existingJti?: string): TokenRes
     tokenType: config.tokenType,
     usesLeft: config.uses,
     totalUses: config.uses,
-    expiresAt: getExpirationTimestamp(config.durationDays, now),
+    expiresAt:
+      fixedExpiresAt ?? getExpirationTimestamp(config.durationDays, now),
     quality: config.quality,
   };
 
@@ -83,7 +88,7 @@ export function setAccessTokenCookie(res: Response, result: TokenResult) {
 
   res.cookie(ACCESS_TOKEN_COOKIE_NAME, result.token, {
     httpOnly: true,
-    secure: true,
+    secure: process.env.NODE_ENV === "production",
     sameSite: "lax" as const,
     path: "/",
     maxAge: diffMs,
@@ -101,14 +106,12 @@ export function verifyToken(token: string): TokenPayload | null {
   try {
     return jwt.verify(token, TOKEN_SECRET) as TokenPayload;
   } catch (error) {
-    console.error("Token verification failed:", error);
+    // Expired or malformed credentials are expected; never log tokens.
     return null;
   }
 }
 
-export function decrementTokenUsage(
-  payload: TokenPayload,
-): TokenResult | null {
+export function decrementTokenUsage(payload: TokenPayload): TokenResult | null {
   if (payload.usesLeft <= 0) {
     return null;
   }
@@ -160,13 +163,36 @@ export function checkAccessToken(
   next();
 }
 
-export function requirePaidAccess(
+export async function requirePaidAccess(
   req: Request,
   res: Response,
   next: NextFunction,
 ) {
   if (hasValidAccess(req)) {
-    return next();
+    try {
+      const grants =
+        await client`SELECT expires_at,revoked_at FROM access_grants WHERE token_id=${getTokenIdFromRequest(req)!}`;
+      // Preserve legacy cookies until their original expiry; migrated packs additionally support revocation.
+      if (
+        grants.length &&
+        !grants.some(
+          (g) => !g.revoked_at && new Date(g.expires_at).getTime() > Date.now(),
+        )
+      ) {
+        clearAccessToken(res);
+        return res
+          .status(401)
+          .json({
+            error:
+              "This pack is no longer active. Open your current email link.",
+          });
+      }
+      return next();
+    } catch {
+      return res
+        .status(503)
+        .json({ error: "Unable to verify access. Please retry." });
+    }
   }
 
   return res.status(402).json({

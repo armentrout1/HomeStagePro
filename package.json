@@ -5,12 +5,14 @@
   "license": "MIT",
   "scripts": {
     "dev": "tsx --env-file=.env server/index.ts",
-    "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
+    "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/index.js && esbuild scripts/migrate-access.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/migrate-access.js && esbuild scripts/prerender.tsx --bundle --platform=node --format=cjs --jsx=automatic --define:import.meta.env.DEV=false --outfile=dist/prerender.cjs && node dist/prerender.cjs",
     "start": "NODE_ENV=production node dist/index.js",
     "check": "tsc",
     "db:push": "drizzle-kit push",
     "optimize:gallery": "node scripts/optimize-gallery-images.mjs",
-    "security:probe": "node scripts/security-probe-check.mjs"
+    "security:probe": "node scripts/security-probe-check.mjs",
+    "test": "tsx --test tests/*.test.ts",
+    "migrate:access": "tsx scripts/migrate-access.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
@@ -56,7 +58,7 @@
     "connect-pg-simple": "^10.0.0",
     "cookie-parser": "^1.4.7",
     "date-fns": "^3.6.0",
-    "drizzle-orm": "^0.39.1",
+    "drizzle-orm": "^0.45.3",
     "drizzle-zod": "^0.7.0",
     "embla-carousel-react": "^8.3.0",
     "express": "^4.21.2",
@@ -68,7 +70,7 @@
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.453.0",
     "memorystore": "^1.6.7",
-    "openai": "^4.91.1",
+    "openai": "^7.25.0",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
     "postgres": "^3.4.5",
@@ -80,7 +82,7 @@
     "react-icons": "^5.4.0",
     "react-resizable-panels": "^2.1.4",
     "recharts": "^2.13.0",
-    "sharp": "^0.34.5",
+    "sharp": "^0.35.5",
     "stripe": "^18.0.0",
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7",

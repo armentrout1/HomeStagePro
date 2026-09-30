@@ -89,7 +89,9 @@ export const properties = pgTable("properties", {
   bedrooms: integer("bedrooms"),
   bathrooms: integer("bathrooms"),
   squareFeet: integer("square_feet"),
-  featuredImageId: integer("featured_image_id").references(() => stagedImages.id),
+  featuredImageId: integer("featured_image_id").references(
+    () => stagedImages.id,
+  ),
   isStaged: boolean("is_staged").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -124,32 +126,46 @@ export const propertiesRelations = relations(properties, ({ one, many }) => ({
 }));
 
 // Stripe purchases table
-export const stripePurchases = pgTable("stripe_purchases", {
-  id: bigserial("id", { mode: "number" }).primaryKey(),
-  stripeEventId: text("stripe_event_id").notNull(),
-  checkoutSessionId: text("checkout_session_id").notNull(),
-  paymentIntentId: text("payment_intent_id"),
-  planId: text("plan_id").notNull(),
-  planLabel: text("plan_label"),
-  amountTotalCents: integer("amount_total_cents").notNull(),
-  currency: text("currency").notNull(),
-  paymentStatus: text("payment_status").notNull(),
-  livemode: boolean("livemode").notNull().default(false),
-  environment: text("environment").notNull().default("test"),
-  customerEmail: text("customer_email"),
-  cardBrand: text("card_brand"),
-  cardLast4: text("card_last4"),
-  receiptUrl: text("receipt_url"),
-  stripeEvent: jsonb("stripe_event"),
-  stripeSession: jsonb("stripe_session"),
-  tokenId: text("token_id"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, (table) => ({
-  uxStripeEventId: uniqueIndex("ux_stripe_purchases_event_id").on(table.stripeEventId),
-  ixCheckoutSessionId: index("ix_stripe_purchases_checkout_session_id").on(table.checkoutSessionId),
-  ixPaymentIntentId: index("ix_stripe_purchases_payment_intent_id").on(table.paymentIntentId),
-  ixCreatedAt: index("ix_stripe_purchases_created_at").on(table.createdAt.desc()),
-}));
+export const stripePurchases = pgTable(
+  "stripe_purchases",
+  {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    stripeEventId: text("stripe_event_id").notNull(),
+    checkoutSessionId: text("checkout_session_id").notNull(),
+    paymentIntentId: text("payment_intent_id"),
+    planId: text("plan_id").notNull(),
+    planLabel: text("plan_label"),
+    amountTotalCents: integer("amount_total_cents").notNull(),
+    currency: text("currency").notNull(),
+    paymentStatus: text("payment_status").notNull(),
+    livemode: boolean("livemode").notNull().default(false),
+    environment: text("environment").notNull().default("test"),
+    customerEmail: text("customer_email"),
+    cardBrand: text("card_brand"),
+    cardLast4: text("card_last4"),
+    receiptUrl: text("receipt_url"),
+    stripeEvent: jsonb("stripe_event"),
+    stripeSession: jsonb("stripe_session"),
+    tokenId: text("token_id"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => ({
+    uxStripeEventId: uniqueIndex("ux_stripe_purchases_event_id").on(
+      table.stripeEventId,
+    ),
+    ixCheckoutSessionId: index("ix_stripe_purchases_checkout_session_id").on(
+      table.checkoutSessionId,
+    ),
+    ixPaymentIntentId: index("ix_stripe_purchases_payment_intent_id").on(
+      table.paymentIntentId,
+    ),
+    ixCreatedAt: index("ix_stripe_purchases_created_at").on(
+      table.createdAt.desc(),
+    ),
+  }),
+);
 
 export type StripePurchase = typeof stripePurchases.$inferSelect;
 export type InsertStripePurchase = typeof stripePurchases.$inferInsert;
@@ -162,8 +178,12 @@ export const usageEntitlements = pgTable(
     freeUsed: integer("free_used").notNull().default(0),
     paidGranted: integer("paid_granted").notNull().default(0),
     paidUsed: integer("paid_used").notNull().default(0),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
   },
   (table) => ({
     uxUsageEntitlementsToken: uniqueIndex("ux_usage_entitlements_token").on(
@@ -182,11 +202,17 @@ export const ipFreeUsage = pgTable(
     ipHash: text("ip_hash").notNull(),
     freeUsed: integer("free_used").notNull().default(0),
     freeLimit: integer("free_limit").notNull().default(2),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
   },
   (table) => ({
-    uxIpFreeUsageIpHash: uniqueIndex("ux_ip_free_usage_ip_hash").on(table.ipHash),
+    uxIpFreeUsageIpHash: uniqueIndex("ux_ip_free_usage_ip_hash").on(
+      table.ipHash,
+    ),
   }),
 );
 
@@ -210,10 +236,14 @@ export const feedbackSubmissions = pgTable("feedback_submissions", {
   watermarkPreference: text("watermark_preference"),
   watermarkTextPreference: text("watermark_text_preference"),
   freeformFeedback: text("freeform_feedback"),
-  canPublishTestimonial: boolean("can_publish_testimonial").notNull().default(false),
+  canPublishTestimonial: boolean("can_publish_testimonial")
+    .notNull()
+    .default(false),
   testimonialName: text("testimonial_name"),
   testimonialCompany: text("testimonial_company"),
-  canShareBeforeAfter: boolean("can_share_before_after").notNull().default(false),
+  canShareBeforeAfter: boolean("can_share_before_after")
+    .notNull()
+    .default(false),
   jobId: text("job_id"),
   planType: text("plan_type"),
   roomType: text("room_type"),
@@ -225,3 +255,55 @@ export const feedbackSubmissions = pgTable("feedback_submissions", {
 
 export type FeedbackSubmission = typeof feedbackSubmissions.$inferSelect;
 export type InsertFeedbackSubmission = typeof feedbackSubmissions.$inferInsert;
+
+export const accessGrants = pgTable(
+  "access_grants",
+  {
+    sessionId: text("session_id").primaryKey(),
+    tokenId: text("token_id").notNull(),
+    planId: text("plan_id").notNull(),
+    email: text("email"),
+    linkHash: text("link_hash").notNull().unique(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => ({ emailIdx: index("access_grants_email_idx").on(table.email) }),
+);
+export const accessEmailOutbox = pgTable("access_email_outbox", {
+  id: uuid("id").primaryKey(),
+  sessionId: text("session_id")
+    .notNull()
+    .references(() => accessGrants.sessionId),
+  attempts: integer("attempts").notNull().default(0),
+  availableAt: timestamp("available_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  sentAt: timestamp("sent_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+export const stagingJobs = pgTable(
+  "staging_jobs",
+  {
+    id: uuid("id").primaryKey(),
+    tokenId: text("token_id").notNull(),
+    inputHash: text("input_hash").notNull(),
+    state: text("state").notNull(),
+    result: jsonb("result"),
+    error: text("error"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+  },
+  (table) => ({
+    ownerIdx: index("staging_jobs_owner_idx").on(
+      table.tokenId,
+      table.createdAt.desc(),
+    ),
+  }),
+);

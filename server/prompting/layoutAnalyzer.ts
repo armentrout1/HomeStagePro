@@ -101,7 +101,7 @@ const FALLBACK_CONSTRAINTS: LayoutConstraints = {
 
 const tryParseConstraintsFromText = (
   text: string,
-  source: string
+  source: string,
 ): LayoutConstraints | null => {
   try {
     const parsed = JSON.parse(text);
@@ -110,14 +110,14 @@ const tryParseConstraintsFromText = (
     console.error(
       `[layoutAnalyzer] Failed to parse analyzer JSON from ${source}: ${
         (error as Error).message
-      }`
+      }`,
     );
     return null;
   }
 };
 
 const extractConstraintsFromResponse = (
-  response: ResponsesJSONResult
+  response: ResponsesJSONResult,
 ): LayoutConstraints => {
   const outputMessages = response.output || [];
 
@@ -133,7 +133,7 @@ const extractConstraintsFromResponse = (
       ) {
         const parsed = tryParseConstraintsFromText(
           part.text,
-          `response.output message part`
+          `response.output message part`,
         );
         if (parsed) {
           return parsed;
@@ -146,7 +146,7 @@ const extractConstraintsFromResponse = (
   if (fallback) {
     const parsed = tryParseConstraintsFromText(
       fallback,
-      "response.output_text[0]"
+      "response.output_text[0]",
     );
     if (parsed) {
       return parsed;
@@ -154,7 +154,7 @@ const extractConstraintsFromResponse = (
   }
 
   console.error(
-    "[layoutAnalyzer] Falling back to empty constraints because no structured JSON was returned."
+    "[layoutAnalyzer] Falling back to empty constraints because no structured JSON was returned.",
   );
   return FALLBACK_CONSTRAINTS;
 };
@@ -211,7 +211,10 @@ export const analyzeRoomLayout = async ({
     },
   } as Parameters<typeof openai.responses.create>[0];
 
-  const response = (await openai.responses.create(payload)) as unknown as ResponsesJSONResult;
+  const response = (await openai.responses.create(
+    { ...payload, store: false },
+    { timeout: 30_000, maxRetries: 0 },
+  )) as unknown as ResponsesJSONResult;
 
   return extractConstraintsFromResponse(response);
 };
