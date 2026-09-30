@@ -473,6 +473,7 @@ test("atomic checkout, private reusable access, credits, saved jobs, and exact m
             (init!.headers as Record<string, string>)["Idempotency-Key"],
           );
           const body = JSON.parse(init!.body as string);
+          assert.equal(body.reply_to, "aaron@aprkc.com");
           assert.match(body.text, /https:\/\/roomstagerpro.com\/access#token=/);
           return new Response("{}", { status: ++attempts === 1 ? 503 : 200 });
         };
@@ -496,6 +497,39 @@ test("atomic checkout, private reusable access, credits, saved jobs, and exact m
         }
       },
     );
+    await t.test("quota deferral preserves attempts and delivers after reset", async () => {
+      await client`UPDATE access_email_outbox SET sent_at=now()`;
+      await fulfillCheckout(session("cs_email_quota"));
+      const realFetch = globalThis.fetch;
+      process.env.RESEND_API_KEY = "test-provider-only";
+      process.env.ACCESS_EMAIL_FROM = "RoomStagerPro <test@example.invalid>";
+      const keys: string[] = [];
+      globalThis.fetch = async (_url, init) => {
+        keys.push((init!.headers as Record<string, string>)["Idempotency-Key"]);
+        return keys.length === 1
+          ? Response.json({ name: "daily_quota_exceeded" }, { status: 429 })
+          : Response.json({ id: "test-email" });
+      };
+      try {
+        await deliverAccessEmails();
+        const [pending] = await client`SELECT * FROM access_email_outbox WHERE session_id='cs_email_quota'`;
+        assert.equal(pending.sent_at, null);
+        assert.equal(pending.attempts, 0);
+        assert.ok(new Date(pending.available_at).getTime() > Date.now());
+        await deliverAccessEmails();
+        assert.equal(keys.length, 1);
+        await client`UPDATE access_email_outbox SET available_at=now() WHERE id=${pending.id}`;
+        await deliverAccessEmails();
+        const [done] = await client`SELECT * FROM access_email_outbox WHERE id=${pending.id}`;
+        assert.ok(done.sent_at);
+        assert.equal(done.attempts, 1);
+        assert.equal(keys[0], keys[1]);
+      } finally {
+        globalThis.fetch = realFetch;
+        delete process.env.RESEND_API_KEY;
+        delete process.env.ACCESS_EMAIL_FROM;
+      }
+    });
   } finally {
     await new Promise<void>((resolve) => server.close(() => resolve()));
     await client.end();

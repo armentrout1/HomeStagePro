@@ -16,7 +16,7 @@ Nineteen public pages are prerendered with route-specific initial metadata. Priv
 
 - Keep the existing OPENAI_API_KEY, JWT_SECRET, Stripe keys, DATABASE_URL and Supabase settings. Do not rotate JWT_SECRET as part of this rollout: it signs legacy cookies and derives reusable links.
 - PUBLIC_APP_URL must be the environment's correct public HTTPS origin; production is https://roomstagerpro.com. It controls both checkout return URLs and emailed links.
-- Add RESEND_API_KEY and ACCESS_EMAIL_FROM for a verified sending domain, or adapt the small delivery adapter to the owner's existing provider. No provider is currently configured and no real access email has been sent. Do not paste keys into a PR or chat.
+- Add a sending-only RESEND_API_KEY restricted to the verified send.roomstagerpro.com domain, with ACCESS_EMAIL_FROM="RoomStagerPro <access@send.roomstagerpro.com>". ACCESS_EMAIL_REPLY_TO defaults to aaron@aprkc.com. Disable open/click tracking for this domain. Resend is selected but credentials/domain verification and a real delivery test remain pending. Do not paste keys into a PR or chat.
 - Optional explicit model settings: STAGING_IMAGE_MODEL=gpt-image-2.5-sunburst and STAGING_REVIEW_MODEL=gpt-6-luna. Both were tested using the existing OpenAI key.
 - Railway pre-deploy command: `node dist/migrate-access.js`.
 - Railway healthcheck path: `/api/health`. It returns 503 when required tables are absent or the DB is unreachable.
@@ -36,7 +36,7 @@ Railway's accept_deploy tool explicitly requires the user's confirmation to depl
 ## Validation completed
 
 - `npm run check`: passed. GitHub Actions verify job also passed on commit 2cb4eba (run 36759597833).
-- `npm test` with an isolated loopback Postgres database: 13 passing tests (12 scenarios and parent test). Covers 20 repeated checkout fulfillments, legacy adoption, two-device link exchange, exact protected RGB pixels, duplicate requests, failed/stale refunds, last-credit concurrency, enumeration-safe recovery, input rejection, signed Stripe webhook retries, revocation and email provider retries/idempotency.
+- `npm test` with an isolated loopback Postgres database: 17 passing tests (13 integration scenarios, parent test, and three retry scheduling tests). Covers 20 repeated checkout fulfillments, legacy adoption, two-device link exchange, exact protected RGB pixels, duplicate requests, failed/stale refunds, last-credit concurrency, enumeration-safe recovery, input rejection, signed Stripe webhook retries, revocation and email provider retries/idempotency.
 - `npm run build`: passed; 19 public pages prerendered.
 - Built migration applied twice to the isolated local database: passed.
 - HTTP checks: all 19 public routes plus three private routes and an unknown route; unique initial title/description/robots/canonical, public H1 content, private noindex, 404, DB health, cross-site POST rejection and no-store API responses passed.
@@ -53,3 +53,7 @@ The reusable URL is a bearer credential: anyone it is forwarded to can use the p
 
 Keep current prices initially; compare indexed pages, non-branded impressions, landing-page clicks, checkout starts, paid conversions and repeat usage after launch. Publish real customer examples and improve existing relevant pages before scaling acquisition spend. No ranking or customer-volume improvement has yet been measured.
 
+
+## Resend quota behavior
+
+A daily quota response leaves the email queued until shortly after midnight UTC. Monthly quota responses recheck after 24 hours; rate limits honor Retry-After with a five-minute minimum. These explicit refusals do not consume the ordinary 20-attempt retry budget. Revoked or expired packs are discarded before delivery. Provider acceptance does not prove inbox delivery; check Resend delivery/bounce events during rollout.

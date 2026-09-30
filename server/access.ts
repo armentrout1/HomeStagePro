@@ -4,6 +4,7 @@ import type Stripe from "stripe";
 import { rateLimit } from "express-rate-limit";
 import { z } from "zod";
 import { client } from "./db";
+import { resendRetryAt } from "./emailRetry";
 import { getPlanConfig } from "./plans";
 import { generateToken, setAccessTokenCookie } from "./tokenManager";
 
@@ -184,11 +185,20 @@ export async function deliverAccessEmails() {
           },
           body: JSON.stringify({
             from: process.env.ACCESS_EMAIL_FROM,
+            reply_to: process.env.ACCESS_EMAIL_REPLY_TO || "aaron@aprkc.com",
             to: [g.email],
             subject: "Your RoomStagerPro access link",
             text: `Open your RoomStagerPro pack on any device:\n\n${accessUrl(g.session_id)}\n\nKeep this link private: anyone with it can use your pack. It remains valid until ${new Date(g.expires_at).toISOString().slice(0, 10)}. Your remaining credits are shared across devices. This link does not create a new purchase.\n\nReview each staged image before publishing and label it as virtually staged.`,
           }),
         });
+        if (reply.status === 429) {
+          const retryAt = await resendRetryAt(reply);
+          // Quota/rate-limit refusals are not failed deliveries. Keep the message
+          // queued without exhausting its retry budget before the quota resets.
+          await client`UPDATE access_email_outbox SET available_at=${retryAt.toISOString()}, attempts=GREATEST(attempts-1,0) WHERE id=${row.id}`;
+          console.error("Access email deferred: provider sending limit reached");
+          continue;
+        }
         if (!reply.ok) throw new Error(`email_provider_${reply.status}`);
         await client`UPDATE access_email_outbox SET sent_at=now() WHERE id=${row.id}`;
       } catch {
