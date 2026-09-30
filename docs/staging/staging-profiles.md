@@ -379,3 +379,5 @@ Future ideas / roadmap: [`docs/staging/staging-roadmap.md`](./staging-roadmap.md
 - Live tests: GPT-4o-mini accepted an intentionally clipped result; GPT-6 Luna rejected it. A subsequent complete pipeline test (edit, composite, review, private storage, signed download) succeeded with a larger, fixture-aware selection.
 
 - Preserve exposed flooring grain, joints, wall finishes and sharpness inside the edit selection. The secondary review rejects obvious surface changes, broad blur patches and artificial vignettes as well as geometry changes and clipped objects.
+
+- Provider mask is intentionally omitted: controlled edits with it repeatedly blurred exposed flooring. The alpha selection remains authoritative in local pixel restoration, followed by the image-quality gate. Region-boundary clipping is rejected rather than delivered.

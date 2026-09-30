@@ -415,22 +415,15 @@ CRITICAL PHOTOGRAPH PRESERVATION: Retain the exact visible floor material, wood-
       { type: decodedImage.mime },
     );
 
-    let maskFile: Awaited<ReturnType<typeof toFile>> | undefined;
-    if (maskDecoded) {
-      maskFile = await toFile(
-        Buffer.from(maskDecoded.bytes),
-        `mask.${maskDecoded.extension}`,
-        { type: maskDecoded.mime },
-      );
-    }
-
+    // The API mask caused broad floor blur in controlled room-photo tests.
+    // Edit the supplied photograph, then enforce the customer's alpha selection
+    // exactly in preserveProtectedPixels and reject incomplete/composited objects.
     const model = process.env.STAGING_IMAGE_MODEL || "gpt-image-2.5-sunburst";
     mark("openaiEditStart");
     const editParams: ImageEditParamsWithFidelity = {
       model,
       image: inputFile,
       prompt: finalPrompt,
-      mask: maskFile,
       ...(model.startsWith("gpt-image-1")
         ? { input_fidelity: "high" as const }
         : {}),
