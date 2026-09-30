@@ -1,6 +1,6 @@
 # RoomStagerPro access, image editing, and SEO release
 
-Status: implemented and locally verified; production has not been deployed.
+Status: implementation committed in draft PR #1; local checks and GitHub CI passed. Production has not been deployed. Email delivery and image-quality acceptance remain release gates.
 
 ## Behavior
 
@@ -35,13 +35,13 @@ Railway's accept_deploy tool explicitly requires the user's confirmation to depl
 
 ## Validation completed
 
-- `npm run check`: passed.
+- `npm run check`: passed. GitHub Actions verify job also passed on commit 2cb4eba (run 36759597833).
 - `npm test` with an isolated loopback Postgres database: 13 passing tests (12 scenarios and parent test). Covers 20 repeated checkout fulfillments, legacy adoption, two-device link exchange, exact protected RGB pixels, duplicate requests, failed/stale refunds, last-credit concurrency, enumeration-safe recovery, input rejection, signed Stripe webhook retries, revocation and email provider retries/idempotency.
 - `npm run build`: passed; 19 public pages prerendered.
 - Built migration applied twice to the isolated local database: passed.
 - HTTP checks: all 19 public routes plus three private routes and an unknown route; unique initial title/description/robots/canonical, public H1 content, private noindex, 404, DB health, cross-site POST rejection and no-store API responses passed.
 - Chrome desktop and 390px responsive checks: home/pricing/access pages, upload reaching edit controls, recovery form, navigation, no horizontal overflow on sampled pages. No observed browser console errors. Physical iPhone/Android testing is still outstanding; HEIC requires JPEG export.
-- Real furnish pipeline: 41.2 seconds; real removal pipeline: 34.5 seconds. The replacement path also completed in 37.6 seconds. These initially included model editing, protected-pixel restoration, automated review, private storage and signed download. The reviewer rejected an earlier clipped-furniture sample. Visual inspection identified a blurred floor in the furnish/replacement sample despite the initial automated approval. Editing instructions and the reviewer were tightened; the updated reviewer correctly rejects that known defective sample as surface_changed. Treat the successful initial API paths as plumbing tests, not quality approvals. This is a small living-room sample, not a broad quality benchmark.
+- Real furnish pipeline: 41.2 seconds; real removal pipeline: 34.5 seconds. The replacement path also completed in 37.6 seconds. These initially included model editing, protected-pixel restoration, automated review, private storage and signed download. The reviewer rejected an earlier clipped-furniture sample. Visual inspection identified a blurred floor in the furnish/replacement sample despite the initial automated approval. Editing instructions and the reviewer were tightened; the updated reviewer correctly rejects that known defective sample as surface_changed. Treat the successful initial API paths as plumbing tests, not quality approvals. Two additional Sunburst furnish attempts and a gpt-image-1.5 comparison were rejected by the stricter quality gate. A diagnostic Sunburst attempt confirmed surface_changed. This is a release blocker, not an acceptable success rate. This is a small living-room sample, not a broad quality benchmark.
 - `npm audit --omit=dev`: zero reported vulnerabilities. Full dependency audit still reports development/build-tool advisories; those major-version upgrades were not bundled into this release.
 - No real checkout was charged and no customer email was sent during these tests. Stripe route tests used signed synthetic events and a disposable database; email tests used a mocked provider.
 
@@ -52,3 +52,4 @@ Email delivery has a database outbox, 5-minute leases, retries with an idempoten
 The reusable URL is a bearer credential: anyone it is forwarded to can use the pack until expiry or revocation. It is hashed at rest, placed in the URL fragment, removed immediately by the access page, and exchanged for an HTTP-only cookie. Rate limits are per process; shared limits would be needed for a multi-instance rollout. Stronger review reduces obvious defects but cannot certify MLS compliance or guarantee architectural accuracy inside the editable mask.
 
 Keep current prices initially; compare indexed pages, non-branded impressions, landing-page clicks, checkout starts, paid conversions and repeat usage after launch. Publish real customer examples and improve existing relevant pages before scaling acquisition spend. No ranking or customer-volume improvement has yet been measured.
+
