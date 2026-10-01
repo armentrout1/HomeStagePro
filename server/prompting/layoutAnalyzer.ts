@@ -86,6 +86,9 @@ const normalizeConstraints = (raw: unknown): LayoutConstraints => {
   }
 
   const record = raw as Record<string, unknown>;
+  for (const key of ["noFurnitureZones", "preferredPlacements", "notes"]) {
+    if (!Array.isArray(record[key]) || !(record[key] as unknown[]).every(v => typeof v === "string")) throw new Error("Layout analysis returned invalid constraints");
+  }
 
   return {
     noFurnitureZones: formatList(record.noFurnitureZones),
@@ -94,11 +97,6 @@ const normalizeConstraints = (raw: unknown): LayoutConstraints => {
   };
 };
 
-const FALLBACK_CONSTRAINTS: LayoutConstraints = {
-  noFurnitureZones: [],
-  preferredPlacements: [],
-  notes: [],
-};
 
 const tryParseConstraintsFromText = (
   text: string,
@@ -155,9 +153,9 @@ const extractConstraintsFromResponse = (
   }
 
   console.error(
-    "[layoutAnalyzer] Falling back to empty constraints because no structured JSON was returned.",
+    "[layoutAnalyzer] No structured constraints were returned; staging will fail closed.",
   );
-  return FALLBACK_CONSTRAINTS;
+  throw new Error("Layout analysis did not return usable constraints");
 };
 
 export const analyzeRoomLayout = async ({
@@ -169,7 +167,7 @@ export const analyzeRoomLayout = async ({
   const dataUrl = `data:${mime};base64,${imageBase64}`;
 
   const payload = {
-    model: "gpt-4o-mini",
+    model: process.env.STAGING_LAYOUT_MODEL || "gpt-6-luna",
     input: [
       {
         role: "system",

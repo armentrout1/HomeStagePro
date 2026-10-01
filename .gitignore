@@ -6,3 +6,5 @@ vite.config.ts.*
 *.tar.gz
 .env
 temp/
+# Pinned segmentation weights are fetched during the image build.
+.model-cache/

@@ -285,14 +285,15 @@ test("atomic checkout, private reusable access, credits, saved jobs, and exact m
       assert.equal(after.paid_used, 1);
     });
     await t.test("removal preflight failures explain the correction and refund once", async () => {
-      const owner = await fulfillCheckout(session("cs_removal_preflight"));
-      let removalCookie = "";
-      activateGrant({cookie(name: string, value: string){removalCookie=`${name}=${value}`;}}, owner);
       for (const [code, expected] of [
+        ["QUALITY_REVIEW_FAILED", "clean, complete result"],
         ["NO_REMOVABLE_ITEMS", "No removable furniture"],
         ["REMOVAL_SELECTION_INCOMPLETE", "selection cuts through furniture"],
         ["REMOVAL_PLAN_UNCERTAIN", "could not confidently identify"],
       ]) {
+        const owner = await fulfillCheckout(session("cs_preflight_" + code));
+        let removalCookie = "";
+        activateGrant({cookie(name: string, value: string){removalCookie=`${name}=${value}`;}}, owner);
         failureCode=code;
         const id=randomUUID();
         assert.equal((await post("/api/generate-staged-room",{...payload,mode:"remove",requestId:id},removalCookie)).status,202);
@@ -385,6 +386,10 @@ test("atomic checkout, private reusable access, credits, saved jobs, and exact m
           ).status,
           400,
         );
+        const oversized = await sharp({ create: { width: 2049, height: 50, channels: 3, background: "white" } }).png().toBuffer();
+        const invalidId = randomUUID();
+        assert.equal((await post("/api/generate-staged-room", { ...payload, requestId: invalidId, image: oversized.toString("base64") }, invalidCookie)).status, 400);
+        assert.equal((await client`SELECT id FROM staging_jobs WHERE id=${invalidId}`).length, 0);
         assert.equal(calls, before);
       },
     );
