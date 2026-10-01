@@ -26,7 +26,7 @@ const probePaths = [
   { path: '/', expected: 200, type: 'SPA' },
   
   // API routes (should return their expected status codes)
-  { path: '/api/usage-status', expected: 402, type: 'API' },
+  { path: '/api/usage-status', expected: 200, type: 'API', anonymousUsage: true },
   { path: '/api/health', expected: 200, type: 'API' },
   
   // Static assets (should return 200)
@@ -47,7 +47,11 @@ async function checkPath(pathInfo) {
     });
     
     const status = response.status;
-    const passed = status === pathInfo.expected;
+    let passed = status === pathInfo.expected;
+    if (pathInfo.anonymousUsage && passed) {
+      const body = await response.json();
+      passed = body.status === 'payment_required' && body.totalRemaining === 0 && body.remaining === 0 && body.paidGranted === undefined && body.planId === undefined;
+    }
     
     return {
       ...pathInfo,

@@ -393,3 +393,6 @@ Editor guidance: include the complete furniture item, bedding and shadow in the 
 
 ### Release boundary verification
 The compositor blends only inward from fully protected pixels over at most 16 pixels (2% of the shorter image dimension for small photos). Fully protected pixels remain exact; the natural photograph edge and the edit interior are not faded. The image reviewer also checks tone seams and ghosted furniture. A fresh bedroom fixture passed with zero changed protected pixels; this narrow sample is not a general acceptance-rate guarantee. Keep a margin around complete objects in the selection.
+
+### Mode-specific release checks
+Removal uses a separate selection prompt with no furniture-placement instructions; it explicitly removes the main bed/sofa and reconstructs the newly exposed surfaces. Replacement explicitly requires visibly different main-furniture design or styling, and the reviewer rejects unchanged furniture with only accessories removed. In a public bedroom diagnostic, furnishing and revised replacement passed with zero changed protected pixels. Revised removal emptied the room but was rejected for a surface change. Keep this rejection and credit-restoration behavior; do not weaken the quality gate or infer a general acceptance rate from these samples.
