@@ -20,4 +20,5 @@ dist
 logs
 *.log
 tmp
+temp
 *.tmp

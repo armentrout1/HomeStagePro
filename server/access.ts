@@ -7,6 +7,8 @@ import { client } from "./db";
 import { resendRetryAt } from "./emailRetry";
 import { getPlanConfig } from "./plans";
 import { generateToken, setAccessTokenCookie } from "./tokenManager";
+import { reconcileBilling } from "./billingAdjustments";
+import { syncEmailDelivery } from "./emailDelivery";
 
 export const appOrigin = () =>
   new URL(process.env.PUBLIC_APP_URL || "https://roomstagerpro.com").origin;
@@ -33,9 +35,17 @@ export async function fulfillCheckout(session: Stripe.Checkout.Session) {
   return client.begin(async (tx) => {
     // Serializes the webhook and return-page race, including legacy purchases.
     await tx`SELECT pg_advisory_xact_lock(hashtextextended(${session.id}, 0))`;
+    const paymentIntentId = typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id || null;
+    if (paymentIntentId) await tx`SELECT pg_advisory_xact_lock(hashtextextended(${paymentIntentId},3))`;
     const [existing] =
       await tx`SELECT * FROM access_grants WHERE session_id=${session.id}`;
-    if (existing) return existing;
+    if (existing) {
+      if (paymentIntentId) {
+        await tx`UPDATE access_grants SET payment_intent_id=${paymentIntentId} WHERE session_id=${session.id} AND payment_intent_id IS NULL`;
+        await reconcileBilling(tx,paymentIntentId);
+      }
+      return (await tx`SELECT * FROM access_grants WHERE session_id=${session.id}`)[0];
+    }
     const [legacy] =
       await tx`SELECT token_id FROM stripe_purchases WHERE checkout_session_id=${session.id} AND token_id IS NOT NULL LIMIT 1`;
     const tokenId = legacy?.token_id || randomUUID();
@@ -53,19 +63,20 @@ export async function fulfillCheckout(session: Stripe.Checkout.Session) {
         ON CONFLICT (token_id) DO UPDATE SET paid_granted=usage_entitlements.paid_granted+EXCLUDED.paid_granted, updated_at=now()`;
     }
     const [grant] =
-      await tx`INSERT INTO access_grants(session_id, token_id, plan_id, email, link_hash, expires_at)
-      VALUES (${session.id},${tokenId},${plan.id},${email},${digest(linkSecret(session.id))},${expiresAt.toISOString()}) RETURNING *`;
+      await tx`INSERT INTO access_grants(session_id, token_id, plan_id, email, link_hash, expires_at,payment_intent_id)
+      VALUES (${session.id},${tokenId},${plan.id},${email},${digest(linkSecret(session.id))},${expiresAt.toISOString()},${paymentIntentId}) RETURNING *`;
+    if (paymentIntentId) await reconcileBilling(tx,paymentIntentId);
     await tx`UPDATE stripe_purchases SET token_id=${tokenId} WHERE checkout_session_id=${session.id}`;
     if (email && expiresAt.getTime() > Date.now()) {
       await tx`INSERT INTO access_email_outbox(id, session_id) VALUES (${randomUUID()},${session.id})`;
     }
-    return grant;
+    return (await tx`SELECT * FROM access_grants WHERE session_id=${session.id}`)[0];
   });
 }
 
 export function activateGrant(res: any, grant: any) {
   const expiry = Math.floor(new Date(grant.expires_at).getTime() / 1000);
-  if (grant.revoked_at || expiry <= Date.now() / 1000) return false;
+  if (grant.revoked_at || grant.billing_blocked || expiry <= Date.now() / 1000) return false;
   setAccessTokenCookie(
     res,
     generateToken(grant.plan_id, grant.token_id, expiry),
@@ -135,7 +146,7 @@ export function registerAccessRoutes(app: Express) {
         }
         const grants =
           await tx`SELECT g.session_id FROM access_grants g WHERE g.email=${email}
-          AND g.expires_at>now() AND g.revoked_at IS NULL
+          AND g.expires_at>now() AND g.revoked_at IS NULL AND NOT g.billing_blocked
           AND NOT EXISTS (SELECT 1 FROM access_email_outbox o WHERE o.session_id=g.session_id AND o.created_at>now()-interval '15 minutes')`;
         for (const g of grants)
           await tx`INSERT INTO access_email_outbox(id,session_id) VALUES (${randomUUID()},${g.session_id})`;
@@ -158,20 +169,26 @@ export async function deliverAccessEmails() {
     return;
   sending = true;
   try {
+    await client`INSERT INTO access_email_delivery(outbox_id,status,last_error)
+      SELECT id,'failed','retry_budget_exhausted' FROM access_email_outbox WHERE sent_at IS NULL AND attempts>=20
+      ON CONFLICT(outbox_id) DO UPDATE SET status='failed',last_error='retry_budget_exhausted',updated_at=now()`;
     // A lease and provider idempotency key protect against concurrent workers/restarts.
     const rows =
       await client`UPDATE access_email_outbox SET available_at=now()+interval '5 minutes', attempts=attempts+1
       WHERE id IN (SELECT id FROM access_email_outbox WHERE sent_at IS NULL AND available_at<=now() AND attempts<20
       ORDER BY created_at LIMIT 5 FOR UPDATE SKIP LOCKED) RETURNING *`;
     for (const row of rows) {
+      await client`INSERT INTO access_email_delivery(outbox_id) VALUES (${row.id}) ON CONFLICT DO NOTHING`;
       const [g] =
         await client`SELECT * FROM access_grants WHERE session_id=${row.session_id}`;
       if (
         !g?.email ||
         g.revoked_at ||
+        g.billing_blocked ||
         new Date(g.expires_at).getTime() <= Date.now()
       ) {
         await client`UPDATE access_email_outbox SET sent_at=now() WHERE id=${row.id}`;
+        await client`UPDATE access_email_delivery SET status='skipped',updated_at=now() WHERE outbox_id=${row.id}`;
         continue;
       }
       try {
@@ -196,12 +213,19 @@ export async function deliverAccessEmails() {
           // Quota/rate-limit refusals are not failed deliveries. Keep the message
           // queued without exhausting its retry budget before the quota resets.
           await client`UPDATE access_email_outbox SET available_at=${retryAt.toISOString()}, attempts=GREATEST(attempts-1,0) WHERE id=${row.id}`;
+          await client`UPDATE access_email_delivery SET status='deferred',last_error='provider_limit',updated_at=now() WHERE outbox_id=${row.id}`;
           console.error("Access email deferred: provider sending limit reached");
           continue;
         }
         if (!reply.ok) throw new Error(`email_provider_${reply.status}`);
-        await client`UPDATE access_email_outbox SET sent_at=now() WHERE id=${row.id}`;
+        const accepted = z.object({id:z.string().min(1).max(128)}).parse(await reply.json());
+        await client.begin(async(tx)=>{
+          await tx`UPDATE access_email_outbox SET sent_at=now() WHERE id=${row.id}`;
+          await tx`UPDATE access_email_delivery SET provider_id=${accepted.id},status='accepted',last_error=NULL,updated_at=now() WHERE outbox_id=${row.id}`;
+        });
+        await syncEmailDelivery(accepted.id);
       } catch {
+        await client`UPDATE access_email_delivery SET status=${row.attempts>=20?'failed':'retrying'},last_error='provider_send_failed',updated_at=now() WHERE outbox_id=${row.id} AND provider_id IS NULL`;
         console.error("Access email delivery failed; queued for retry");
       }
     }

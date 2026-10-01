@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { roomTypes } from "../constants";
-import { generateStagedRoom, getJob, pendingJobKey } from "../api/stagingApi";
+import { generateStagedRoom, getJob, pendingJobKey, pendingRequest, clearPending } from "../api/stagingApi";
+import { trackEvent } from "@/analytics/events";
 export type UseStageRoomArgs = {
   originalImage: string | null;
   roomType: string;
@@ -31,14 +32,37 @@ export function useStageRoom(args: UseStageRoomArgs) {
       "Staging your room. This can take a few minutes; your result is saved automatically.",
     );
     try {
+      let failures = 0;
+      let replayed = false;
       for (;;) {
-        const job = await getJob(id, ac.signal);
+        let job;
+        try {
+          job = await getJob(id, ac.signal);
+          failures = 0;
+        } catch (error) {
+          if (ac.signal.aborted) throw error;
+          const status = (error as { status?: number }).status;
+          if (status === 404 && !replayed) {
+            const request = await pendingRequest();
+            if (request?.requestId === id) {
+              replayed = true;
+              await generateStagedRoom(request);
+              continue;
+            }
+          }
+          if (status && status < 500 && status !== 429) { await clearPending(); throw error; }
+          latest.current.setProgressPhase("Connection interrupted. Reconnecting to your existing image—no extra credit will be used.");
+          if (++failures > 6) throw new Error("Your image may still be processing. Press Stage to reconnect, or reopen My access. Do not start a new image yet.");
+          await new Promise((resolve) => setTimeout(resolve, Math.min(1000 * 2 ** failures, 15000)));
+          continue;
+        }
         if (job.state === "failed") {
-          sessionStorage.removeItem(pendingJobKey);
+          await clearPending();
+          trackEvent("staging_failed", { reason: job.code || "generation_failed" });
           throw new Error(job.error);
         }
         if (job.state === "completed") {
-          sessionStorage.removeItem(pendingJobKey);
+          await clearPending();
           latest.current.setStagedImage(
             job.data.stagedSignedUrl || job.data.imageUrl,
           );
@@ -48,7 +72,7 @@ export function useStageRoom(args: UseStageRoomArgs) {
             "Your staged image is ready",
             "Review the room details before publishing. Label it as virtually staged.",
           );
-          window.gtag?.("event", "staging_complete", {
+          trackEvent("staging_complete", {
             room_type: latest.current.roomType,
           });
           break;
@@ -83,21 +107,24 @@ export function useStageRoom(args: UseStageRoomArgs) {
     }
   }, []);
   useEffect(() => {
-    const id = sessionStorage.getItem(pendingJobKey);
-    if (id) {
-      busy.current = true;
-      void watch(id);
-    }
-    return () => controller.current?.abort();
+    let active = true;
+    void pendingRequest().then((request) => {
+      const id = request?.requestId || sessionStorage.getItem(pendingJobKey);
+      if (id && active) { busy.current = true; void watch(id); }
+    }).catch(() => {});
+    return () => { active = false; controller.current?.abort(); };
   }, [watch]);
   const stageRoom = useCallback(
     async (mask?: string | null) => {
       if (busy.current) return;
       const a = latest.current;
-      if (!a.originalImage) return;
       busy.current = true;
       a.setIsLoading(true);
       try {
+        const pending = await pendingRequest();
+        const pendingId = pending?.requestId || sessionStorage.getItem(pendingJobKey);
+        if (pendingId) { await watch(pendingId); return; }
+        if (!a.originalImage) { busy.current = false; a.setIsLoading(false); return; }
         const id = await generateStagedRoom({
           requestId: crypto.randomUUID(),
           image: a.originalImage.split(",")[1],
@@ -107,12 +134,14 @@ export function useStageRoom(args: UseStageRoomArgs) {
           mask: mask || undefined,
           mode: a.mode,
         });
-        window.gtag?.("event", "staging_start", {
+        trackEvent("staging_start", {
           room_type: a.roomType,
           edit_mode: a.mode,
         });
         await watch(id);
       } catch (e) {
+        const pendingId = sessionStorage.getItem(pendingJobKey);
+        if (pendingId) { await watch(pendingId); return; }
         busy.current = false;
         a.setIsLoading(false);
         a.toast.error(

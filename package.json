@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "tsx --env-file=.env server/index.ts",
-    "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/index.js && esbuild scripts/migrate-access.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/migrate-access.js && esbuild scripts/prerender.tsx --bundle --platform=node --format=cjs --jsx=automatic --define:import.meta.env.DEV=false --outfile=dist/prerender.cjs && node dist/prerender.cjs",
+    "build": "vite build && node scripts/responsive-images.mjs && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/index.js && esbuild scripts/migrate-access.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/migrate-access.js && esbuild scripts/prerender.tsx --bundle --platform=node --format=cjs --jsx=automatic --define:import.meta.env.DEV=false --define:import.meta.env.VITE_STRIPE_PUBLIC_KEY=undefined --outfile=dist/prerender.cjs && node dist/prerender.cjs",
     "start": "NODE_ENV=production node dist/index.js",
     "check": "tsc",
     "db:push": "drizzle-kit push",
@@ -84,6 +84,7 @@
     "recharts": "^2.13.0",
     "sharp": "^0.35.5",
     "stripe": "^18.0.0",
+    "svix": "2.6.1",
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^1.1.0",
@@ -105,16 +106,17 @@
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.1",
     "@types/ws": "^8.5.13",
-    "@vitejs/plugin-react": "^4.3.2",
+    "@vitejs/plugin-react": "4.7.0",
     "autoprefixer": "^10.4.20",
-    "drizzle-kit": "^0.30.4",
+    "drizzle-kit": "0.31.11",
     "esbuild": "^0.25.0",
+    "playwright": "1.62.1",
     "postcss": "^8.4.47",
     "rollup-plugin-visualizer": "^6.0.5",
     "tailwindcss": "^3.4.14",
     "tsx": "^4.19.1",
     "typescript": "5.6.3",
-    "vite": "^5.4.14"
+    "vite": "6.4.3"
   },
   "optionalDependencies": {
     "bufferutil": "^4.0.8"

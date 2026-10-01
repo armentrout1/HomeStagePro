@@ -196,6 +196,8 @@ export default function Home() {
                     alt="Original empty living room"
                     width="1536"
                     height="1024"
+                    srcSet={import.meta.env.DEV ? undefined : "/staging-examples/living-1-before-480.webp 480w, /staging-examples/living-1-before-960.webp 960w, /staging-examples/living-1-before.webp 1536w"}
+                    sizes="(max-width: 767px) 45vw, 24vw"
                     className="rounded-lg"
                   />
                   <figcaption className="mt-2 text-center text-sm">
@@ -208,6 +210,8 @@ export default function Home() {
                     alt="The same living room with virtual furniture"
                     width="1536"
                     height="1024"
+                    srcSet={import.meta.env.DEV ? undefined : "/staging-examples/living-1-after-480.webp 480w, /staging-examples/living-1-after-960.webp 960w, /staging-examples/living-1-after.webp 1536w"}
+                    sizes="(max-width: 767px) 45vw, 24vw"
                     className="rounded-lg"
                   />
                   <figcaption className="mt-2 text-center text-sm">

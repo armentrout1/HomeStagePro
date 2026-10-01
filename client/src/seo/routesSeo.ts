@@ -60,19 +60,19 @@ export const ROUTE_SEO: Record<string, RouteSeo> = {
   "/virtual-staging-for-investors": {
     title: "Virtual Staging for Investors | RoomStagerPro",
     description:
-      "Deploy AI staging for BRRRR, flips, and STR portfolios. Cut DOM, lift offers, and scale marketing with deal-ready visuals from RoomStagerPro.",
+      "Explore AI virtual staging for investment properties, flips, and rental design concepts. Compare examples and image-pack pricing.",
     canonicalPath: "/virtual-staging-for-investors",
     ogImage: "/images/meta-preview.png",
   },
   "/virtual-staging-for-real-estate-agents": {
     title: "Virtual Staging for Real Estate Agents – RoomStagerPro",
     description:
-      "Equip listings with MLS-safe virtual staging, overnight turnarounds, and seller-ready proof. Explore pricing, workflow, and gallery assets in one guide from RoomStagerPro.",
+      "Create virtually staged listing photos, review the details, and label edits clearly. Explore real examples, the workflow, and image-pack pricing for agents.",
     canonicalPath: "/virtual-staging-for-real-estate-agents",
     ogImage: "/images/meta-preview.png",
   },
   "/virtual-staging-for-short-term-rentals": {
-    title: "Virtual Staging for Short-Term Rentals | Boost Airbnb Bookings",
+    title: "Virtual Staging for Rental Design Concepts | RoomStagerPro",
     description:
       "Explore virtual staging for rental design concepts. Clearly label edited images and keep booking photos accurate to what guests will receive.",
     canonicalPath: "/virtual-staging-for-short-term-rentals",

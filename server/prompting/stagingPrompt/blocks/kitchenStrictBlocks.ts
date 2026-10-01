@@ -22,17 +22,14 @@ export const buildKitchenStrictBlocks = (
     : "";
   const floorLine =
     "Floor rule: Allow AT MOST one small sink mat placed directly in front of the sink; no large rugs, runners, or mats across the tile.";
-  const shelvingLine =
-    profile === "large"
-      ? "Open shelving: Allowed ONLY if there is a clear empty wall segment between upper cabinets that is not a window; keep it minimal with 2–3 decorative items."
-      : "Open shelving: DO NOT add open shelving in standard kitchens.";
+  const shelvingLine = "Shelving: preserve existing shelves; do not install new shelves in any kitchen.";
   const clearanceLine =
     "Clearances: Do not block sinks, stoves, refrigerators, dishwashers, or any cabinet doors/drawers. Keep decor away from door swings and appliance handles.";
   const placementLine =
     "Placement: Never add furniture except compact counter decor; do NOT introduce new islands or dining sets.";
   const maxCountsLine =
     profile === "large"
-      ? "Max counts: decor ≤ 4, sink mats ≤ 1, shelving ≤ 1 small section, rugs = 0, runners = 0."
+      ? "Max counts: decor ≤ 4, sink mats ≤ 1, new shelving = 0, rugs = 0, runners = 0."
       : "Max counts: decor ≤ 2, sink mats ≤ 1, shelving = 0, rugs = 0, runners = 0.";
   const sizeDefinitionLine =
     profile === "large"

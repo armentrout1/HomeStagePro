@@ -1,4 +1,5 @@
 import { useRef, useCallback, ChangeEvent } from "react";
+import { trackEvent } from "@/analytics/events";
 
 /**
  * Resize and compress an image file using canvas
@@ -88,7 +89,8 @@ export function useImageUpload(args: UseImageUploadArgs) {
         if (!file) return;
 
         // 1) type validation (same as before)
-        if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+        if (!["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"].includes(file.type) && !/\.hei[cf]$/i.test(file.name)) {
+          trackEvent("upload_failed", { reason: "file_type" });
           args.toast.error(
             "Invalid file type",
             "Use JPG, PNG or WebP. For iPhone HEIC photos, export as JPEG first.",
@@ -99,6 +101,7 @@ export function useImageUpload(args: UseImageUploadArgs) {
         // 2) NEW: size validation (10MB)
         const limit = args.maxBytes ?? 10 * 1024 * 1024;
         if (file.size > limit) {
+          trackEvent("upload_failed", { reason: "file_size" });
           args.toast.error(
             "File too large",
             "Please upload an image under 10MB.",
@@ -115,10 +118,12 @@ export function useImageUpload(args: UseImageUploadArgs) {
           // Try to resize and compress the image
           const resizedDataUrl = await fileToResizedDataUrl(file, 1536, 0.95);
           args.setOriginalImage(resizedDataUrl);
+          trackEvent("upload_complete");
         } catch (resizeError) {
+          trackEvent("upload_failed", { reason: "decode" });
           args.toast.error(
             "Unable to open this photo",
-            "Export it as JPG or PNG and try again.",
+            "This browser cannot decode this photo. For iPhone HEIC, export a JPEG from Photos, or use Settings → Camera → Formats → Most Compatible for new photos.",
           );
           e.target.value = "";
         }

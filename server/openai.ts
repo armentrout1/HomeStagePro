@@ -6,6 +6,8 @@ import { checkStagingQuality } from "./prompting/qualityCheck";
  */
 import crypto from "crypto";
 import { preserveProtectedPixels } from "./utils/preservePixels";
+import { createSelectionGuide, stagingOutputSize } from "./utils/selectionGuide";
+import { storagePrefix } from "./jobFiles";
 import { toFile } from "openai";
 import { z } from "zod";
 import { type Request, type Response } from "express";
@@ -72,7 +74,7 @@ const buildStoragePath = (
   extension: string,
   date = new Date(),
 ): string => {
-  return `roomstager/${formatYearMonth(date)}/${reqId}/${variant}.${extension}`;
+  return `${storagePrefix()}/results/${formatYearMonth(date)}/${reqId}/${variant}.${extension}`;
 };
 
 const mimeToExtension = (mime: string): string => {
@@ -132,48 +134,9 @@ const tryCreateSignedUrl = async (
 
 const decodeBase64Image = (base64: string): DecodedImage => {
   const sanitized = base64.replace(/[\r\n\s]/g, "");
-  if (sanitized.length % 4 !== 0) {
-    throw new Error("Invalid base64 image data");
-  }
-
-  const chars =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-  const charToIndex = (char: string): number => {
-    if (char === "=") return 0;
-    const index = chars.indexOf(char);
-    if (index === -1) {
-      throw new Error("Invalid character in base64 image data");
-    }
-    return index;
-  };
-
-  const padding = sanitized.endsWith("==")
-    ? 2
-    : sanitized.endsWith("=")
-      ? 1
-      : 0;
-  const outputLength = (sanitized.length * 3) / 4 - padding;
-  const bytes = new Uint8Array(outputLength);
-
-  let byteIndex = 0;
-  for (let i = 0; i < sanitized.length; i += 4) {
-    const chunk =
-      (charToIndex(sanitized[i]) << 18) |
-      (charToIndex(sanitized[i + 1]) << 12) |
-      (charToIndex(sanitized[i + 2]) << 6) |
-      charToIndex(sanitized[i + 3]);
-
-    bytes[byteIndex++] = (chunk >> 16) & 0xff;
-    if (sanitized[i + 2] !== "=") {
-      bytes[byteIndex++] = (chunk >> 8) & 0xff;
-    }
-    if (sanitized[i + 3] !== "=") {
-      bytes[byteIndex++] = chunk & 0xff;
-    }
-  }
-
+  if (sanitized.length % 4 !== 0 || !/^[A-Za-z0-9+/]*={0,2}$/.test(sanitized)) throw new Error("Invalid base64 image data");
+  const bytes = Buffer.from(sanitized, "base64");
   const { mime, extension } = detectImageType(bytes);
-
   return { bytes, mime, extension };
 };
 
@@ -324,6 +287,7 @@ export const generateStagedRoom = async (req: Request, res: Response) => {
     mark("uploadOriginalDone");
 
     const { layoutPrompt, layoutConstraints } = await (async () => {
+      if (req.body.mode === "remove") return { layoutPrompt: "", layoutConstraints: { noFurnitureZones: [], preferredPlacements: [], notes: [] } };
       try {
         const layout = await analyzeRoomLayout({
           roomType: req.body.roomType || "Unknown",
@@ -392,6 +356,7 @@ Editing task: ${req.body.mode === "remove" ? "Remove movable furniture and clutt
 Keep the same room, camera, walls, windows, doors, flooring, built-ins and permanent fixtures. Never remodel or invent architecture. Respect the original perspective and lighting. The mask's transparent area is editable; its opaque area must remain untouched.`;
 
     const finalPrompt = `${taskPrompt}
+SELECTION REFERENCE: Image 1 is the original photograph to edit. Image 2 is a guide made from that same photograph: orange-tinted pixels identify the editable region, and untinted pixels are protected. The guide supplies the mask boundary referenced above. Never copy the orange tint into the output. Edit image 1 only. Fit complete furniture and its shadows inside the orange region. Existing furniture outside the region must stay unchanged. Selection and preservation rules override any furniture count or room-profile suggestion; omit items that do not fit.
 CRITICAL PHOTOGRAPH PRESERVATION: Retain the exact visible floor material, wood-grain texture, plank/tile joints, wall finish and photographic sharpness wherever a new object does not cover them, including within the editable selection. The transparent mask permits object edits; it is not a request to repaint or blur the entire area. No vignette, artificial depth-of-field blur, smooth gray floor, dramatic relighting or broad dark shadow. Add only physically plausible localized contact shadows beneath furniture. Keep all furniture and rugs complete within the editable region; reduce their size or omit optional pieces rather than intersecting a protected mask boundary.`;
 
     const promptHashFull = crypto
@@ -419,16 +384,19 @@ CRITICAL PHOTOGRAPH PRESERVATION: Retain the exact visible floor material, wood-
     // Edit the supplied photograph, then enforce the customer's alpha selection
     // exactly in preserveProtectedPixels and reject incomplete/composited objects.
     const model = process.env.STAGING_IMAGE_MODEL || "gpt-image-2.5-sunburst";
+    const selectionGuide = await createSelectionGuide(Buffer.from(decodedImage.bytes), Buffer.from(maskDecoded!.bytes));
+    const guideFile = await toFile(selectionGuide, "selection-guide.png", { type: "image/png" });
+    const dimensions = await getImageSize(decodedImage.bytes);
     mark("openaiEditStart");
     const editParams: ImageEditParamsWithFidelity = {
       model,
-      image: inputFile,
+      image: [inputFile, guideFile],
       prompt: finalPrompt,
       ...(model.startsWith("gpt-image-1")
         ? { input_fidelity: "high" as const }
         : {}),
       quality: "high",
-      size: "auto",
+      size: model.startsWith("gpt-image-2.5") ? stagingOutputSize(dimensions.width, dimensions.height) : "auto",
     };
     // Abort the HTTP request and disable automatic retries of expensive image edits.
     const response = await openai.images.edit(
@@ -461,11 +429,15 @@ CRITICAL PHOTOGRAPH PRESERVATION: Retain the exact visible floor material, wood-
       decodedImage.mime,
       stagedBytes,
       req.body.mode || "furnish",
+      selectionGuide,
     );
+    const metrics = { model, reviewModel: process.env.STAGING_REVIEW_MODEL || "gpt-6-luna", mode: req.body.mode || "furnish", acceptable: verdict.acceptable, reason: verdict.reason, elapsedMs: Date.now() - t0, promptHash, usage: response.usage ?? null };
+    log(JSON.stringify({ event: "staging_quality", requestId: reqId, ...metrics }));
     if (!verdict.acceptable)
       return res.status(422).json({
         success: false,
         code: "QUALITY_REVIEW_FAILED",
+        metrics,
         error:
           "The result did not pass the image check. Your credit was restored. Adjust the editable area to include the full furniture area and try again.",
       });
@@ -476,6 +448,9 @@ CRITICAL PHOTOGRAPH PRESERVATION: Retain the exact visible floor material, wood-
     );
     await uploadToStorage(stagedStoragePath, stagedBytes, outputMime);
     mark("uploadStagedDone");
+
+    // The job API signs links only when read; avoid encoding and signing discarded copies.
+    if (req.body.resultPathsOnly) return res.json({ success: true, requestId: reqId, promptHash, originalStoragePath, stagedStoragePath, storageBucket: STORAGE_BUCKET, metrics });
 
     const originalDataUrl = `data:${decodedImage.mime};base64,${originalBase64}`;
     const stagedDataUrl = `data:${outputMime};base64,${stagedBytes.toString("base64")}`;

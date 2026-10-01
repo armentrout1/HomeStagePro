@@ -12,6 +12,7 @@ import {
 import { stagingRateLimiter } from "./middleware/stagingRateLimiter";
 import { generateStagedRoom } from "./openai";
 import { getSignedImageUrl } from "./supabase";
+import { jobFiles, storagePrefix, type JobFiles } from "./jobFiles";
 
 const schema = z.object({
   requestId: z.string().uuid(),
@@ -30,25 +31,27 @@ const schema = z.object({
   ]),
   mode: z.enum(["furnish", "replace", "remove"]).default("furnish"),
 });
-async function refundFailed(id: string, message: string) {
+export async function refundFailed(id: string, message: string, lease?: string) {
   await client.begin(async (tx) => {
     const [job] =
       await tx`UPDATE staging_jobs SET state='failed', error=${message}, completed_at=now()
-      WHERE id=${id} AND state='processing' RETURNING token_id`;
+      WHERE id=${id} AND state='processing'
+      AND (${lease ?? null}::uuid IS NULL OR EXISTS (SELECT 1 FROM staging_work WHERE job_id=${id} AND lease=${lease ?? null}::uuid AND phase='running')) RETURNING token_id`;
     if (job)
       await tx`UPDATE usage_entitlements SET paid_used=GREATEST(0,paid_used-1),updated_at=now() WHERE token_id=${job.token_id}`;
   });
 }
 export async function recoverStaleJobs() {
   const rows =
-    await client`SELECT id FROM staging_jobs WHERE state='processing' AND created_at<now()-interval '15 minutes' LIMIT 100`;
+    await client`SELECT id FROM staging_jobs WHERE state='processing' AND created_at<now()-interval '15 minutes'
+      AND NOT EXISTS (SELECT 1 FROM staging_work WHERE job_id=staging_jobs.id) LIMIT 100`;
   for (const row of rows)
     await refundFailed(
       row.id,
       "This staging was interrupted. Your credit was restored; please try again.",
     );
 }
-async function runJob(req: Request, id: string, generate = generateStagedRoom) {
+export async function runJob(req: Request, id: string, generate = generateStagedRoom, lease?: string) {
   let status = 200;
   let result: any;
   const receiver = {
@@ -62,7 +65,7 @@ async function runJob(req: Request, id: string, generate = generateStagedRoom) {
     },
   };
   try {
-    await generate(req, receiver as Response);
+    await generate({ ...req, body: { ...req.body, resultPathsOnly: true } } as Request, receiver as Response);
     if (status >= 400 || !result?.success)
       throw new Error(result?.error || "Staging failed. Please try again.");
     // Store paths, not expiring URLs or image payloads; signed links are regenerated on read.
@@ -73,8 +76,12 @@ async function runJob(req: Request, id: string, generate = generateStagedRoom) {
         originalStoragePath: result.originalStoragePath,
         stagedStoragePath: result.stagedStoragePath,
         storageBucket: result.storageBucket,
+        roomType: req.body.roomType,
+        mode: req.body.mode,
+        metrics: result.metrics,
       },
-    )}::jsonb WHERE id=${id} AND state='processing'`;
+    )}::jsonb WHERE id=${id} AND state='processing'
+      AND (${lease ?? null}::uuid IS NULL OR EXISTS (SELECT 1 FROM staging_work WHERE job_id=${id} AND lease=${lease ?? null}::uuid AND phase='running'))`;
   } catch (error) {
     console.error("Staging job failed", {
       message: error instanceof Error ? error.message : "unknown",
@@ -84,13 +91,16 @@ async function runJob(req: Request, id: string, generate = generateStagedRoom) {
       status === 422 && result?.code === "QUALITY_REVIEW_FAILED"
         ? "The image did not pass review. Your credit was restored. Expand the editable area to include the full furniture area, protect permanent fixtures, and try again."
         : "We couldn’t finish this image. Your credit was restored. Please try again.",
+      lease,
     );
+    if (result?.metrics) await client`UPDATE staging_jobs SET result=${JSON.stringify({ metrics: result.metrics, roomType: req.body.roomType, mode: req.body.mode })}::jsonb WHERE id=${id} AND state='failed'`;
   }
 }
 export function registerStagingJobs(
   app: Express,
   generate = generateStagedRoom,
   sign = getSignedImageUrl,
+  files: JobFiles = jobFiles,
 ) {
   app.post(
     "/api/generate-staged-room",
@@ -117,6 +127,7 @@ export function registerStagingJobs(
           !["png", "jpeg", "webp"].includes(metadata.format || "") ||
           (metadata.pages || 1) > 1 ||
           input.length > 10 * 1024 * 1024
+          || metadata.width / metadata.height > 3 || metadata.width / metadata.height < 1 / 3
         )
           throw new Error("invalid_image");
         if (payload.mask) {
@@ -159,11 +170,15 @@ export function registerStagingJobs(
             return old.token_id === tokenId && old.input_hash === hash
               ? "existing"
               : "conflict";
+          const durable = process.env.STAGING_DURABLE_QUEUE === "true";
+          const inputPath = `${storagePrefix()}/inputs/${payload.requestId}/${hash}`;
           const [credit] =
             await tx`UPDATE usage_entitlements SET paid_used=paid_used+1, updated_at=now()
           WHERE token_id=${tokenId} AND paid_used<paid_granted RETURNING token_id`;
           if (!credit) return "empty";
+          if (durable) await files.put(inputPath, payload);
           await tx`INSERT INTO staging_jobs(id,token_id,input_hash,state) VALUES (${payload.requestId},${tokenId},${hash},'processing')`;
+          if (durable) await tx`INSERT INTO staging_work(job_id,input_path,room_type,edit_mode,has_mask) VALUES (${payload.requestId},${inputPath},${payload.roomType},${payload.mode},${Boolean(payload.mask)})`;
           return "created";
         });
         if (outcome === "empty")
@@ -175,7 +190,7 @@ export function registerStagingJobs(
           return res
             .status(409)
             .json({ error: "This request identifier is already in use." });
-        if (outcome === "created") {
+        if (outcome === "created" && process.env.STAGING_DURABLE_QUEUE !== "true") {
           req.body = payload;
           void runJob(req, payload.requestId, generate).catch(() =>
             console.error(
@@ -238,9 +253,16 @@ export function registerStagingJobs(
     requirePaidAccess,
     async (req, res) => {
       res.set("Cache-Control", "no-store");
+      const before = req.query.before;
+      if (before !== undefined && !z.string().uuid().safeParse(before).success)
+        return res.status(400).json({ error: "Invalid image-history cursor." });
       try {
-        const rows =
-          await client`SELECT id,state,created_at FROM staging_jobs WHERE token_id=${getTokenIdFromRequest(req)!} ORDER BY created_at DESC LIMIT 30`;
+        const tokenId = getTokenIdFromRequest(req)!;
+        const rows = before
+          ? await client`SELECT id,state,created_at FROM staging_jobs
+              WHERE token_id=${tokenId} AND (created_at,id)<(SELECT created_at,id FROM staging_jobs WHERE id=${before as string} AND token_id=${tokenId})
+              ORDER BY created_at DESC,id DESC LIMIT 30`
+          : await client`SELECT id,state,created_at FROM staging_jobs WHERE token_id=${tokenId} ORDER BY created_at DESC,id DESC LIMIT 30`;
         res.json(rows);
       } catch {
         res.status(503).json({ error: "Could not load your images." });

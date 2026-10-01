@@ -1,3 +1,4 @@
+import { loadLocal, saveLocal } from "@/lib/localDraft";
 export type GenerateStagedRoomRequest = {
   image: string;
   roomType: string;
@@ -20,13 +21,12 @@ export async function getJob(id: string, signal?: AbortSignal) {
   });
   const data = await res.json();
   if (!res.ok) {
-    if ([401, 402, 404].includes(res.status))
-      sessionStorage.removeItem(pendingJobKey);
-    throw new Error(data.error || "Unable to load your image. Please retry.");
+    throw Object.assign(new Error(data.error || "Unable to load your image. Please retry."), { status: res.status });
   }
   return data;
 }
 export async function generateStagedRoom(req: GenerateStagedRoomRequest) {
+  await saveLocal("pending", req);
   sessionStorage.setItem(pendingJobKey, req.requestId);
   const res = await fetch("/api/generate-staged-room", {
     method: "POST",
@@ -35,9 +35,14 @@ export async function generateStagedRoom(req: GenerateStagedRoomRequest) {
   });
   const data = await res.json();
   if (!res.ok) {
-    sessionStorage.removeItem(pendingJobKey);
+    if (res.status < 500) await clearPending();
     throw new Error(data.error || "Unable to start staging.");
   }
   sessionStorage.setItem(pendingJobKey, data.jobId);
   return data.jobId as string;
 }
+export async function clearPending() {
+  sessionStorage.removeItem(pendingJobKey);
+  await saveLocal("pending", null);
+}
+export async function pendingRequest() { return loadLocal<GenerateStagedRoomRequest>("pending"); }

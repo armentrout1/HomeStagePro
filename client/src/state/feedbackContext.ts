@@ -58,4 +58,4 @@ export const resetFeedbackContext = () => {
 };
 
 export const useFeedbackContext = () =>
-  useSyncExternalStore(subscribe, () => context);
+  useSyncExternalStore(subscribe, () => context, () => context);

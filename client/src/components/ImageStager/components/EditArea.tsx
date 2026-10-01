@@ -3,15 +3,37 @@ export function EditArea({
   image,
   onChange,
   disabled,
+  initialMask,
 }: {
   image: string;
   onChange: (mask: string) => void;
   disabled: boolean;
+  initialMask?: string | null;
 }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const mask = useRef<HTMLCanvasElement | null>(null);
   const [brush, setBrush] = useState(8);
   const [protect, setProtect] = useState(false);
+  const [zoom, setZoom] = useState(100);
+  const [undoCount, setUndoCount] = useState(0);
+  const history = useRef<string[]>([]);
+  const remember = () => {
+    if (!mask.current || disabled) return;
+    history.current = [...history.current.slice(-7), mask.current.toDataURL("image/png")];
+    setUndoCount(history.current.length);
+  };
+  const undo = () => {
+    const previous = history.current.pop();
+    if (!previous || disabled) return;
+    const img = new Image();
+    img.onload = () => {
+      const m = mask.current!;
+      const ctx = m.getContext("2d")!;
+      ctx.globalCompositeOperation = "source-over"; ctx.clearRect(0,0,m.width,m.height); ctx.drawImage(img,0,0);
+      publish(); setUndoCount(history.current.length);
+    };
+    img.src = previous;
+  };
   const drawing = useRef(false);
   const changed = useRef(onChange);
   changed.current = onChange;
@@ -49,6 +71,7 @@ export function EditArea({
     publish();
   };
   useEffect(() => {
+    history.current = []; setUndoCount(0); setZoom(100);
     let active = true;
     const img = new Image();
     img.onload = () => {
@@ -57,13 +80,18 @@ export function EditArea({
       m.width = img.naturalWidth;
       m.height = img.naturalHeight;
       mask.current = m;
-      reset();
+      if (initialMask) {
+        const saved = new Image();
+        saved.onload = () => { if (active) { m.getContext("2d")!.drawImage(saved, 0, 0); publish(); } };
+        saved.onerror = () => { if (active) reset(); };
+        saved.src = `data:image/png;base64,${initialMask}`;
+      } else reset();
     };
     img.src = image;
     return () => {
       active = false;
     };
-  }, [image]);
+  }, [image, initialMask]);
   const paint = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (disabled || !drawing.current || !mask.current) return;
     const m = mask.current,
@@ -93,7 +121,8 @@ export function EditArea({
         it. Use Protect to keep doors, windows, built-ins and other details
         unchanged.
       </p>
-      <div className="relative mx-auto max-w-2xl">
+      <div className="mx-auto max-w-2xl overflow-auto rounded border" style={{ maxHeight: "65vh" }}>
+      <div className="relative" style={{ width: `${zoom}%` }}>
         <img
           src={image}
           alt="Room with highlighted editable area"
@@ -104,6 +133,8 @@ export function EditArea({
           className="absolute inset-0 h-full w-full touch-none"
           aria-label="Paint editable areas on the room"
           onPointerDown={(e) => {
+            if (disabled) return;
+            remember();
             drawing.current = true;
             e.currentTarget.setPointerCapture(e.pointerId);
             paint(e);
@@ -119,7 +150,10 @@ export function EditArea({
           }}
         />
       </div>
+      </div>
       <div className="flex flex-wrap items-center gap-3 text-sm">
+        <button type="button" disabled={disabled || !undoCount} onClick={undo} className="rounded border px-3 py-2 disabled:opacity-40">Undo selection</button>
+        <label>Zoom <select aria-label="Photo zoom" value={zoom} onChange={(e) => setZoom(Number(e.target.value))} className="rounded border p-2"><option value={100}>100%</option><option value={150}>150%</option><option value={200}>200%</option></select></label>
         <button
           type="button"
           disabled={disabled}
@@ -152,7 +186,7 @@ export function EditArea({
         <button
           type="button"
           disabled={disabled}
-          onClick={() => reset()}
+            onClick={() => { remember(); reset(); }}
           className="rounded border px-3 py-2"
         >
           Use center area
@@ -160,14 +194,14 @@ export function EditArea({
         <button
           type="button"
           disabled={disabled}
-          onClick={() => reset(true)}
+            onClick={() => { remember(); reset(true); }}
           className="rounded border px-3 py-2"
         >
           Protect everything
         </button>
       </div>
       <p className="text-xs text-slate-500">
-        The original pixels outside your selection are preserved. Review AI
+        Include the entire furniture item and its shadow in your selection. The original pixels outside your selection are preserved. Review AI
         changes inside the selection before using the result.
       </p>
     </section>

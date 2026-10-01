@@ -2,7 +2,6 @@ import { useEffect, useState, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { apiRequest } from "@/lib/queryClient";
 
 export default function ThankYou() {
   const poll = useRef<number>();
@@ -11,14 +10,14 @@ export default function ThankYou() {
   const [location, setLocation] = useLocation();
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [paymentStatus, setPaymentStatus] = useState<
-    "success" | "canceled" | "processing" | "unknown"
+    "success" | "canceled" | "processing" | "unknown" | "email_access"
   >("processing");
   const [paymentInfo, setPaymentInfo] = useState<{
     plan?: string;
     accessUntil?: string;
     usageAllowed?: number;
     price?: number;
-    sessionId?: string;
+    orderId?: string;
     emailDeliveryConfigured?: boolean;
   } | null>(null);
 
@@ -44,10 +43,8 @@ export default function ThankYou() {
 
   const checkPaymentStatus = async (session: string) => {
     try {
-      const response = await apiRequest(
-        "GET",
-        `/api/checkout-status?session_id=${session}`,
-      );
+      const response = await fetch(`/api/checkout-status?session_id=${encodeURIComponent(session)}`, { cache: "no-store" });
+      if (response.status === 403) { setPaymentStatus("email_access"); return; }
 
       if (!response.ok) {
         throw new Error("Failed to verify payment status");
@@ -63,18 +60,20 @@ export default function ThankYou() {
           accessUntil: data.accessUntil,
           usageAllowed: data.usageAllowed,
           price: data.price,
-          sessionId: data.sessionId,
+          orderId: data.orderId,
           emailDeliveryConfigured: data.emailDeliveryConfigured,
         });
 
         // Fire Google Ads conversion event for successful paid checkout
         if (
           typeof window.gtag === "function" &&
-          !localStorage.getItem(`purchase:${data.sessionId}`)
+          data.livePayment === true &&
+          window.location.hostname === "roomstagerpro.com" &&
+          !localStorage.getItem(`purchase:${data.orderId}`)
         ) {
-          localStorage.setItem(`purchase:${data.sessionId}`, "1");
+          localStorage.setItem(`purchase:${data.orderId}`, "1");
           window.gtag("event", "purchase", {
-            transaction_id: data.sessionId,
+            transaction_id: data.orderId,
             value: data.price,
             currency: "USD",
             items: [
@@ -90,7 +89,7 @@ export default function ThankYou() {
             send_to: "AW-11090220613/W5fYCODZtOkbEMWsnagp",
             value: data.price ?? 1.0,
             currency: "USD",
-            transaction_id: data.sessionId ?? "",
+            transaction_id: data.orderId ?? "",
           });
         }
 
@@ -120,6 +119,8 @@ export default function ThankYou() {
 
   const renderContent = () => {
     switch (paymentStatus) {
+      case "email_access":
+        return <div className="space-y-4 text-center"><h1 className="text-3xl font-bold">Open your pack from your email</h1><p>For your privacy, this checkout return works only in the browser that started the purchase, for two hours. Your private email link works on any device until the pack expires.</p><Button asChild><Link href="/access">Email my access link</Link></Button></div>;
       case "success":
         return (
           <div className="text-center">

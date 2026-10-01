@@ -45,6 +45,7 @@ await client.unsafe(
 await client.unsafe(
   await readFile("migrations/0002_access_and_jobs.sql", "utf8"),
 );
+await client.unsafe(await readFile("migrations/0003_reliability.sql", "utf8"));
 const session = (id: string, extra: any = {}) =>
   ({
     id,
@@ -436,6 +437,22 @@ test("atomic checkout, private reusable access, credits, saved jobs, and exact m
         }
       },
     );
+    await t.test("history pagination includes tied timestamps once and isolates each pack", async () => {
+      const historyGrant = await fulfillCheckout(session("cs_history"));
+      const token = createHmac("sha256", process.env.JWT_SECRET!).update("roomstager-access-v1:cs_history").digest("base64url");
+      const response = await post("/api/access/exchange", { token });
+      const historyCookie = response.headers.get("set-cookie")!.split(";")[0];
+      const ids = Array.from({ length: 35 }, () => randomUUID());
+      for (const id of ids) await client`INSERT INTO staging_jobs(id,token_id,input_hash,state,created_at) VALUES (${id},${historyGrant.token_id},'fixture','completed','2026-09-30T12:00:00.123456Z')`;
+      const fetchPage = (suffix = "") => fetch(base + "/api/staging-jobs" + suffix, { headers: { Cookie: historyCookie } });
+      const first = await (await fetchPage()).json();
+      const second = await (await fetchPage(`?before=${first[29].id}`)).json();
+      assert.equal(first.length, 30); assert.equal(second.length, 5);
+      assert.deepEqual(new Set([...first, ...second].map((j: any) => j.id)), new Set(ids));
+      assert.equal((await fetchPage("?before=invalid")).status, 400);
+      const [other] = await client`SELECT id FROM staging_jobs WHERE token_id=${grant.token_id} LIMIT 1`;
+      assert.deepEqual(await (await fetchPage(`?before=${other.id}`)).json(), []);
+    });
     await t.test(
       "revocation blocks an already-issued cookie and its reusable link",
       async () => {
@@ -475,7 +492,7 @@ test("atomic checkout, private reusable access, credits, saved jobs, and exact m
           const body = JSON.parse(init!.body as string);
           assert.equal(body.reply_to, "aaron@aprkc.com");
           assert.match(body.text, /https:\/\/roomstagerpro.com\/access#token=/);
-          return new Response("{}", { status: ++attempts === 1 ? 503 : 200 });
+          return Response.json({id:"email-retry-fixture"}, { status: ++attempts === 1 ? 503 : 200 });
         };
         try {
           await deliverAccessEmails();
@@ -529,6 +546,57 @@ test("atomic checkout, private reusable access, credits, saved jobs, and exact m
         delete process.env.RESEND_API_KEY;
         delete process.env.ACCESS_EMAIL_FROM;
       }
+    });
+    await t.test("partial/full refunds, duplicate events, failed refunds and dispute recovery preserve accounting", async()=>{
+      const {recordBillingAdjustment}=await import("../server/billingAdjustments");
+      const g=await fulfillCheckout(session("cs_billing",{payment_intent:"pi_billing"}));
+      const balance=async()=> (await client`SELECT paid_granted FROM usage_entitlements WHERE token_id=${g.token_id}`)[0].paid_granted;
+      const adjustment={paymentIntentId:"pi_billing",kind:"refund.updated",eventCreated:100,refund:{id:"re_partial",amount:180,status:"succeeded"}};
+      await recordBillingAdjustment({...adjustment,eventId:"evt_partial"});
+      await recordBillingAdjustment({...adjustment,eventId:"evt_partial"});
+      assert.equal(await balance(),4);
+      await recordBillingAdjustment({...adjustment,eventId:"evt_partial_older",eventCreated:99,refund:{...adjustment.refund,status:"pending"}});
+      assert.equal(await balance(),4);
+      await recordBillingAdjustment({...adjustment,eventId:"evt_refund_failed",eventCreated:101,refund:{...adjustment.refund,status:"failed"}});
+      assert.equal(await balance(),5);
+      await recordBillingAdjustment({eventId:"evt_dispute",paymentIntentId:"pi_billing",kind:"dispute",eventCreated:200,disputed:true});
+      assert.equal(await balance(),0);
+      assert.equal(activateGrant({} as any,(await client`SELECT * FROM access_grants WHERE session_id='cs_billing'`)[0]),false);
+      await recordBillingAdjustment({eventId:"evt_won",paymentIntentId:"pi_billing",kind:"dispute",eventCreated:202,disputed:false});
+      await recordBillingAdjustment({eventId:"evt_late_dispute",paymentIntentId:"pi_billing",kind:"dispute",eventCreated:201,disputed:true});
+      assert.equal(await balance(),5);
+      await recordBillingAdjustment({eventId:"evt_full",paymentIntentId:"pi_billing",kind:"refund.updated",eventCreated:203,refund:{id:"re_full",amount:900,status:"succeeded"}});
+      assert.equal(await balance(),0);
+      await fulfillCheckout(session("cs_billing",{payment_intent:"pi_billing"}));
+      assert.equal(await balance(),0);
+      await recordBillingAdjustment({eventId:"evt_before_checkout",paymentIntentId:"pi_early",kind:"refund.updated",eventCreated:300,refund:{id:"re_early",amount:900,status:"succeeded"}});
+      const early=await fulfillCheckout(session("cs_early",{payment_intent:"pi_early"}));
+      assert.equal(early.billing_blocked,true);
+      assert.equal((await client`SELECT paid_granted FROM usage_entitlements WHERE token_id=${early.token_id}`)[0].paid_granted,0);
+    });
+    await t.test("verified delivery webhooks handle replay, out-of-order events and tampered signatures",async()=>{
+      const {Webhook}=await import("svix");
+      const {registerEmailWebhook}=await import("../server/emailDelivery");
+      const secret="whsec_"+Buffer.from("local-delivery-test-secret-only-32").toString("base64");
+      process.env.RESEND_WEBHOOK_SECRET=secret;
+      const hookApp=express();hookApp.use(express.json({verify:(req,_res,buffer)=>{(req as any).rawBody=buffer;}}));registerEmailWebhook(hookApp);
+      const hookServer=hookApp.listen(0,"127.0.0.1");await new Promise<void>(resolve=>hookServer.once("listening",resolve));
+      const endpoint=`http://127.0.0.1:${(hookServer.address() as any).port}/api/email-webhook`;
+      const webhook=new Webhook(secret);const now=new Date();
+      const send=async(id:string,type:string,created:string,tampered=false)=>{
+        const raw=JSON.stringify({type,created_at:created,data:{email_id:"email-retry-fixture"}});
+        return fetch(endpoint,{method:"POST",headers:{"Content-Type":"application/json","svix-id":id,"svix-timestamp":String(Math.floor(now.getTime()/1000)),"svix-signature":webhook.sign(id,now,raw)},body:tampered?raw.replace("delivered","bounced"):raw});
+      };
+      try {
+        assert.equal((await send("msg_delivered","email.delivered",now.toISOString(),true)).status,400);
+        assert.equal((await send("msg_delivered","email.delivered",now.toISOString())).status,200);
+        assert.equal((await send("msg_delivered","email.delivered",now.toISOString())).status,200);
+        await send("msg_sent","email.sent",new Date(now.getTime()-1000).toISOString());
+        assert.equal((await client`SELECT status FROM access_email_delivery WHERE provider_id='email-retry-fixture'`)[0].status,"delivered");
+        assert.equal((await client`SELECT * FROM access_email_events WHERE event_id='msg_delivered'`).length,1);
+        await send("msg_bounced","email.bounced",now.toISOString());
+        assert.equal((await client`SELECT status FROM access_email_delivery WHERE provider_id='email-retry-fixture'`)[0].status,"bounced");
+      } finally {delete process.env.RESEND_WEBHOOK_SECRET;await new Promise<void>(resolve=>hookServer.close(()=>resolve()));}
     });
   } finally {
     await new Promise<void>((resolve) => server.close(() => resolve()));

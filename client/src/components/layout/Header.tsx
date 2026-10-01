@@ -98,6 +98,8 @@ export default function Header() {
           className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-full border border-amber-300 p-0 text-amber-700 shadow-sm transition-transform duration-200 ease-out hover:scale-[1.03] active:scale-[0.97] hover:border-amber-400 hover:bg-amber-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
           onClick={toggleMobileMenu}
           aria-label="Toggle mobile menu"
+          aria-expanded={isMobileMenuOpen}
+          aria-controls="mobile-navigation"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

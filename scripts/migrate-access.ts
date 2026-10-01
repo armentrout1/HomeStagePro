@@ -7,6 +7,7 @@ try {
       "utf8",
     ),
   );
+  await client.unsafe(await readFile(new URL("../migrations/0003_reliability.sql", import.meta.url), "utf8"));
   console.log(
     "Access and staging-job migration applied. Existing balances retained.",
   );

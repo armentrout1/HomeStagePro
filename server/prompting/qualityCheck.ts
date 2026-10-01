@@ -16,6 +16,7 @@ export async function checkStagingQuality(
   originalMime: string,
   edited: Buffer,
   mode: string,
+  selectionGuide?: Buffer,
 ) {
   const response = await openai.responses.create(
     {
@@ -27,6 +28,7 @@ export async function checkStagingQuality(
         {
           role: "user",
           content: [
+            ...(selectionGuide ? [{ type: "input_text" as const, text: "A third image is an annotated selection guide, not a result. Orange pixels identify where edits are permitted; untinted regions must remain unchanged. Judge task completion only inside the orange region. Existing furniture outside it is intentionally unchanged. Do not require the whole room to be emptied or furnished when only part is selected. The edited result must not contain orange annotation tint." }] : []),
             {
               type: "input_text",
               text: `Compare the original room photo (first) and edited result (second). Task: ${mode}. Accept only if the result remains the same room and camera perspective, fixed windows/doors/built-ins are unchanged, and no added furniture or rug is visibly sliced off at an artificial edit-selection boundary. Furniture naturally occluded by other objects or by the photo edge is fine. For remove, the visible selected furniture should be removed; for furnish/replace there should be plausible furnishings. Reject visible floor or wall material changes, missing wood grain or tile lines, large smooth/blurred patches, and artificial dark vignettes in exposed floor areas. A new rug may cover flooring, but uncovered floor must retain the original material, texture and sharpness. Normal localized contact shadows under furniture are acceptable. Return a concise structured verdict. Reject obvious structural changes or implausible cut-off objects.`,
@@ -41,6 +43,7 @@ export async function checkStagingQuality(
               image_url: `data:image/png;base64,${edited.toString("base64")}`,
               detail: "high",
             },
+            ...(selectionGuide ? [{ type: "input_image" as const, image_url: `data:image/png;base64,${selectionGuide.toString("base64")}`, detail: "high" as const }] : []),
           ],
         },
       ],

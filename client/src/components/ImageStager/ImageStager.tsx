@@ -19,9 +19,15 @@ import { StagedPreviewPanel } from "./components/StagedPreviewPanel";
 import { ActionButtons } from "./components/ActionButtons";
 import { EditArea } from "./components/EditArea";
 import { SavingIndicator } from "./components/SavingIndicator";
+import { loadLocal, saveLocal, type RoomDraft } from "@/lib/localDraft";
+import { trackEvent } from "@/analytics/events";
+import { getJob } from "./api/stagingApi";
 
 export default function ImageStager() {
   const [mask, setMask] = useState<string | null>(null);
+  const [draftReady, setDraftReady] = useState(false);
+  const [draftNotice, setDraftNotice] = useState("");
+  const [initialMask, setInitialMask] = useState<string | null>(null);
   const [mode, setMode] = useState("furnish");
   const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [stagedImage, setStagedImage] = useState<string | null>(null);
@@ -31,6 +37,22 @@ export default function ImageStager() {
   const [progressPhase, setProgressPhase] = useState<string>("");
   const [activeTab, setActiveTab] = useState<"original" | "staged">("original");
   const previousStagedImageRef = useRef<string | null>(null);
+  useEffect(() => {
+    let active = true;
+    loadLocal<RoomDraft>("room").then((draft) => {
+      if (!active || !draft) return;
+      setOriginalImage(draft.image); setMask(draft.mask); setInitialMask(draft.mask);
+      setRoomType(draft.roomType); setMode(draft.mode);
+      setDraftNotice("Your photo and edit selection were restored on this device.");
+    }).catch(() => { if (active) setDraftNotice("This browser cannot save a draft. Keep this page open while editing."); })
+      .finally(() => { if (active) setDraftReady(true); });
+    return () => { active = false; };
+  }, []);
+  useEffect(() => {
+    if (!draftReady) return;
+    void saveLocal<RoomDraft>("room", originalImage ? { image: originalImage, mask, roomType, mode } : null)
+      .catch(() => setDraftNotice("Your draft could not be saved. Keep this page open while editing."));
+  }, [draftReady, originalImage, mask, roomType, mode]);
 
   const { toast } = useToast();
 
@@ -38,7 +60,7 @@ export default function ImageStager() {
 
   const { fileInputRef, triggerFileInput, handleFileChange } = useImageUpload({
     toast,
-    setOriginalImage,
+    setOriginalImage: (image) => { setInitialMask(null); setMask(null); setOriginalImage(image); },
     resetStagedImage: () => setStagedImage(null),
     // maxBytes omitted to use default 10MB
   });
@@ -47,6 +69,7 @@ export default function ImageStager() {
     setOriginalImage(null);
     setStagedImage(null);
     setRoomType("living_room");
+    setMask(null); setInitialMask(null); setDraftNotice("");
 
     toast.success("Reset complete", "All images have been cleared");
   }, [toast, setOriginalImage, setStagedImage, setRoomType]);
@@ -68,7 +91,10 @@ export default function ImageStager() {
 
     try {
       // Fetch the image and convert to blob to force download (cross-origin URLs ignore download attribute)
-      const response = await fetch(stagedImage);
+      const latest = requestId ? await getJob(requestId) : null;
+      const url = latest?.data?.stagedSignedUrl || stagedImage;
+      const response = await fetch(url);
+      if (!response.ok || !response.headers.get("content-type")?.startsWith("image/")) throw new Error("Image download unavailable");
       const blob = await response.blob();
       const blobUrl = URL.createObjectURL(blob);
 
@@ -81,12 +107,11 @@ export default function ImageStager() {
 
       // Clean up the blob URL
       URL.revokeObjectURL(blobUrl);
+      trackEvent("image_download");
     } catch (error) {
-      // Fallback: open in new tab if fetch fails
-      window.open(stagedImage, "_blank");
-      toast.error("Download failed", "Please right-click the image to save it");
+      toast.error("Download unavailable", "Please try again to refresh the download link, or reopen this image from My access.");
     }
-  }, [stagedImage, toast]);
+  }, [stagedImage, toast, requestId]);
 
   useEffect(() => {
     if (stagedImage && stagedImage !== previousStagedImageRef.current) {
@@ -108,7 +133,7 @@ export default function ImageStager() {
         ref={fileInputRef}
         onChange={handleFileChange}
         disabled={isLoading}
-        accept="image/jpeg,image/png,image/webp"
+        accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
         className="hidden"
       />
       <div className="rounded-2xl bg-gradient-to-r from-amber-300 via-amber-400 to-amber-300 p-[2px] shadow-lg">
@@ -122,6 +147,7 @@ export default function ImageStager() {
                 Upload a room photo, choose the furniture area, then furnish,
                 replace or remove items. One completed image uses one credit.
               </p>
+              {draftNotice && <p role="status" className="text-sm text-slate-600">{draftNotice}</p>}
             </div>
 
             <RoomTypeSelect
@@ -232,8 +258,9 @@ export default function ImageStager() {
               {originalImage && (
                 <EditArea
                   image={originalImage}
+                  initialMask={initialMask}
                   onChange={setMask}
-                  disabled={isLoading}
+                  disabled={isLoading || !draftReady}
                 />
               )}
               <p className="text-sm text-slate-600">

@@ -1,5 +1,5 @@
 export function trackPageView(path: string): void {
-  if (typeof window === "undefined") {
+  if (typeof window === "undefined" || window.location.hostname !== "roomstagerpro.com") {
     return;
   }
 

@@ -171,12 +171,12 @@ export async function requirePaidAccess(
   if (hasValidAccess(req)) {
     try {
       const grants =
-        await client`SELECT expires_at,revoked_at FROM access_grants WHERE token_id=${getTokenIdFromRequest(req)!}`;
+          await client`SELECT expires_at,revoked_at,billing_blocked FROM access_grants WHERE token_id=${getTokenIdFromRequest(req)!}`;
       // Preserve legacy cookies until their original expiry; migrated packs additionally support revocation.
       if (
         grants.length &&
         !grants.some(
-          (g) => !g.revoked_at && new Date(g.expires_at).getTime() > Date.now(),
+            (g) => !g.revoked_at && !g.billing_blocked && new Date(g.expires_at).getTime() > Date.now(),
         )
       ) {
         clearAccessToken(res);

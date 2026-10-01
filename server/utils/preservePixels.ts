@@ -12,6 +12,11 @@ export async function preserveProtectedPixels(
     .removeAlpha()
     .raw()
     .toBuffer({ resolveWithObject: true });
+  const generatedInfo = await sharp(generated).metadata();
+  if (!generatedInfo.width || !generatedInfo.height || Math.abs((generatedInfo.width / generatedInfo.height) / (info.width / info.height) - 1) > 0.02) {
+    throw new Error("GENERATED_ASPECT_RATIO_MISMATCH");
+  }
+  // Only normalize the tiny rounding difference from the provider's size grid.
   const output = await sharp(generated)
     .resize(info.width, info.height, { fit: "fill" })
     .toColourspace("srgb")

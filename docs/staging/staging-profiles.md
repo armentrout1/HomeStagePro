@@ -84,7 +84,7 @@ Future ideas / roadmap: [`docs/staging/staging-roadmap.md`](./staging-roadmap.md
 - **Countertop decor placement**: Place decor as **one small clustered vignette along the backsplash**, positioned away from the sink basin/faucet zone and away from the cooktop/stove zone. **Do not scatter items across multiple counters.**
 - **Standard**: choose **at most two** optional decor items total, keep countertops mostly visible, do not add open shelving, and allow only one small mat directly in front of the sink.
 - **Constrained override**: same as Standard but limit to **one** optional item total (omit entirely if it risks blocking doors/appliances), explicitly remind the model to keep decor away from counter edges and appliance clearances, and **if uncertain, omit countertop decor entirely.**
-- **Large**: up to **four** optional decor items, still only one small sink mat, and optionally one small open-shelving segment (2–3 decorative items) **only** when an empty wall segment between uppers exists and it is not a window.
+- **Large**: up to **four** optional decor items and one small sink mat. Never add shelving or change permanent fixtures.
 
 ### Forbidden Items
 - Applies to all kitchen profiles: **no** sofas, beds, dining tables/chairs (unless room type is explicitly dining), desks, bar stools, sectionals, new islands, large rugs, runners, wall remodeling, or any permanent fixture changes. Never block sinks, stoves, refrigerators, dishwashers, or cabinet/ drawer swing.
@@ -92,7 +92,7 @@ Future ideas / roadmap: [`docs/staging/staging-roadmap.md`](./staging-roadmap.md
 ### Max Counts
 - **Standard**: decor ≤2, sink mats ≤1 (sink-only), shelving =0, rugs =0, runners =0.
 - **Constrained**: decor ≤1, sink mats ≤1, shelving =0, rugs =0, runners =0.
-- **Large**: decor ≤4, sink mats ≤1, shelving ≤1 small section, rugs =0, runners =0.
+- **Large**: decor ≤4, sink mats ≤1, shelving =0, rugs =0, runners =0.
 
 ### Size Inference Rules
 - Aggregate `preferredPlacements + notes`.
@@ -105,11 +105,11 @@ Future ideas / roadmap: [`docs/staging/staging-roadmap.md`](./staging-roadmap.md
 - When constrained keywords trigger, also log `KitchenConstrained=true`.
 
 ### Room-Specific Guardrails
-- Reinforce in prompt builder: countertops mostly visible, never block appliances or cabinet doors, only one small sink mat, and optional shelving is allowed only on empty wall segments, never windows.
+- Reinforce in prompt builder: countertops mostly visible, never block appliances or cabinet doors, only one small sink mat, and never add shelving.
 
 ### Quick Test Cases
 1. **Kitchen — Standard default**: no constraints provided → expect `KitchenProfile=standard`, no constrained log, optional decor limit = 2.
-2. **Kitchen — Large (keyword hits)**: notes include "spacious", "open" and mention an island → expect `KitchenProfile=large`, optional decor limit = 4, shelving allowed if wall segment exists.
+2. **Kitchen — Large (keyword hits)**: notes include "spacious", "open" and mention an island → expect `KitchenProfile=large`, optional decor limit = 4, shelving forbidden.
 3. **Kitchen — Large via secondary zone**: single "breakfast nook" mention → expect Large profile without constrained log.
 4. **Kitchen — Constrained**: notes say "galley layout" and "keep path clear" → force Standard, log `KitchenConstrained=true`, optional decor limit = 1.
 5. **Kitchen — Mixed cues**: constraints mention "large open kitchen" but also "multiple doors" → constrained override wins; expect Standard with `KitchenConstrained=true`.
@@ -367,6 +367,8 @@ Future ideas / roadmap: [`docs/staging/staging-roadmap.md`](./staging-roadmap.md
 
 
 ## September 2026 editing and access changes
+- September 30, approved: compositing rejects generated aspect-ratio changes over 2% instead of stretching the room. Exact protected-pixel restoration remains in place. The editor and reviewer receive an additional orange-highlighted copy identifying the editable region. The editor must keep every added object and shadow inside that region; selection constraints override room furniture counts. GPT Image 2.5 output dimensions follow the source aspect ratio on a 16-pixel grid. Removal skips furniture-layout analysis. Rejected results restore the reserved credit.
+- Live fixture verification: living-room furnishing and removal passed with zero changed protected pixels. Two bedroom furnishing selections failed the cut-off-furniture check; bedroom placement remains an open quality limitation. These small samples do not establish a general success rate.
 - Default image model: gpt-image-2.5-sunburst; override with STAGING_IMAGE_MODEL after testing.
 - Transparent mask pixels are editable. Opaque pixels are restored from the original after inference and saved as lossless PNG.
 - Customers can paint/protect regions and choose furnish, replace, or remove. The default center selection is only a starting point; protect windows, doors and fixtures.

@@ -5,6 +5,9 @@ import {
   appOrigin,
 } from "./access";
 import { registerStagingJobs } from "./stagingJobs";
+import { registerEmailWebhook } from "./emailDelivery";
+import { recordBillingAdjustment } from "./billingAdjustments";
+import { newCheckoutBinding, setCheckoutBinding, canActivateCheckout, analyticsOrderId } from "./checkoutAccess";
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
@@ -53,12 +56,14 @@ const debugLog = (...args: any[]) => {
 export async function registerRoutes(app: Express): Promise<Server> {
   // Cookie parser must be registered BEFORE any routes that use cookies
   app.use(cookieParser());
+  registerEmailWebhook(app);
 
   // Health check endpoint for custom domain validation
   app.get("/api/health", async (_req, res) => {
     try {
       const [ready] =
-        await client`SELECT to_regclass('public.access_grants') IS NOT NULL AND to_regclass('public.staging_jobs') IS NOT NULL AND to_regclass('public.access_email_outbox') IS NOT NULL AS ready`;
+        await client`SELECT to_regclass('public.access_grants') IS NOT NULL AND to_regclass('public.staging_jobs') IS NOT NULL AND to_regclass('public.access_email_outbox') IS NOT NULL
+          AND to_regclass('public.staging_work') IS NOT NULL AND to_regclass('public.access_email_delivery') IS NOT NULL AND to_regclass('public.billing_refunds') IS NOT NULL AS ready`;
       res
         .status(ready.ready ? 200 : 503)
         .json({ status: ready.ready ? "ok" : "migration_required" });
@@ -373,7 +378,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 Date.now() + planConfig.durationDays * 24 * 60 * 60 * 1000,
               );
 
+        const binding = newCheckoutBinding();
         const metadata: Stripe.Checkout.SessionCreateParams["metadata"] = {
+          browserBinding: binding.hash,
           planId,
           planLabel,
           usesAllowed: String(planConfig.uses),
@@ -405,6 +412,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           metadata,
         });
 
+        setCheckoutBinding(res, session.id, binding.secret);
         res.json({ id: session.id, url: session.url });
       } catch (error) {
         console.error("Error creating checkout session:", error);
@@ -455,6 +463,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     try {
       switch (event.type) {
+        case "refund.created":
+        case "refund.updated":
+        case "refund.failed":
+        case "charge.refunded":
+        case "charge.dispute.created":
+        case "charge.dispute.updated":
+        case "charge.dispute.closed": {
+          const object=event.data.object as any;
+          const isDispute=event.type.startsWith("charge.dispute.");
+          const chargeId=event.type==="charge.refunded" ? object.id : typeof object.charge==="string" ? object.charge : object.charge?.id;
+          if(!chargeId) throw new Error("Billing event is missing its charge");
+          const charge=await stripe.charges.retrieve(chargeId);
+          const paymentIntentId=typeof charge.payment_intent==="string" ? charge.payment_intent : charge.payment_intent?.id;
+          if(!paymentIntentId) break;
+          // Adopt existing checkout records even when refund/dispute delivery wins the webhook race.
+          const sessions=await stripe.checkout.sessions.list({payment_intent:paymentIntentId,limit:10});
+          for(const session of sessions.data) if(getPlanConfig(session.metadata?.planId) && session.payment_status==="paid") await fulfillCheckout(session);
+          if(isDispute) {
+            const dispute=await stripe.disputes.retrieve(object.id);
+            const blocked=!["won","warning_closed"].includes(dispute.status);
+            await recordBillingAdjustment({eventId:event.id,paymentIntentId,kind:event.type,eventCreated:event.created,disputed:blocked});
+          } else {
+            // Use current refund objects, including failed/canceled refunds, rather than a stale cumulative charge snapshot.
+            for await(const refund of stripe.refunds.list({charge:chargeId,limit:100})) {
+              await recordBillingAdjustment({eventId:`${event.id}:${refund.id}`,paymentIntentId,kind:event.type,eventCreated:event.created,refund:{id:refund.id,amount:refund.amount,status:refund.status||"pending"}});
+            }
+          }
+          break;
+        }
         case "checkout.session.completed":
         case "checkout.session.async_payment_succeeded": {
           const session = event.data.object as Stripe.Checkout.Session;
@@ -548,6 +585,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
 
       if (session.payment_status === "paid") {
+        if (!canActivateCheckout(req, session)) {
+          return res.status(403).json({ error: "Open the private link in your purchase email to access this pack on this device.", code: "EMAIL_ACCESS_REQUIRED" });
+        }
         const grant = await fulfillCheckout(session);
         if (!activateGrant(res, grant))
           return res.status(410).json({
@@ -567,7 +607,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ),
           planId: grant.plan_id,
           price: plan.price,
-          sessionId: session.id,
+          orderId: analyticsOrderId(session.id),
+          livePayment: session.livemode,
           emailDeliveryConfigured: Boolean(
             process.env.RESEND_API_KEY && process.env.ACCESS_EMAIL_FROM,
           ),

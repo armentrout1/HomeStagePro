@@ -1,0 +1,74 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import { randomUUID } from "node:crypto";
+import postgres from "postgres";
+import express from "express";
+import cookieParser from "cookie-parser";
+import sharp from "sharp";
+import type { JobFiles } from "../server/jobFiles";
+const url = process.env.TEST_DATABASE_URL;
+if (!url || !["127.0.0.1","localhost"].includes(new URL(url).hostname)) throw new Error("Use an isolated localhost database");
+Object.assign(process.env, { DATABASE_URL: url, JWT_SECRET: "queue-local-test", OPENAI_API_KEY: "test", SUPABASE_URL: "https://example.supabase.co", SUPABASE_SERVICE_ROLE_KEY: "test", NODE_ENV: "test", STAGING_DURABLE_QUEUE: "true" });
+const admin = postgres(url);
+const schema = `queue_${randomUUID().replaceAll("-","")}`;
+await admin.unsafe(`CREATE SCHEMA ${schema}`); await admin.end();
+const { client } = await import("../server/db");
+await client.unsafe(`SET search_path TO ${schema}`);
+await client.unsafe("CREATE TABLE usage_entitlements(token_id text UNIQUE NOT NULL,free_granted integer DEFAULT 2,free_used integer DEFAULT 0,paid_granted integer DEFAULT 0,paid_used integer DEFAULT 0,created_at timestamptz DEFAULT now(),updated_at timestamptz DEFAULT now()); CREATE TABLE stripe_purchases(checkout_session_id text,token_id text,plan_id text,customer_email text,stripe_session jsonb,created_at timestamptz default now());");
+for (const file of ["0002_access_and_jobs.sql","0003_reliability.sql"]) await client.unsafe(await readFile(`migrations/${file}`,"utf8"));
+const { fulfillCheckout, activateGrant } = await import("../server/access");
+const { registerStagingJobs } = await import("../server/stagingJobs");
+const { createJobWorker, recoverDurableJobs, cleanTemporaryInputs } = await import("../server/jobQueue");
+const inputs = new Map<string, {image: string; mask?: string}>();
+const files: JobFiles = { async put(path,value) { inputs.set(path,{image:value.image,mask:value.mask}); }, async get(path) { const input=inputs.get(path); if(!input) throw new Error("missing input"); return input; }, async remove(path) { inputs.delete(path); } };
+const calls: string[] = []; const release = new Map<string,()=>void>();
+const generate: typeof import("../server/openai").generateStagedRoom = async (req,res) => {
+  calls.push(req.body.requestId);
+  await new Promise<void>(resolve=>release.set(req.body.requestId,resolve));
+  return res.json({success:true,requestId:req.body.requestId,promptHash:"fixture",storageBucket:"test",originalStoragePath:"source",stagedStoragePath:"result"});
+};
+const app=express(); app.use(express.json()); app.use(cookieParser());
+registerStagingJobs(app,generate,async()=>"https://example.invalid/image",files);
+const server=app.listen(0,"127.0.0.1"); await new Promise<void>(resolve=>server.once("listening",resolve));
+const base=`http://127.0.0.1:${(server.address() as any).port}`;
+const photo=await sharp({create:{width:80,height:60,channels:3,background:"white"}}).png().toBuffer();
+const grant=await fulfillCheckout({id:"cs_queue",mode:"payment",payment_status:"paid",currency:"usd",amount_total:900,created:Math.floor(Date.now()/1000),metadata:{planId:"quick-pack"},customer_details:{email:"test@example.invalid"}} as any);
+let cookie=""; activateGrant({cookie(name:string,value:string){cookie=`${name}=${value}`;}},grant);
+const submit=async(id=randomUUID())=>{const r=await fetch(base+"/api/generate-staged-room",{method:"POST",headers:{"Content-Type":"application/json",Cookie:cookie},body:JSON.stringify({requestId:id,image:photo.toString("base64"),roomType:"Living Room",mode:"furnish"})});assert.equal(r.status,202);return id;};
+const settle=async(predicate:()=>Promise<boolean>)=>{for(let i=0;i<100;i++){if(await predicate())return;await new Promise(r=>setTimeout(r,10));}throw new Error("Queue did not settle");};
+test("persistent queue survives worker recreation, bounds replicas, and refunds ambiguous calls once",async()=>{
+  const workers=[createJobWorker(generate,files),createJobWorker(generate,files)];
+  try {
+    const ids=[await submit(),await submit(),await submit()];
+    assert.equal(calls.length,0); assert.equal(inputs.size,3);
+    await Promise.all(workers.map(w=>w.tick()));
+    await settle(async()=>calls.length===2);
+    assert.equal((await client`SELECT * FROM staging_work WHERE phase='running'`).length,2);
+    // Simulate a restart after a provider call began: outcome is unknown, never replay it.
+    await client`UPDATE staging_work SET lease_until=now()-interval '1 second' WHERE job_id=${ids[0]}`;
+    await recoverDurableJobs(); await recoverDurableJobs();
+    release.get(ids[0])!(); release.get(ids[1])!();
+    await settle(async()=>workers.every(w=>w.active()===0));
+    await workers[1].tick(); await settle(async()=>calls.length===3);
+    release.get(ids[2])!(); await settle(async()=>workers.every(w=>w.active()===0));
+    assert.equal(calls.filter(id=>id===ids[0]).length,1);
+    assert.equal((await client`SELECT state FROM staging_jobs WHERE id=${ids[0]}`)[0].state,"failed");
+    assert.equal((await client`SELECT paid_used FROM usage_entitlements WHERE token_id=${grant.token_id}`)[0].paid_used,2);
+    await cleanTemporaryInputs(files); assert.equal(inputs.size,0);
+    // An expired lease before the paid-call boundary may be safely recovered.
+    const waiting=await submit();
+    await client`UPDATE staging_work SET phase='running',lease=${randomUUID()},lease_until=now()-interval '1 second',attempts=1 WHERE job_id=${waiting}`;
+    await recoverDurableJobs(); assert.equal((await client`SELECT phase FROM staging_work WHERE job_id=${waiting}`)[0].phase,"queued");
+    await workers[0].tick(); await settle(async()=>calls.includes(waiting)); release.get(waiting)!();
+    await settle(async()=>workers.every(w=>w.active()===0));
+    assert.equal(calls.filter(id=>id===waiting).length,1);
+    await cleanTemporaryInputs(files);
+    const remaining = (await client`SELECT paid_granted,paid_used FROM usage_entitlements WHERE token_id=${grant.token_id}`)[0];
+    await client`UPDATE usage_entitlements SET paid_used=paid_granted WHERE token_id=${grant.token_id}`;
+    const empty = await fetch(base+"/api/generate-staged-room",{method:"POST",headers:{"Content-Type":"application/json",Cookie:cookie},body:JSON.stringify({requestId:randomUUID(),image:photo.toString("base64"),roomType:"Living Room",mode:"furnish"})});
+    assert.equal(empty.status,402);
+    assert.equal(inputs.size,0,"An exhausted pack must not upload a temporary photo");
+    await client`UPDATE usage_entitlements SET paid_used=${remaining.paid_used} WHERE token_id=${grant.token_id}`;
+  } finally { workers.forEach(w=>w.stop());release.forEach(f=>f());await new Promise<void>(r=>server.close(()=>r()));await client.end(); }
+});

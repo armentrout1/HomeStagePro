@@ -1,5 +1,6 @@
 import { deliverAccessEmails } from "./access";
 import { recoverStaleJobs } from "./stagingJobs";
+import { startJobQueue } from "./jobQueue";
 import express, { type Request, Response, NextFunction } from "express";
 import helmet from "helmet";
 import { registerRoutes } from "./routes";
@@ -202,6 +203,7 @@ app.use((req, res, next) => {
   }
 
   const server = await registerRoutes(app);
+  startJobQueue();
   const maintain = () =>
     Promise.all([deliverAccessEmails(), recoverStaleJobs()]).catch(() =>
       console.error("Background maintenance failed"),

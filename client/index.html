@@ -9,7 +9,7 @@
       }
       gtag("js", new Date());
 
-      if (location.pathname !== "/access") {
+      if (location.hostname === "roomstagerpro.com" && location.pathname !== "/access") {
         const analyticsScript = document.createElement("script");
         analyticsScript.async = true;
         analyticsScript.src =
@@ -42,11 +42,6 @@
     <meta name="apple-mobile-web-app-title" content="RoomStagerPro" />
     <meta name="application-name" content="RoomStagerPro" />
     <meta name="theme-color" content="#4F46E5" />
-    <link
-      rel="preload"
-      as="image"
-      href="/staging-examples/living-1-after.webp"
-    />
 
     <!-- Primary Meta Tags -->
     <title>

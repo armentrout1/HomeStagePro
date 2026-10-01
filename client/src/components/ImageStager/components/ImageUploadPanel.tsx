@@ -48,7 +48,7 @@ export function ImageUploadPanel({
               Click to upload room photo
             </p>
             <p className="text-xs md:text-sm text-slate-400 mt-1">
-              JPG or PNG up to 10MB
+              JPG, PNG or WebP up to 10MB. HEIC works where supported by your browser.
             </p>
           </div>
         )}
