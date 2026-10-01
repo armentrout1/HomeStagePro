@@ -63,7 +63,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const [ready] =
         await client`SELECT to_regclass('public.access_grants') IS NOT NULL AND to_regclass('public.staging_jobs') IS NOT NULL AND to_regclass('public.access_email_outbox') IS NOT NULL
-          AND to_regclass('public.staging_work') IS NOT NULL AND to_regclass('public.access_email_delivery') IS NOT NULL AND to_regclass('public.billing_refunds') IS NOT NULL AS ready`;
+          AND to_regclass('public.staging_work') IS NOT NULL AND to_regclass('public.access_email_delivery') IS NOT NULL AND to_regclass('public.billing_refunds') IS NOT NULL AND EXISTS(SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='staging_jobs' AND column_name='purged_at') AS ready`;
       res
         .status(ready.ready ? 200 : 503)
         .json({ status: ready.ready ? "ok" : "migration_required" });

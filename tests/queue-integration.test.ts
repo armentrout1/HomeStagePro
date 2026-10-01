@@ -16,7 +16,7 @@ await admin.unsafe(`CREATE SCHEMA ${schema}`); await admin.end();
 const { client } = await import("../server/db");
 await client.unsafe(`SET search_path TO ${schema}`);
 await client.unsafe("CREATE TABLE usage_entitlements(token_id text UNIQUE NOT NULL,free_granted integer DEFAULT 2,free_used integer DEFAULT 0,paid_granted integer DEFAULT 0,paid_used integer DEFAULT 0,created_at timestamptz DEFAULT now(),updated_at timestamptz DEFAULT now()); CREATE TABLE stripe_purchases(checkout_session_id text,token_id text,plan_id text,customer_email text,stripe_session jsonb,created_at timestamptz default now());");
-for (const file of ["0002_access_and_jobs.sql","0003_reliability.sql"]) await client.unsafe(await readFile(`migrations/${file}`,"utf8"));
+for (const file of ["0002_access_and_jobs.sql","0003_reliability.sql","0004_image_history.sql"]) await client.unsafe(await readFile(`migrations/${file}`,"utf8"));
 const { fulfillCheckout, activateGrant } = await import("../server/access");
 const { registerStagingJobs } = await import("../server/stagingJobs");
 const { createJobWorker, recoverDurableJobs, cleanTemporaryInputs } = await import("../server/jobQueue");

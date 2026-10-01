@@ -1,3 +1,4 @@
+import { registerImageHistory, type ImageHistoryFiles } from "./imageHistory";
 import { createHash } from "node:crypto";
 import type { Express, Request, Response } from "express";
 import { z } from "zod";
@@ -75,6 +76,7 @@ export async function runJob(req: Request, id: string, generate = generateStaged
         promptHash: result.promptHash,
         originalStoragePath: result.originalStoragePath,
         stagedStoragePath: result.stagedStoragePath,
+        thumbnailStoragePath: result.thumbnailStoragePath,
         storageBucket: result.storageBucket,
         roomType: req.body.roomType,
         mode: req.body.mode,
@@ -101,6 +103,7 @@ export function registerStagingJobs(
   generate = generateStagedRoom,
   sign = getSignedImageUrl,
   files: JobFiles = jobFiles,
+  historyFiles?: ImageHistoryFiles,
 ) {
   app.post(
     "/api/generate-staged-room",
@@ -218,7 +221,7 @@ export function registerStagingJobs(
         return res.status(404).json({ error: "Image not found" });
       try {
         const [job] =
-          await client`SELECT * FROM staging_jobs WHERE id=${req.params.id} AND token_id=${getTokenIdFromRequest(req)!}`;
+          await client`SELECT * FROM staging_jobs WHERE id=${req.params.id} AND token_id=${getTokenIdFromRequest(req)!} AND deleted_at IS NULL AND purged_at IS NULL`;
         if (!job) return res.status(404).json({ error: "Image not found" });
         if (job.state !== "completed")
           return res.json({
@@ -247,26 +250,5 @@ export function registerStagingJobs(
       }
     },
   );
-  app.get(
-    "/api/staging-jobs",
-    checkAccessToken,
-    requirePaidAccess,
-    async (req, res) => {
-      res.set("Cache-Control", "no-store");
-      const before = req.query.before;
-      if (before !== undefined && !z.string().uuid().safeParse(before).success)
-        return res.status(400).json({ error: "Invalid image-history cursor." });
-      try {
-        const tokenId = getTokenIdFromRequest(req)!;
-        const rows = before
-          ? await client`SELECT id,state,created_at FROM staging_jobs
-              WHERE token_id=${tokenId} AND (created_at,id)<(SELECT created_at,id FROM staging_jobs WHERE id=${before as string} AND token_id=${tokenId})
-              ORDER BY created_at DESC,id DESC LIMIT 30`
-          : await client`SELECT id,state,created_at FROM staging_jobs WHERE token_id=${tokenId} ORDER BY created_at DESC,id DESC LIMIT 30`;
-        res.json(rows);
-      } catch {
-        res.status(503).json({ error: "Could not load your images." });
-      }
-    },
-  );
+  registerImageHistory(app, historyFiles);
 }

@@ -20,7 +20,7 @@ const dataPoints = {
   retentionPractices: [
     "Queued photos and edit selections are held in private storage so processing can survive interruptions. Temporary queue inputs are removed after completion or failure; saved original and result images remain available under the retention terms below.",
     "Account data is retained while you maintain an active relationship with RoomStagerPro.",
-    "To request deletion of stored photos or personal information, contact support. Download access follows your pack expiry; expiry does not itself delete stored files.",
+    "In My access, move finished attempts to Trash to hide them and restore them later. Trash does not erase files or revoke previously issued download links. Confirm Delete permanently to remove an eligible completed attempt’s stored original, result and preview; minimal usage and billing records remain. Older or incomplete attempts and other personal-data requests require support. Download access follows your pack expiry; expiry does not itself delete stored files.",
     "To restore unfinished work after checkout, this browser stores your draft photo and selection locally. Drafts can be restored for 24 hours. Reset clears the current draft. Browser site-data controls can also remove local drafts.",
     "We may retain limited records as required for legal, tax, or security purposes.",
   ],

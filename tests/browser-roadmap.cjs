@@ -10,7 +10,8 @@ let posts = 0, jobId = null, polls = 0;
 let savedReads = 0;
 const exchangedTokens = [];
 let inactivePack = false;
-const savedJobs = Array.from({length:31}, (_, i) => ({id:`00000000-0000-4000-8000-${String(i).padStart(12,'0')}`,state:'completed',created_at:new Date(Date.UTC(2026,8,30,12,0,i)).toISOString()}));
+const trashed=new Set(),purged=new Set(); let permanentDeletes=0;
+const savedJobs = Array.from({length:31}, (_, i) => ({id:`00000000-0000-4000-8000-${String(i).padStart(12,'0')}`,state:'completed',room_type:'Living Room',mode:'furnish',thumbnailUrl:'/staging-examples/living-1-after.webp',created_at:new Date(Date.UTC(2026,8,30,12,0,i)).toISOString()}));
 const submittedIds = new Set();
 const send = (res, data, status = 200) => { res.writeHead(status, {'Content-Type':'application/json'}); res.end(JSON.stringify(data)); };
 const server = createServer(async (req,res) => {
@@ -33,7 +34,18 @@ const server = createServer(async (req,res) => {
   if(url.pathname===`/api/staging-jobs/${jobId}`) {
     polls++; return send(res,{state:'completed',data:{requestId:jobId,promptHash:'fixture',stagedSignedUrl:'/staging-examples/living-1-after.webp'}});
   }
-  if(url.pathname==='/api/staging-jobs') return inactivePack ? send(res,{error:'Access required'},402) : send(res,url.searchParams.has('before') ? savedJobs.slice(30) : savedJobs.slice(0,30));
+  const mutation=url.pathname.match(/^\/api\/staging-jobs\/(00000000-[a-f0-9-]+)(?:\/(trash|restore))?$/);
+  if(mutation&&req.method!=='GET'){
+    const [,id,action]=mutation;
+    if(action==='trash')trashed.add(id);else if(action==='restore')trashed.delete(id);else if(req.method==='DELETE'){purged.add(id);permanentDeletes++;}
+    return send(res,{success:true});
+  }
+  if(url.pathname==='/api/staging-jobs') {
+    if(inactivePack)return send(res,{error:'Access required'},402);
+    const rows=savedJobs.filter(j=>!purged.has(j.id)&&trashed.has(j.id)===(url.searchParams.get('view')==='trash'));
+    const start=url.searchParams.has('before')?rows.findIndex(j=>j.id===url.searchParams.get('before'))+1:0;
+    return send(res,rows.slice(start,start+30));
+  }
   if(url.pathname.startsWith('/api/staging-jobs/00000000-')) { savedReads++; return send(res,{state:'completed',data:{stagedSignedUrl:'/staging-examples/living-1-after.webp'}}); }
   if(url.pathname.startsWith('/api/')) return send(res,{error:'Fixture does not implement this endpoint'},404);
   const publicRoot=path.join(repo,'dist/public');
@@ -102,6 +114,30 @@ const server = createServer(async (req,res) => {
     assert.equal((await downloadEvent).suggestedFilename(),'virtually-staged-room.png');
     assert.equal(savedReads,2);
     results.push({test:'older saved images load and download refreshes the private URL',result:'pass'});
+    await page.getByRole('button',{name:'Move to Trash',exact:true}).first().click();
+    await page.getByText('Moved to Trash. You can restore it there.',{exact:true}).waitFor();
+    await page.getByRole('button',{name:'Trash',exact:true}).click();
+    await page.getByRole('button',{name:'Restore image',exact:true}).click();
+    await page.getByText('Trash is empty.',{exact:true}).waitFor();
+    await page.getByRole('button',{name:'Saved images',exact:true}).click();
+    await page.getByRole('button',{name:'Move to Trash',exact:true}).first().click();
+    await page.getByText('Moved to Trash. You can restore it there.',{exact:true}).waitFor();
+    await page.getByRole('button',{name:'Trash',exact:true}).click();
+    await page.getByRole('button',{name:'Delete permanently',exact:true}).click();
+    const deleteDialog=page.getByRole('alertdialog');await deleteDialog.waitFor();
+    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),true);
+    await page.getByRole('button',{name:'Keep in Trash',exact:true}).click();
+    assert.equal(permanentDeletes,0);
+    await page.getByRole('button',{name:'Delete permanently',exact:true}).click();
+    await page.getByRole('button',{name:'Delete these files permanently',exact:true}).click();
+    await page.getByText('Trash is empty.',{exact:true}).waitFor();assert.equal(permanentDeletes,1);
+    await page.getByRole('button',{name:'Saved images',exact:true}).click();
+    await page.getByRole('button',{name:/Ready · open image/}).nth(29).waitFor();
+    await page.evaluate(()=>window.scrollTo(0,0));
+    await page.screenshot({path:path.join(output,'saved-images-mobile.png'),fullPage:false});
+    await page.setViewportSize({width:1280,height:900});
+    await page.screenshot({path:path.join(output,'saved-images-desktop.png'),fullPage:false});
+    results.push({test:'saved-image cards, Trash, restore, and cancel/confirm permanent deletion on mobile',result:'pass'});
     // Emulate opening an emailed link while /access is already mounted.
     for(const token of ['fixture-pack-one','fixture-pack-two']) {
       await page.goto('http://127.0.0.1:5181/access#token='+token);

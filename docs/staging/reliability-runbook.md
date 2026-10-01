@@ -33,3 +33,13 @@ Before production: verify migration/health, same-link access on separate devices
 ## Image benchmark limitation
 
 The generator/reviewer now receive the approved orange selection guide. Living-room furnishing and removal fixtures passed with zero modified protected pixels. Two bedroom selection attempts were rejected for cut-off furniture. Keep the quality gate enabled. A broader representative benchmark and physical-device checks remain release evidence to collect.
+
+## Saved-image management
+
+Apply additive migration 0004_image_history before starting this release; health checks require it. New accepted results receive a metadata-free WebP preview no larger than 384×256. History signs previews in one batch with a five-minute expiry; older rows without previews remain usable with a placeholder. No bulk backfill is automatic.
+
+Trash hides completed/failed attempts from normal history and prevents new image links. It does not erase objects or revoke previously issued links. Restore is available until permanent deletion starts. Explicit permanent deletion validates the active pack, job ownership, this environment's storage namespace and exact job filenames; it removes the completed attempt's original/result/preview and any known temporary inputs. Credit balances and the request-id ledger are retained. A storage failure leaves deletion pending and blocks restore; retrying removes the same paths. Older storage layouts and incomplete/ambiguous attempts require support review, rather than guessing which files to delete.
+
+Read-only orphan inventory: with the target environment's existing DATABASE_URL, Supabase credentials and PUBLIC_APP_URL, run `node --import tsx scripts/storage-inventory.ts --origin=https://YOUR-EXACT-APP-ORIGIN --output=temp/storage-inventory.json`. The script never deletes or changes data, restricts traversal to the configured environment prefix, excludes recent files, and reports incomplete scans at 10,000 files/jobs or 500 folders. An inventory candidate is not authorization for removal. Inspect it before planning any cleanup; no general orphan purge is enabled.
+
+Local coverage includes another pack's access, processing jobs, confirmed deletion, partial failure/retry, restore exclusion, unchanged credits, path validation, compact previews, and mobile confirmation/cancellation.

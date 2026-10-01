@@ -46,6 +46,7 @@ await client.unsafe(
   await readFile("migrations/0002_access_and_jobs.sql", "utf8"),
 );
 await client.unsafe(await readFile("migrations/0003_reliability.sql", "utf8"));
+await client.unsafe(await readFile("migrations/0004_image_history.sql", "utf8"));
 const session = (id: string, extra: any = {}) =>
   ({
     id,

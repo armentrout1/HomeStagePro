@@ -1,3 +1,4 @@
+import { makeImageThumbnail } from "./utils/imageThumbnail";
 import { checkStagingQuality } from "./prompting/qualityCheck";
 /**
  * STAGING RULES SOURCE OF TRUTH:
@@ -449,9 +450,12 @@ CRITICAL PHOTOGRAPH PRESERVATION: Retain the exact visible floor material, wood-
     );
     await uploadToStorage(stagedStoragePath, stagedBytes, outputMime);
     mark("uploadStagedDone");
+    let thumbnailStoragePath: string | null = stagedStoragePath.replace(/staged\.png$/, "thumbnail.webp");
+    try { await uploadToStorage(thumbnailStoragePath, await makeImageThumbnail(stagedBytes), "image/webp"); }
+    catch { thumbnailStoragePath = null; log("History preview unavailable; full result retained"); }
 
     // The job API signs links only when read; avoid encoding and signing discarded copies.
-    if (req.body.resultPathsOnly) return res.json({ success: true, requestId: reqId, promptHash, originalStoragePath, stagedStoragePath, storageBucket: STORAGE_BUCKET, metrics });
+    if (req.body.resultPathsOnly) return res.json({ success: true, requestId: reqId, promptHash, originalStoragePath, stagedStoragePath, thumbnailStoragePath, storageBucket: STORAGE_BUCKET, metrics });
 
     const originalDataUrl = `data:${decodedImage.mime};base64,${originalBase64}`;
     const stagedDataUrl = `data:${outputMime};base64,${stagedBytes.toString("base64")}`;
