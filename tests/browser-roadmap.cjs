@@ -77,6 +77,9 @@ const server = createServer(async (req,res) => {
     const dialog=page.getByRole('dialog',{name:'RoomStagerPro menu'}); await dialog.waitFor();
     for(let i=0;i<12;i++) { await page.keyboard.press('Tab'); assert.equal(await page.evaluate(()=>Boolean(document.activeElement.closest('[role=dialog]'))),true); }
     await page.keyboard.press('Escape');
+    await dialog.waitFor({state:'hidden'});
+    // Radix restores focus after unmount; wait for that lifecycle on slower CI runners.
+    await page.waitForFunction(()=>document.activeElement?.getAttribute('aria-label')==='Toggle mobile menu');
     assert.equal(await page.getByRole('button',{name:'Toggle mobile menu'}).evaluate(e=>e===document.activeElement),true);
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),true);
     results.push({test:'mobile dialog focus trap, Escape and no horizontal overflow',result:'pass'});
