@@ -1,6 +1,6 @@
 const dataPoints = {
   informationCollected: [
-    "Account details you provide, such as name, email, and organization.",
+    "Your checkout email and payment-pack details. Access uses a private email link rather than a password account.",
     "Property data, images, and project notes uploaded to the platform.",
     "Usage information including device type, browser, and feature interactions.",
     "Transactional details related to plan selections or purchases (processed securely by our payment partners).",
@@ -12,13 +12,16 @@ const dataPoints = {
     "Analyze aggregate usage trends to plan new features and safeguard the service.",
   ],
   sharingContexts: [
+    "OpenAI receives your room photo and a highlighted copy showing where edits are allowed to generate and review the result. The highlighting is a guide and is not part of the delivered image.",
     "Vetted service providers that support hosting, analytics, payments, or customer communications.",
     "Professional advisors or legal authorities when required to comply with law or protect our rights.",
     "Business transfers, if RoomStagerPro is involved in a merger, acquisition, or asset sale.",
   ],
   retentionPractices: [
+    "Queued photos and edit selections are held in private storage so processing can survive interruptions. Temporary queue inputs are removed after completion or failure; saved original and result images remain available under the retention terms below.",
     "Account data is retained while you maintain an active relationship with RoomStagerPro.",
-    "Project files and uploads can be deleted by you at any time from within the product.",
+    "In My access, move finished attempts to Trash to hide them and restore them later. Trash does not erase files or revoke previously issued download links. Confirm Delete permanently to remove an eligible completed attempt’s stored original, result and preview; minimal usage and billing records remain. Older or incomplete attempts and other personal-data requests require support. Download access follows your pack expiry; expiry does not itself delete stored files.",
+    "To restore unfinished work after checkout, this browser stores your draft photo and selection locally. Drafts can be restored for 24 hours. Reset clears the current draft. Browser site-data controls can also remove local drafts.",
     "We may retain limited records as required for legal, tax, or security purposes.",
   ],
   securityPractices: [
@@ -27,7 +30,7 @@ const dataPoints = {
     "Monitoring and review of systems for potential vulnerabilities.",
   ],
   choices: [
-    "Update or correct your profile information within your account settings.",
+    "Contact support to correct your checkout email or request deletion. Keep private access links confidential.",
     "Opt out of marketing emails by using the unsubscribe link or contacting us directly.",
     "Disable cookies in your browser, understanding that certain features may be limited.",
   ],

@@ -76,12 +76,14 @@ interface UpgradePricingPlan {
 
 const featureDefinitions: FeatureDefinition[] = [
   { key: "high_res_downloads", label: "High-resolution downloads" },
-  { key: "secure_token_auth", label: "Secure token authentication" },
+  { key: "secure_token_auth", label: "Reopen with your private email link" },
   { key: "usage_tracking", label: "Usage tracking" },
   { key: "access_all_styles", label: "Access to all room types" },
 ];
 
-const createFeatureSet = (overrides: Partial<Record<FeatureKey, boolean>> = {}) => ({
+const createFeatureSet = (
+  overrides: Partial<Record<FeatureKey, boolean>> = {},
+) => ({
   high_res_downloads: false,
   secure_token_auth: false,
   usage_tracking: false,
@@ -105,19 +107,19 @@ export default function Upgrade() {
         id: "quick-pack",
         name: "Quick Pack",
         price: 9,
-        description: "5 stagings to use anytime",
+        description: "5 stagings, valid for 365 days",
         features: createFeatureSet({
           high_res_downloads: true,
           secure_token_auth: true,
-          usage_tracking: false,
-          access_all_styles: false,
+          usage_tracking: true,
+          access_all_styles: true,
         }),
       },
       {
         id: "value-pack",
         name: "Value Pack",
         price: 25,
-        description: "20 stagings to use anytime",
+        description: "20 stagings, valid for 365 days",
         highlight: true,
         features: createFeatureSet({
           high_res_downloads: true,
@@ -128,9 +130,9 @@ export default function Upgrade() {
       },
       {
         id: "pro-monthly",
-        name: "Pro Monthly",
+        name: "Pro Pack",
         price: 49,
-        description: "50 stagings per month",
+        description: "50 stagings, valid for 30 days",
         features: createFeatureSet({
           high_res_downloads: true,
           secure_token_auth: true,
@@ -195,11 +197,15 @@ export default function Upgrade() {
 
     try {
       // Create checkout session on the server
-      const response = await apiRequest("POST", "/api/create-checkout-session", {
-        planId: planIdMapping[plan.id],
-        planName: plan.name,
-        amount: plan.price,
-      });
+      const response = await apiRequest(
+        "POST",
+        "/api/create-checkout-session",
+        {
+          planId: planIdMapping[plan.id],
+          planName: plan.name,
+          amount: plan.price,
+        },
+      );
 
       if (!response.ok) {
         throw new Error("Network response was not ok");
@@ -250,7 +256,8 @@ export default function Upgrade() {
             Upgrade Your Staging Experience
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Purchase a credit pack below to keep staging rooms and transforming your real estate listings.
+            Purchase a credit pack below to keep staging rooms and transforming
+            your real estate listings.
           </p>
         </div>
 
@@ -281,7 +288,11 @@ export default function Upgrade() {
             <div>
               <h4 className="text-lg font-medium mb-2">Secure & Simple</h4>
               <p className="text-gray-600">
-                All payments are processed securely through Stripe. After purchase, a secure JWT token is automatically stored in your browser as an HTTP-only cookie. This token grants you immediate access to your plan benefits without requiring registration or login. We don't store your payment details.
+                All payments are processed securely through Stripe. After
+                purchase, a secure JWT token is automatically stored in your
+                browser as an HTTP-only cookie. This token grants you immediate
+                access to your plan benefits without requiring registration or
+                login. We don't store your payment details.
               </p>
             </div>
           </div>

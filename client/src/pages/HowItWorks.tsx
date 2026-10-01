@@ -5,7 +5,7 @@ const steps = [
   {
     title: "Upload your rooms",
     description:
-      "Upload a room photo, choose the room type, and we'll stage it automatically—no MLS intake or disclosures required.",
+      "Upload a JPG, PNG or WebP photo under 10 MB. Choose the room type and protect features that must stay unchanged.",
   },
   {
     title: "Select a room type",
@@ -35,9 +35,9 @@ const HowItWorks = () => {
           How RoomStagerPro Delivers Turnkey Virtual Staging
         </h1>
         <p className="mx-auto max-w-3xl text-lg text-muted-foreground">
-          Upload, select a room type, approve, and publish staged rooms in a single
-          session. Our process is optimized for fast AI generation and instant
-          downloads you can drop into your listings or pitch decks.
+          Upload, select a room type, approve, and publish staged rooms in a
+          single session. Our process is optimized for fast AI generation and
+          instant downloads you can drop into your listings or pitch decks.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-4">
           <Button
@@ -50,7 +50,7 @@ const HowItWorks = () => {
             Start in the AI Stager
           </Button>
           <Button asChild variant="outline" size="lg">
-            <Link href="/sales">Talk to Sales</Link>
+            <Link href="/sales">View credit packs</Link>
           </Button>
         </div>
       </header>
@@ -67,7 +67,9 @@ const HowItWorks = () => {
             <h2 className="mt-2 text-2xl font-semibold text-foreground">
               {step.title}
             </h2>
-            <p className="mt-3 text-sm text-muted-foreground">{step.description}</p>
+            <p className="mt-3 text-sm text-muted-foreground">
+              {step.description}
+            </p>
           </article>
         ))}
       </section>
@@ -80,7 +82,7 @@ const HowItWorks = () => {
           Want to see the renders this workflow produces?
         </h2>
         <p className="mt-4 text-base text-muted-foreground">
-          Browse before-and-after sets, client wins, and style boards inside our
+          Browse actual before-and-after examples inside our
           <Link href="/gallery" className="text-primary underline">
             {" gallery showcase"}
           </Link>
@@ -98,7 +100,7 @@ const HowItWorks = () => {
             Launch the AI Stager
           </Button>
           <Button asChild variant="secondary" size="lg">
-            <Link href="/sales">Book a Sales Call</Link>
+            <Link href="/sales">View pricing</Link>
           </Button>
         </div>
       </section>

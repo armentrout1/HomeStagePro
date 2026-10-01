@@ -4,14 +4,8 @@ import { log } from "./vite";
 import { usageEntitlements, type UsageEntitlement } from "@shared/schema";
 import { eq } from "drizzle-orm";
 
-const {
-  DATABASE_URL,
-  PGHOST,
-  PGPORT,
-  PGDATABASE,
-  PGUSER,
-  PGPASSWORD,
-} = process.env;
+const { DATABASE_URL, PGHOST, PGPORT, PGDATABASE, PGUSER, PGPASSWORD } =
+  process.env;
 
 const buildLocalConfig = () => ({
   host: PGHOST ?? "localhost",
@@ -28,7 +22,7 @@ let dbMode: "database_url" | "pg_env";
 let logHost = "n/a";
 let logDatabase = "n/a";
 
-const client = (() => {
+export const client = (() => {
   if (DATABASE_URL) {
     dbMode = "database_url";
     try {
@@ -42,7 +36,10 @@ const client = (() => {
 
     return postgres(DATABASE_URL, {
       max: 1,
-      ...sslConfig,
+      ...(new URL(DATABASE_URL).hostname === "127.0.0.1" ||
+      new URL(DATABASE_URL).hostname === "localhost"
+        ? {}
+        : sslConfig),
     });
   }
 
@@ -52,17 +49,15 @@ const client = (() => {
   logDatabase = config.database;
 
   if (PGHOST && PGPORT && PGDATABASE && PGUSER && PGPASSWORD) {
-    return postgres(
-      {
-        host: PGHOST,
-        port: Number(PGPORT),
-        database: PGDATABASE,
-        user: PGUSER,
-        password: PGPASSWORD,
-        max: 1,
-        ...sslConfig,
-      },
-    );
+    return postgres({
+      host: PGHOST,
+      port: Number(PGPORT),
+      database: PGDATABASE,
+      user: PGUSER,
+      password: PGPASSWORD,
+      max: 1,
+      ...(PGHOST === "localhost" || PGHOST === "127.0.0.1" ? {} : sslConfig),
+    });
   }
 
   return postgres(config);
@@ -76,7 +71,9 @@ void (async () => {
     const schemaName = info?.schema ?? "unknown";
     const serverAddr = info?.server ?? "unknown";
     const serverPort = info?.port ?? "unknown";
-    log(`[db] connected db=${dbName} schema=${schemaName} server=${serverAddr}:${serverPort}`);
+    log(
+      `[db] connected db=${dbName} schema=${schemaName} server=${serverAddr}:${serverPort}`,
+    );
   } catch (error) {
     const message = (error as Error).message || "Unknown error";
     log(`[db] connection_probe_failed ${message}`);

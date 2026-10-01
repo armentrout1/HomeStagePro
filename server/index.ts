@@ -1,3 +1,6 @@
+import { deliverAccessEmails } from "./access";
+import { recoverStaleJobs } from "./stagingJobs";
+import { startJobQueue } from "./jobQueue";
 import express, { type Request, Response, NextFunction } from "express";
 import helmet from "helmet";
 import { registerRoutes } from "./routes";
@@ -6,7 +9,20 @@ import { setupVite, serveStatic, log } from "./vite";
 const app = express();
 
 // Trust proxy for Railway/production environments (required for secure cookies behind reverse proxy)
-app.set('trust proxy', 1);
+app.set("trust proxy", 1);
+
+// Preview environments remain crawlable so crawlers can see this noindex header.
+// Keep the production sitemap out of their robots response as well.
+if (process.env.SEARCH_INDEXING === "disabled") {
+  app.use((_req, res, next) => {
+    res.set("X-Robots-Tag", "noindex, nofollow, noarchive");
+    next();
+  });
+  app.get("/robots.txt", (_req, res) => {
+    res.type("text/plain").send("User-agent: *\nAllow: /\n");
+  });
+}
+
 
 // Canonical host + HTTPS + trailing slash normalization (non-API routes)
 // Only apply in production - skip in development so localhost works
@@ -24,8 +40,12 @@ app.use((req, res, next) => {
 
   const forwardedProto = normalizeHeader(req.headers["x-forwarded-proto"]);
   const forwardedHost = normalizeHeader(req.headers["x-forwarded-host"]);
-  const currentProtocol = (forwardedProto ?? req.protocol ?? "http").split(",")[0].trim();
-  const currentHost = (forwardedHost ?? req.headers.host ?? "").split(",")[0].trim();
+  const currentProtocol = (forwardedProto ?? req.protocol ?? "http")
+    .split(",")[0]
+    .trim();
+  const currentHost = (forwardedHost ?? req.headers.host ?? "")
+    .split(",")[0]
+    .trim();
 
   if (!currentHost) {
     return next();
@@ -33,11 +53,12 @@ app.use((req, res, next) => {
 
   const originalUrl = req.originalUrl || "/";
   const queryIndex = originalUrl.indexOf("?");
-  let pathname = queryIndex >= 0 ? originalUrl.slice(0, queryIndex) : originalUrl;
+  let pathname =
+    queryIndex >= 0 ? originalUrl.slice(0, queryIndex) : originalUrl;
   const search = queryIndex >= 0 ? originalUrl.slice(queryIndex) : "";
 
   let redirectRequired = false;
-  
+
   // Strip trailing slashes (except for root "/")
   if (pathname !== "/" && pathname.endsWith("/")) {
     pathname = pathname.slice(0, -1);
@@ -81,10 +102,7 @@ if (app.get("env") !== "production") {
 } else {
   // Allow inline scripts for Google Tag Manager compatibility
   // This is Google's recommended approach for GTM implementations
-  scriptSrc.push(
-    "'unsafe-inline'",
-    "https://static.cloudflareinsights.com",
-  );
+  scriptSrc.push("'unsafe-inline'", "https://static.cloudflareinsights.com");
 }
 
 app.use(
@@ -92,7 +110,7 @@ app.use(
     // Disable HSTS in development so localhost works without HTTPS
     strictTransportSecurity: app.get("env") !== "development",
     crossOriginResourcePolicy: { policy: "cross-origin" },
-    referrerPolicy: { policy: "no-referrer-when-downgrade" },
+    referrerPolicy: { policy: "no-referrer" },
     contentSecurityPolicy: {
       directives: {
         ...helmet.contentSecurityPolicy.getDefaultDirectives(),
@@ -101,6 +119,7 @@ app.use(
         "img-src": [
           "'self'",
           "data:",
+          "blob:",
           "https://images.openai.com",
           "https://images.unsplash.com",
           "https://www.googletagmanager.com",
@@ -143,37 +162,34 @@ app.use(
 // Increase the JSON payload size limit to 50MB and capture raw body for Stripe webhooks
 app.use(
   express.json({
-    limit: '50mb',
+    limit: "50mb",
     verify: (req, _res, buf) => {
       (req as any).rawBody = buf;
     },
   }),
 );
-app.use(express.urlencoded({ extended: false, limit: '50mb' }));
+app.use(express.urlencoded({ extended: false, limit: "50mb" }));
+app.use("/api", (req, res, next) => {
+  res.set("Cache-Control", "no-store");
+  if (
+    req.path !== "/webhook" &&
+    req.method !== "GET" &&
+    req.headers["sec-fetch-site"] === "cross-site"
+  ) {
+    return res
+      .status(403)
+      .json({ error: "Please use RoomStagerPro directly." });
+  }
+  next();
+});
 
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
-  let capturedJsonResponse: Record<string, any> | undefined = undefined;
-
-  const originalResJson = res.json;
-  res.json = function (bodyJson, ...args) {
-    capturedJsonResponse = bodyJson;
-    return originalResJson.apply(res, [bodyJson, ...args]);
-  };
-
   res.on("finish", () => {
     const duration = Date.now() - start;
     if (path.startsWith("/api")) {
       let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-      if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
-      }
-
-      if (logLine.length > 80) {
-        logLine = logLine.slice(0, 79) + "…";
-      }
-
       log(logLine);
     }
   });
@@ -182,18 +198,25 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  if (process.env.DISABLE_USAGE_LIMITS === 'true') {
-    log('Usage limits disabled (DISABLE_USAGE_LIMITS=true)');
+  if (process.env.DISABLE_USAGE_LIMITS === "true") {
+    log("Usage limits disabled (DISABLE_USAGE_LIMITS=true)");
   }
 
   const server = await registerRoutes(app);
+  startJobQueue();
+  const maintain = () =>
+    Promise.all([deliverAccessEmails(), recoverStaleJobs()]).catch(() =>
+      console.error("Background maintenance failed"),
+    );
+  void maintain();
+  setInterval(() => void maintain(), 60_000).unref();
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
 
     res.status(status).json({ message });
-    throw err;
+    console.error("Request failed", { status });
   });
 
   // importantly only setup vite in development and after

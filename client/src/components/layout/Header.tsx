@@ -18,6 +18,7 @@ export default function Header() {
     { href: "/gallery", label: "Gallery" },
     { href: "/resources", label: "Resources" },
     { href: "/sales", label: "Pricing" },
+    { href: "/access", label: "My access" },
   ];
 
   useEffect(() => {
@@ -47,11 +48,15 @@ export default function Header() {
   };
 
   return (
-    <header className={`${baseHeaderClasses} ${hasScrolled ? "shadow-sm" : ""}`}>
+    <header
+      className={`${baseHeaderClasses} ${hasScrolled ? "shadow-sm" : ""}`}
+    >
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 md:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-3">
           <img src="/logo.svg" alt="RoomStagerPro logo" className="h-8 w-8" />
-          <span className="text-xl font-semibold text-slate-900">RoomStagerPro</span>
+          <span className="text-xl font-semibold text-slate-900">
+            RoomStagerPro
+          </span>
         </Link>
         <nav className="hidden items-center gap-6 md:flex">
           {navLinks.map((link) => {
@@ -63,14 +68,18 @@ export default function Header() {
                 href={link.href}
                 aria-current={isActive ? "page" : undefined}
                 className={`group relative inline-flex items-center text-sm font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
-                  isActive ? "text-primary" : "text-slate-600 hover:text-slate-900"
+                  isActive
+                    ? "text-primary"
+                    : "text-slate-600 hover:text-slate-900"
                 }`}
               >
                 {link.label}
                 <span
                   aria-hidden="true"
                   className={`absolute inset-x-0 -bottom-1 h-0.5 rounded-full bg-primary transition-all duration-200 ${
-                    isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                    isActive
+                      ? "opacity-100"
+                      : "opacity-0 group-hover:opacity-100"
                   }`}
                 />
               </Link>
@@ -89,6 +98,8 @@ export default function Header() {
           className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-full border border-amber-300 p-0 text-amber-700 shadow-sm transition-transform duration-200 ease-out hover:scale-[1.03] active:scale-[0.97] hover:border-amber-400 hover:bg-amber-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
           onClick={toggleMobileMenu}
           aria-label="Toggle mobile menu"
+          aria-expanded={isMobileMenuOpen}
+          aria-controls="mobile-navigation"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

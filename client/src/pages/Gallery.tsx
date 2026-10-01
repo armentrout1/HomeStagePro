@@ -28,7 +28,7 @@ const Gallery = () => {
         <h1 className="mt-4 text-4xl font-semibold">Before &amp; After Virtual Staging Examples</h1>
         <p className="mt-4 text-lg text-muted-foreground">
           Explore how AI-assisted staging elevates raw listing photos into polished marketing assets.
-          Every pair below uses the exact workflow available inside the RoomStager Pro app.
+          These examples were created with RoomStagerPro. Results vary with the photo, selection, and model version; review each edited image before publishing.
         </p>
         <p className="mt-2 text-muted-foreground">
           Want to create results like these for your own listings? Explore our{" "}

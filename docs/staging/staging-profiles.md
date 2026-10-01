@@ -84,7 +84,7 @@ Future ideas / roadmap: [`docs/staging/staging-roadmap.md`](./staging-roadmap.md
 - **Countertop decor placement**: Place decor as **one small clustered vignette along the backsplash**, positioned away from the sink basin/faucet zone and away from the cooktop/stove zone. **Do not scatter items across multiple counters.**
 - **Standard**: choose **at most two** optional decor items total, keep countertops mostly visible, do not add open shelving, and allow only one small mat directly in front of the sink.
 - **Constrained override**: same as Standard but limit to **one** optional item total (omit entirely if it risks blocking doors/appliances), explicitly remind the model to keep decor away from counter edges and appliance clearances, and **if uncertain, omit countertop decor entirely.**
-- **Large**: up to **four** optional decor items, still only one small sink mat, and optionally one small open-shelving segment (2–3 decorative items) **only** when an empty wall segment between uppers exists and it is not a window.
+- **Large**: up to **four** optional decor items and one small sink mat. Never add shelving or change permanent fixtures.
 
 ### Forbidden Items
 - Applies to all kitchen profiles: **no** sofas, beds, dining tables/chairs (unless room type is explicitly dining), desks, bar stools, sectionals, new islands, large rugs, runners, wall remodeling, or any permanent fixture changes. Never block sinks, stoves, refrigerators, dishwashers, or cabinet/ drawer swing.
@@ -92,7 +92,7 @@ Future ideas / roadmap: [`docs/staging/staging-roadmap.md`](./staging-roadmap.md
 ### Max Counts
 - **Standard**: decor ≤2, sink mats ≤1 (sink-only), shelving =0, rugs =0, runners =0.
 - **Constrained**: decor ≤1, sink mats ≤1, shelving =0, rugs =0, runners =0.
-- **Large**: decor ≤4, sink mats ≤1, shelving ≤1 small section, rugs =0, runners =0.
+- **Large**: decor ≤4, sink mats ≤1, shelving =0, rugs =0, runners =0.
 
 ### Size Inference Rules
 - Aggregate `preferredPlacements + notes`.
@@ -105,11 +105,11 @@ Future ideas / roadmap: [`docs/staging/staging-roadmap.md`](./staging-roadmap.md
 - When constrained keywords trigger, also log `KitchenConstrained=true`.
 
 ### Room-Specific Guardrails
-- Reinforce in prompt builder: countertops mostly visible, never block appliances or cabinet doors, only one small sink mat, and optional shelving is allowed only on empty wall segments, never windows.
+- Reinforce in prompt builder: countertops mostly visible, never block appliances or cabinet doors, only one small sink mat, and never add shelving.
 
 ### Quick Test Cases
 1. **Kitchen — Standard default**: no constraints provided → expect `KitchenProfile=standard`, no constrained log, optional decor limit = 2.
-2. **Kitchen — Large (keyword hits)**: notes include "spacious", "open" and mention an island → expect `KitchenProfile=large`, optional decor limit = 4, shelving allowed if wall segment exists.
+2. **Kitchen — Large (keyword hits)**: notes include "spacious", "open" and mention an island → expect `KitchenProfile=large`, optional decor limit = 4, shelving forbidden.
 3. **Kitchen — Large via secondary zone**: single "breakfast nook" mention → expect Large profile without constrained log.
 4. **Kitchen — Constrained**: notes say "galley layout" and "keep path clear" → force Standard, log `KitchenConstrained=true`, optional decor limit = 1.
 5. **Kitchen — Mixed cues**: constraints mention "large open kitchen" but also "multiple doors" → constrained override wins; expect Standard with `KitchenConstrained=true`.
@@ -364,3 +364,45 @@ Future ideas / roadmap: [`docs/staging/staging-roadmap.md`](./staging-roadmap.md
 5. **Bedroom — Large keyword hits**: notes with "open" and "expansive"; expect Large profile.
 6. **Bedroom — Secondary zone**: notes include "reading corner"; expect Large profile even if only one size keyword.
 7. **Bedroom — Constrained**: notes include "limited wall space" + "closet doors"; expect Standard profile with constrained instructions and log.
+
+
+## September 2026 editing and access changes
+- September 30, approved: compositing rejects generated aspect-ratio changes over 2% instead of stretching the room. Exact protected-pixel restoration remains in place. The editor and reviewer receive an additional orange-highlighted copy identifying the editable region. The editor must keep every added object and shadow inside that region; selection constraints override room furniture counts. GPT Image 2.5 output dimensions follow the source aspect ratio on a 16-pixel grid. Removal skips furniture-layout analysis. Rejected results restore the reserved credit.
+- Live fixture verification: living-room furnishing and removal passed with zero changed protected pixels. Two bedroom furnishing selections failed the cut-off-furniture check; bedroom placement remains an open quality limitation. These small samples do not establish a general success rate.
+- Default image model: gpt-image-2.5-sunburst; override with STAGING_IMAGE_MODEL after testing.
+- Transparent mask pixels are editable. Opaque pixels are restored from the original after inference and saved as lossless PNG.
+- Customers can paint/protect regions and choose furnish, replace, or remove. The default center selection is only a starting point; protect windows, doors and fixtures.
+- The selected area still requires visual review. Do not claim structural perfection, MLS compliance, human review, or guaranteed sales results.
+- A database job reserves one credit before generation, persists the result, refunds failure once, and supports reload/recovery from My access.
+- Image requests have a 240-second timeout with no automatic API retries. Layout analysis has a separate 30-second limit.
+- Existing plan IDs, prices and durations remain compatible; Pro Pack is one payment for 50 credits valid 30 days, not a recurring subscription.
+
+- Post-edit review uses GPT-6 Luna with low reasoning effort to check obvious architecture changes and cut-off furniture. Review failures restore the reserved credit. Automated review is imperfect; customers must review the final image.
+- Live tests: GPT-4o-mini accepted an intentionally clipped result; GPT-6 Luna rejected it. A subsequent complete pipeline test (edit, composite, review, private storage, signed download) succeeded with a larger, fixture-aware selection.
+
+- Preserve exposed flooring grain, joints, wall finishes and sharpness inside the edit selection. The secondary review rejects obvious surface changes, broad blur patches and artificial vignettes as well as geometry changes and clipped objects.
+
+- For furnishing and replacement the provider mask is intentionally omitted: controlled edits with it repeatedly blurred exposed flooring. Removal now uses the narrower object mask described below. The alpha selection remains authoritative in local pixel restoration, followed by the image-quality gate. Region-boundary clipping is rejected rather than delivered.
+
+- Full-resolution staging review found a false acceptance: the top of added wall art was clipped at the internal selection boundary. The reviewer now explicitly checks all object outlines, including art frames, plants, lamps and rug corners. New wall art, curtains and wall-mounted decor are omitted. The layout analyzer receives the same orange selection guide and must fit complete objects within it; selection rules override placement suggestions. This is a risk reduction, not a guarantee.
+
+### September 30 bedroom selection follow-up
+A follow-up public bedroom fixture protected the actual window outline instead of a large rectangle crossing the proposed bed. The current pipeline accepted it in 35.7 seconds with zero changed protected pixels and no clipped bed. This is one sample, not an acceptance-rate estimate. A visible wall-tone seam at the selection boundary remains a quality limitation; broader bedroom/replace/removal coverage is still required before release. No model or compositor change was made for this diagnostic.
+
+Editor guidance: include the complete furniture item, bedding and shadow in the editable region. Trace windows and trim with Protect rather than cutting a large protected rectangle through the furniture area. Customers must still review changes inside the selection.
+
+### Release boundary verification
+The compositor blends only inward from fully protected pixels over at most 16 pixels (2% of the shorter image dimension for small photos). Fully protected pixels remain exact; the natural photograph edge and the edit interior are not faded. The image reviewer also checks tone seams and ghosted furniture. A fresh bedroom fixture passed with zero changed protected pixels; this narrow sample is not a general acceptance-rate guarantee. Keep a margin around complete objects in the selection.
+
+### Mode-specific release checks
+Removal uses a separate selection prompt with no furniture-placement instructions; it explicitly removes the main bed/sofa and reconstructs the newly exposed surfaces. Replacement explicitly requires visibly different main-furniture design or styling, and the reviewer rejects unchanged furniture with only accessories removed. In a public bedroom diagnostic, furnishing and revised replacement passed with zero changed protected pixels. Revised removal emptied the room but was rejected for a surface change. Keep this rejection and credit-restoration behavior; do not weaken the quality gate or infer a general acceptance rate from these samples.
+
+### Removal surface reconstruction
+Removal distinguishes movable area rugs from permanent flooring. The editor must reconstruct hidden flooring from the permanent surface visible outside the rug, never extend the removed rug pattern. Plain wall-to-wall carpet keeps its fine irregular pile; wood/tile keeps existing joint direction and spacing. Already-empty selected areas remain unchanged. The surface-quality review and exact protected-pixel compositor stay enabled. This instruction is subject to live fixture validation, not a guarantee of unseen surface accuracy.
+
+Removal now runs a bounded visual object planner before image generation. Its conservative object bounds are expanded by at most 32 pixels (3.5% of the shorter photo dimension) and intersected with customer alpha; they can only narrow the selection. Exposed surfaces outside those bounds are copied exactly from the original. Fine silhouette tracing was rejected because it missed furniture fragments. Removal uses this mask in the provider edit request and feathers inward by up to 16 pixels. The final reviewer still sees the customer's original selection so an omitted furniture item cannot pass simply because the planner missed it. Empty, uncertain, or visibly incomplete selections return a clear failure and restore the credit without an image-generation request or result-file upload. The planner is fallible; image review remains mandatory.
+
+### Removal validation and boundary lighting
+A bounded, coarse-grid harmonic RGB correction fits generated lighting to protected pixels before compositing. Only protected pixels supply the correction; it never copies original furniture from editable pixels. Generated texture is retained, RGB offsets are capped at 64, and protected pixels are still restored exactly. The final image review remains enabled.
+
+The corrected living-room and carpet-bedroom selections remove complete furniture and rugs; both final tone-corrected outputs passed automated and visual review with zero changed protected pixels. The old furnishing selections protected fragments of the furniture and are invalid removal fixtures. A live preflight detects the incomplete living-room selection; an already-empty bedroom avoids an image call. A GPT Image 1.5 comparison failed the surface check, so the default model remains unchanged. These are two room fixtures, not a general success-rate estimate or proof of hidden-room details.

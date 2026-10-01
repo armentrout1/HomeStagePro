@@ -17,9 +17,18 @@ import { RoomTypeSelect } from "./components/RoomTypeSelect";
 import { ImageUploadPanel } from "./components/ImageUploadPanel";
 import { StagedPreviewPanel } from "./components/StagedPreviewPanel";
 import { ActionButtons } from "./components/ActionButtons";
+import { EditArea } from "./components/EditArea";
 import { SavingIndicator } from "./components/SavingIndicator";
+import { loadLocal, saveLocal, type RoomDraft } from "@/lib/localDraft";
+import { trackEvent } from "@/analytics/events";
+import { getJob } from "./api/stagingApi";
 
 export default function ImageStager() {
+  const [mask, setMask] = useState<string | null>(null);
+  const [draftReady, setDraftReady] = useState(false);
+  const [draftNotice, setDraftNotice] = useState("");
+  const [initialMask, setInitialMask] = useState<string | null>(null);
+  const [mode, setMode] = useState("furnish");
   const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [stagedImage, setStagedImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -28,14 +37,30 @@ export default function ImageStager() {
   const [progressPhase, setProgressPhase] = useState<string>("");
   const [activeTab, setActiveTab] = useState<"original" | "staged">("original");
   const previousStagedImageRef = useRef<string | null>(null);
+  useEffect(() => {
+    let active = true;
+    loadLocal<RoomDraft>("room").then((draft) => {
+      if (!active || !draft) return;
+      setOriginalImage(draft.image); setMask(draft.mask); setInitialMask(draft.mask);
+      setRoomType(draft.roomType); setMode(draft.mode);
+      setDraftNotice("Your photo and edit selection were restored on this device.");
+    }).catch(() => { if (active) setDraftNotice("This browser cannot save a draft. Keep this page open while editing."); })
+      .finally(() => { if (active) setDraftReady(true); });
+    return () => { active = false; };
+  }, []);
+  useEffect(() => {
+    if (!draftReady) return;
+    void saveLocal<RoomDraft>("room", originalImage ? { image: originalImage, mask, roomType, mode } : null)
+      .catch(() => setDraftNotice("Your draft could not be saved. Keep this page open while editing."));
+  }, [draftReady, originalImage, mask, roomType, mode]);
 
   const { toast } = useToast();
-  
+
   const { usageStatus, isLoadingUsage, refreshUsageStatus } = useUsageStatus();
 
   const { fileInputRef, triggerFileInput, handleFileChange } = useImageUpload({
     toast,
-    setOriginalImage,
+    setOriginalImage: (image) => { setInitialMask(null); setMask(null); setOriginalImage(image); },
     resetStagedImage: () => setStagedImage(null),
     // maxBytes omitted to use default 10MB
   });
@@ -44,13 +69,15 @@ export default function ImageStager() {
     setOriginalImage(null);
     setStagedImage(null);
     setRoomType("living_room");
-    
+    setMask(null); setInitialMask(null); setDraftNotice("");
+
     toast.success("Reset complete", "All images have been cleared");
   }, [toast, setOriginalImage, setStagedImage, setRoomType]);
-  
+
   const { stageRoom, requestId, promptHash } = useStageRoom({
     originalImage,
     roomType,
+    mode,
     setStagedImage,
     setIsLoading,
     setIsSaving,
@@ -61,28 +88,30 @@ export default function ImageStager() {
 
   const handleDownload = useCallback(async () => {
     if (!stagedImage) return;
-    
+
     try {
       // Fetch the image and convert to blob to force download (cross-origin URLs ignore download attribute)
-      const response = await fetch(stagedImage);
+      const latest = requestId ? await getJob(requestId) : null;
+      const url = latest?.data?.stagedSignedUrl || stagedImage;
+      const response = await fetch(url);
+      if (!response.ok || !response.headers.get("content-type")?.startsWith("image/")) throw new Error("Image download unavailable");
       const blob = await response.blob();
       const blobUrl = URL.createObjectURL(blob);
-      
-      const link = document.createElement('a');
+
+      const link = document.createElement("a");
       link.href = blobUrl;
-      link.download = 'staged-room.jpg';
+      link.download = "virtually-staged-room.png";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       // Clean up the blob URL
       URL.revokeObjectURL(blobUrl);
+      trackEvent("image_download");
     } catch (error) {
-      // Fallback: open in new tab if fetch fails
-      window.open(stagedImage, '_blank');
-      toast.error("Download failed", "Please right-click the image to save it");
+      toast.error("Download unavailable", "Please try again to refresh the download link, or reopen this image from My access.");
     }
-  }, [stagedImage, toast]);
+  }, [stagedImage, toast, requestId]);
 
   useEffect(() => {
     if (stagedImage && stagedImage !== previousStagedImageRef.current) {
@@ -97,138 +126,184 @@ export default function ImageStager() {
     }
   }, [stagedImage]);
 
-
   return (
     <div className="w-full max-w-4xl mx-auto px-2 md:px-0">
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        disabled={isLoading}
+        accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
+        className="hidden"
+      />
       <div className="rounded-2xl bg-gradient-to-r from-amber-300 via-amber-400 to-amber-300 p-[2px] shadow-lg">
         <Card className="rounded-2xl bg-white p-6 md:px-8 shadow-md">
           <div className="space-y-6 md:space-y-5 pb-10 md:pb-0">
             <div className="text-center space-y-3 md:space-y-4">
-              <h3 className="text-2xl md:text-3xl font-bold">Transform Your Room with AI Staging</h3>
+              <h3 className="text-2xl md:text-3xl font-bold">
+                Transform Your Room with AI Staging
+              </h3>
               <p className="text-gray-600 md:text-lg">
-                Upload a photo of your empty room and our AI will transform it into a beautifully staged space in seconds!
+                Upload a room photo, choose the furniture area, then furnish,
+                replace or remove items. One completed image uses one credit.
               </p>
-          </div>
-
-          <RoomTypeSelect
-            roomType={roomType}
-            onRoomTypeChange={setRoomType}
-            showRoomTypeHint={Boolean(originalImage && !stagedImage)}
-          />
-
-          <div className="w-full space-y-4 md:space-y-5 md:max-w-4xl md:mx-auto">
-            <div className="md:hidden space-y-4">
-              <div
-                className="pp-panel w-full rounded-2xl border border-slate-300/90 bg-slate-200/70 p-1.5 shadow-inner flex gap-1.5"
-                role="tablist"
-                aria-label="Image preview mode"
-              >
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("original")}
-                  className={`relative flex-1 rounded-xl px-4 py-3 min-h-[44px] text-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
-                    activeTab === "original"
-                      ? "bg-white text-slate-900 shadow-md font-semibold ring-1 ring-slate-200"
-                      : "text-slate-600 font-medium hover:bg-white/40"
-                  }`}
-                  aria-selected={activeTab === "original"}
-                  role="tab"
-                >
-                  <span className="flex items-center justify-center gap-2">
-                    <ImageIcon className="h-4 w-4" aria-hidden="true" />
-                    <span>Original</span>
-                  </span>
-                  <span
-                    className={`absolute bottom-1 left-4 right-4 h-0.5 rounded-full bg-slate-900/70 transition-opacity ${
-                      activeTab === "original" ? "opacity-90" : "opacity-0"
-                    }`}
-                    aria-hidden="true"
-                  />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("staged")}
-                  className={`relative flex-1 rounded-xl px-4 py-3 min-h-[44px] text-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
-                    activeTab === "staged"
-                      ? "bg-white text-slate-900 shadow-md font-semibold ring-1 ring-slate-200"
-                      : "text-slate-600 font-medium hover:bg-white/40"
-                  }`}
-                  aria-selected={activeTab === "staged"}
-                  role="tab"
-                >
-                  <span className="flex items-center justify-center gap-2">
-                    <Sparkles className="h-4 w-4" aria-hidden="true" />
-                    <span>Staged</span>
-                  </span>
-                  <span
-                    className={`absolute bottom-1 left-4 right-4 h-0.5 rounded-full bg-slate-900/70 transition-opacity ${
-                      activeTab === "staged" ? "opacity-90" : "opacity-0"
-                    }`}
-                    aria-hidden="true"
-                  />
-                </button>
-              </div>
-
-              <div>
-                {activeTab === "original" ? (
-                  <ImageUploadPanel
-                    originalImage={originalImage}
-                    onTriggerFileInput={triggerFileInput}
-                    fileInputRef={fileInputRef}
-                    onFileChange={handleFileChange}
-                  />
-                ) : (
-                  <StagedPreviewPanel
-                    stagedImage={stagedImage}
-                    isLoading={isLoading}
-                    progressPhase={progressPhase}
-                  />
-                )}
-              </div>
+              {draftNotice && <p role="status" className="text-sm text-slate-600">{draftNotice}</p>}
             </div>
 
-            <div className="hidden md:grid gap-5 md:grid-cols-2 items-stretch">
-              <ImageUploadPanel
-                originalImage={originalImage}
-                onTriggerFileInput={triggerFileInput}
-                fileInputRef={fileInputRef}
-                onFileChange={handleFileChange}
-              />
+            <RoomTypeSelect
+              roomType={roomType}
+              onRoomTypeChange={setRoomType}
+              showRoomTypeHint={Boolean(originalImage && !stagedImage)}
+            />
 
-              <StagedPreviewPanel
+            <div className="w-full space-y-4 md:space-y-5 md:max-w-4xl md:mx-auto">
+              <div className="md:hidden space-y-4">
+                <div
+                  className="pp-panel w-full rounded-2xl border border-slate-300/90 bg-slate-200/70 p-1.5 shadow-inner flex gap-1.5"
+                  role="tablist"
+                  aria-label="Image preview mode"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("original")}
+                    className={`relative flex-1 rounded-xl px-4 py-3 min-h-[44px] text-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
+                      activeTab === "original"
+                        ? "bg-white text-slate-900 shadow-md font-semibold ring-1 ring-slate-200"
+                        : "text-slate-600 font-medium hover:bg-white/40"
+                    }`}
+                    aria-selected={activeTab === "original"}
+                    role="tab"
+                  >
+                    <span className="flex items-center justify-center gap-2">
+                      <ImageIcon className="h-4 w-4" aria-hidden="true" />
+                      <span>Original</span>
+                    </span>
+                    <span
+                      className={`absolute bottom-1 left-4 right-4 h-0.5 rounded-full bg-slate-900/70 transition-opacity ${
+                        activeTab === "original" ? "opacity-90" : "opacity-0"
+                      }`}
+                      aria-hidden="true"
+                    />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("staged")}
+                    className={`relative flex-1 rounded-xl px-4 py-3 min-h-[44px] text-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
+                      activeTab === "staged"
+                        ? "bg-white text-slate-900 shadow-md font-semibold ring-1 ring-slate-200"
+                        : "text-slate-600 font-medium hover:bg-white/40"
+                    }`}
+                    aria-selected={activeTab === "staged"}
+                    role="tab"
+                  >
+                    <span className="flex items-center justify-center gap-2">
+                      <Sparkles className="h-4 w-4" aria-hidden="true" />
+                      <span>Staged</span>
+                    </span>
+                    <span
+                      className={`absolute bottom-1 left-4 right-4 h-0.5 rounded-full bg-slate-900/70 transition-opacity ${
+                        activeTab === "staged" ? "opacity-90" : "opacity-0"
+                      }`}
+                      aria-hidden="true"
+                    />
+                  </button>
+                </div>
+
+                <div>
+                  {activeTab === "original" ? (
+                    <ImageUploadPanel
+                      originalImage={originalImage}
+                      onTriggerFileInput={triggerFileInput}
+                      fileInputRef={fileInputRef}
+                      onFileChange={handleFileChange}
+                    />
+                  ) : (
+                    <StagedPreviewPanel
+                      stagedImage={stagedImage}
+                      isLoading={isLoading}
+                      progressPhase={progressPhase}
+                    />
+                  )}
+                </div>
+              </div>
+
+              <div className="hidden md:grid gap-5 md:grid-cols-2 items-stretch">
+                <ImageUploadPanel
+                  originalImage={originalImage}
+                  onTriggerFileInput={triggerFileInput}
+                  fileInputRef={fileInputRef}
+                  onFileChange={handleFileChange}
+                />
+
+                <StagedPreviewPanel
+                  stagedImage={stagedImage}
+                  isLoading={isLoading}
+                  progressPhase={progressPhase}
+                />
+              </div>
+
+              <label className="block text-sm font-medium">
+                What would you like to do?
+                <select
+                  value={mode}
+                  disabled={isLoading}
+                  onChange={(e) => setMode(e.target.value)}
+                  className="mt-2 block w-full rounded border p-3"
+                >
+                  <option value="furnish">Furnish an empty room</option>
+                  <option value="replace">Replace furniture & clutter</option>
+                  <option value="remove">Remove furniture & clutter</option>
+                </select>
+              </label>
+              {originalImage && (
+                <EditArea
+                  image={originalImage}
+                  initialMask={initialMask}
+                  onChange={setMask}
+                  disabled={isLoading || !draftReady}
+                />
+              )}
+              <p className="text-sm text-slate-600">
+                New here?{" "}
+                <a href="/gallery" className="underline">
+                  See actual examples
+                </a>{" "}
+                ·{" "}
+                <a href="/sales" className="underline">
+                  5 images for $9
+                </a>{" "}
+                ·{" "}
+                <a href="/access" className="underline">
+                  Reopen my pack
+                </a>
+              </p>
+              <ActionButtons
+                originalImage={originalImage}
                 stagedImage={stagedImage}
                 isLoading={isLoading}
-                progressPhase={progressPhase}
+                usageStatus={usageStatus}
+                onUploadClick={triggerFileInput}
+                onStageClick={() => stageRoom(mask)}
+                onResetClick={handleReset}
+                onDownloadClick={handleDownload}
+              />
+
+              {import.meta.env.DEV && requestId && promptHash && (
+                <div className="text-center text-xs text-slate-500">
+                  <p className="font-medium text-slate-600">Support Info</p>
+                  <p className="font-mono">Request ID: {requestId}</p>
+                  <p className="font-mono">Prompt Hash: {promptHash}</p>
+                </div>
+              )}
+
+              <UsageStatusBanner
+                usageStatus={usageStatus}
+                isLoadingUsage={isLoadingUsage}
               />
             </div>
 
-            <ActionButtons
-              originalImage={originalImage}
-              stagedImage={stagedImage}
-              isLoading={isLoading}
-              usageStatus={usageStatus}
-              onUploadClick={triggerFileInput}
-              onStageClick={stageRoom}
-              onResetClick={handleReset}
-              onDownloadClick={handleDownload}
-            />
-
-            {import.meta.env.DEV && requestId && promptHash && (
-              <div className="text-center text-xs text-slate-500">
-                <p className="font-medium text-slate-600">Support Info</p>
-                <p className="font-mono">Request ID: {requestId}</p>
-                <p className="font-mono">Prompt Hash: {promptHash}</p>
-              </div>
-            )}
-
-            <UsageStatusBanner
-              usageStatus={usageStatus}
-              isLoadingUsage={isLoadingUsage}
-            />
+            <SavingIndicator isSaving={isSaving} />
           </div>
-
-          <SavingIndicator isSaving={isSaving} />
-        </div>
         </Card>
       </div>
     </div>

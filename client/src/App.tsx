@@ -11,6 +11,7 @@ import { trackPageView } from "./analytics/gtag";
 import { FeedbackDrawer } from "@/components/feedback/FeedbackDrawer";
 import { FeedbackTabButton } from "@/components/feedback/FeedbackTabButton";
 
+const Access = lazy(() => import("./pages/Access"));
 const HomeStagingTips = lazy(() => import("./pages/HomeStagingTips"));
 const RealEstatePhotos = lazy(() => import("./pages/RealEstatePhotos"));
 const VirtualVsTraditional = lazy(() => import("./pages/VirtualVsTraditional"));
@@ -67,6 +68,10 @@ function Router() {
         }
       >
         <Switch>
+          <Route path="/access">
+            <SeoHead path="/access" />
+            <Access />
+          </Route>
           <Route path="/">
             <>
               <SeoHead path="/" />

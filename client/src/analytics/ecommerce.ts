@@ -10,7 +10,7 @@ export type BeginCheckoutPayload = {
 };
 
 export function trackBeginCheckout(payload: BeginCheckoutPayload): void {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined" || window.location.hostname !== "roomstagerpro.com") return;
   const gtagFn = (window as any).gtag;
   if (typeof gtagFn !== "function") return;
 

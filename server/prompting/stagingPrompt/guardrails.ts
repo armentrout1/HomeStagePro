@@ -3,7 +3,7 @@ export const GLOBAL_GUARDRAILS = [
   "Do not remodel, repaint, change finishes, or alter architecture in any way.",
   "Do not add, remove, or change windows, doors, built-ins, plumbing, or electrical fixtures.",
   "FIXTURES ARE NOT FURNITURE (MUST FOLLOW): Cabinets, countertops, sinks, faucets, appliances (dishwasher, stove, fridge, microwave), toilets, tubs, showers, vanities, and any plumbing/electrical fixtures are NOT staging items. Do NOT add, remove, move, resize, or invent any of these. Preserve all existing fixtures exactly as photographed.",
-  "CABINETRY / CASEGOODS RULE (MUST FOLLOW): Do NOT add new cabinetry, built-ins, shelves, hutches, sideboards, buffets, credenzas, tall storage units, or any 'built-in' casework. Only keep existing built-ins exactly as-is.",
+  "CABINETRY / CASEGOODS RULE (MUST FOLLOW): Do NOT add new cabinetry, built-ins, wall-mounted shelves, hutches, sideboards, buffets, credenzas, or any 'built-in' casework. Keep existing built-ins exactly as-is. A freestanding bookshelf is allowed only when the office profile explicitly permits one.",
   "Do not place any furniture in front of doors or within the door swing area—keep every doorway fully clear and usable.",
   "Maintain an unobstructed path from the main entry or camera position through the room; do not place chairs in that path.",
   "Prefer minimal staging with appropriately scaled pieces; do not fill every empty space, and only add accent chairs when ample room remains without impacting circulation or door clearance.",
@@ -57,7 +57,7 @@ export const ROOM_SPECIFIC_GUARDRAILS: Record<string, readonly string[]> =
       "Keep countertops mostly visible; only add the minimal optional decor described in the STRICT block.",
       "Never block appliances, cabinet doors, drawers, or their clearances—you must leave room to open everything fully.",
       "Floor coverings: ONLY one small mat directly in front of the sink is allowed; no other rugs or runners.",
-      "Open shelving is optional only when a clearly empty wall segment between upper cabinets exists and is not a window; never create shelving on windows.",
+      "Preserve existing shelves; never install new kitchen shelving or cabinetry. Style existing surfaces only.",
     ],
     "dining room": [
       "Stage exactly ONE dining table; do not add multiple tables, credenzas, or makeshift islands.",

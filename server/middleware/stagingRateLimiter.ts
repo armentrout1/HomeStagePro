@@ -7,14 +7,14 @@ export const stagingRateLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: (req) => {
-    const tokenId = (req as any).stagingEntitlement?.tokenId;
+    const tokenId = req.accessTokenPayload?.jti;
     if (tokenId) {
       return `token:${tokenId}`;
     }
-    return `ip:${ipKeyGenerator(req as any)}`;
+    return `ip:${ipKeyGenerator(req.ip || "unknown")}`;
   },
   handler: (req, res) => {
-    const tokenId = (req as any).stagingEntitlement?.tokenId;
+    const tokenId = req.accessTokenPayload?.jti;
     const keyType = tokenId ? "token" : "ip";
     const key = tokenId ?? req.ip ?? "unknown";
 
