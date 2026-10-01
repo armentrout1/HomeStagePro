@@ -1,0 +1,98 @@
+{
+  "living-fireplace-wood": [
+    {
+      "id": "firebox",
+      "label": "Fireplace interior and trim",
+      "x": 0.23,
+      "y": 0.54,
+      "width": 0.125,
+      "height": 0.09
+    },
+    {
+      "id": "upper-window",
+      "label": "Upper left window and exterior view",
+      "x": 0.05,
+      "y": 0.2,
+      "width": 0.15,
+      "height": 0.14
+    },
+    {
+      "id": "right-floor",
+      "label": "Exposed flooring beside the doorway",
+      "x": 0.88,
+      "y": 0.81,
+      "width": 0.07,
+      "height": 0.17
+    },
+    {
+      "id": "ceiling-fan",
+      "label": "Ceiling fan and fixed lighting",
+      "x": 0.36,
+      "y": 0.04,
+      "width": 0.23,
+      "height": 0.21
+    }
+  ],
+  "bedroom-panelled-carpet": [
+    {
+      "id": "ceiling",
+      "label": "Tray ceiling and fixed light",
+      "x": 0.2,
+      "y": 0.01,
+      "width": 0.55,
+      "height": 0.18
+    },
+    {
+      "id": "upper-windows",
+      "label": "Upper window frames and blinds",
+      "x": 0.58,
+      "y": 0.26,
+      "width": 0.24,
+      "height": 0.17
+    }
+  ],
+  "public-small-empty-room": [
+    {
+      "id": "door-handle",
+      "label": "Door handle and frame",
+      "x": 0,
+      "y": 0.4,
+      "width": 0.1,
+      "height": 0.16
+    },
+    {
+      "id": "wall-finish",
+      "label": "Upper right permanent wall finish",
+      "x": 0.6,
+      "y": 0.05,
+      "width": 0.35,
+      "height": 0.18
+    },
+    {
+      "id": "outlets",
+      "label": "Original and candidate outlet positions (occlusion requires review)",
+      "x": 0.76,
+      "y": 0.51,
+      "width": 0.16,
+      "height": 0.14
+    }
+  ],
+  "bedroom-small-window": [
+    {
+      "id": "window",
+      "label": "Window geometry and exterior view",
+      "x": 0.24,
+      "y": 0.34,
+      "width": 0.24,
+      "height": 0.3
+    },
+    {
+      "id": "fan",
+      "label": "Ceiling fan and tray edge",
+      "x": 0.41,
+      "y": 0.02,
+      "width": 0.29,
+      "height": 0.25
+    }
+  ]
+}

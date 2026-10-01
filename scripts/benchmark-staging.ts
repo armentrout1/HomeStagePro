@@ -11,8 +11,10 @@ const manifestPath = resolve(option("--manifest", "benchmarks/staging/manifest.j
 const caseSchema = stagingRequestSchema.omit({requestId:true,image:true,mask:true}).extend({
   id:z.string().regex(/^[a-z0-9-]+$/),source:z.string(),split:z.enum(["development","held-out"]),
   sourceKind:z.string(),externalProviderConsent:z.boolean(),requiredFurniture:z.array(z.string()),preserve:z.array(z.string()),knownRisks:z.array(z.string()),expectedInputOutcome:z.string().optional(),
+  roomIdentity:z.string().optional(),provenance:z.string().optional(),
 });
 const manifest = z.object({version:z.string(),target:z.object({development:z.number(),heldOut:z.number(),repeatedCases:z.number()}),cases:z.array(caseSchema)}).parse(JSON.parse(await readFile(manifestPath,"utf8")));
+if(new Set(manifest.cases.map(c=>c.id)).size!==manifest.cases.length)throw new Error("Duplicate benchmark case ID");
 const ids = option("--cases").split(",").filter(Boolean);
 if (ids.some(id=>!manifest.cases.some(item=>item.id===id))) throw new Error("Unknown benchmark case");
 const chosen = manifest.cases.filter(item=>!ids.length||ids.includes(item.id));
@@ -30,6 +32,8 @@ const distinct = new Set(inventory.map(item=>item.sha256)).size;
 const report: { [key:string]:unknown; results: unknown[] } = {runId,createdAt:new Date().toISOString(),manifestVersion:manifest.version,
   manifestHash:createHash("sha256").update(await readFile(manifestPath)).digest("hex"),mode:args.includes("--execute")?"execute":"inventory",
   provider:option("--provider","full-scene"),target:manifest.target,availableSources:inventory.length,distinctFileHashes:distinct,
+  declaredRoomGroups:new Set(inventory.map(item=>item.roomIdentity||item.id)).size,
+  supplementaryPublicSources:inventory.filter(item=>item.sourceKind.startsWith("cc0-")).length,
   development:inventory.filter(item=>item.split==="development").length,heldOut:inventory.filter(item=>item.split==="held-out").length,
   releaseReady:false,coverageNote:"File hashes do not detect resized copies or repeated rooms. Manually verify source diversity. Missing held-out/removal coverage blocks release.",inventory,results:[]};
 const save = () => writeFile(join(output,"report.json"),JSON.stringify(report,null,2));
@@ -41,6 +45,7 @@ if (args.includes("--execute")) {
   if (chosen.some(item=>item.split==="held-out")) throw new Error("Held-out evaluation needs a frozen release candidate; not a smoke run");
   if (inventory.some(item=>ids.includes(item.id)&&item.needsResolutionReview)) throw new Error("Resolve low-resolution input before paid rendering");
   if (option("--provider","full-scene")!=="full-scene") throw new Error("Provider not enabled: specialized account access and terms review required");
+  if(chosen.some(item=>item.mode!=="furnish"||!["Bedroom","Living Room"].includes(item.roomType)))throw new Error("Full-scene candidate supports empty bedroom/living-room furnishing only; removal needs a separate stage/provider");
   const {fullSceneProvider} = await import("../benchmarks/staging/providers/full-scene");
   let attempted = 0;
   for (const item of chosen) {

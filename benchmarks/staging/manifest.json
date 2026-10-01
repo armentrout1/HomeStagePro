@@ -1,44 +1,196 @@
 {
-  "version": "roomstager-benchmark-v1",
-  "target": { "development": 30, "heldOut": 10, "repeatedCases": 10 },
+  "version": "roomstager-benchmark-v2",
+  "target": {
+    "development": 30,
+    "heldOut": 10,
+    "repeatedCases": 10
+  },
   "status": "incomplete-source-coverage",
   "cases": [
     {
       "id": "bedroom-panelled-carpet",
       "source": "client/public/staging-examples/bed-1-before.webp",
-      "roomType": "Bedroom", "mode": "furnish", "split": "development",
-      "sourceKind": "existing-app-photo", "externalProviderConsent": false,
-      "requiredFurniture": ["bed", "bedside table", "complete area rug"],
-      "preserve": ["panelled left wall", "double window and blinds", "tray ceiling and fan", "permanent carpet", "outlets and trim"],
-      "knownRisks": ["original clipping regression", "rug corners", "window/bed occlusion", "nightstand floor contact"]
+      "roomType": "Bedroom",
+      "mode": "furnish",
+      "split": "development",
+      "sourceKind": "existing-app-photo",
+      "externalProviderConsent": false,
+      "requiredFurniture": [
+        "bed",
+        "bedside table",
+        "complete area rug"
+      ],
+      "preserve": [
+        "panelled left wall",
+        "double window and blinds",
+        "tray ceiling and fan",
+        "permanent carpet",
+        "outlets and trim"
+      ],
+      "knownRisks": [
+        "original clipping regression",
+        "rug corners",
+        "window/bed occlusion",
+        "nightstand floor contact"
+      ],
+      "roomIdentity": "bedroom-panelled-carpet"
     },
     {
       "id": "living-fireplace-wood",
       "source": "client/public/staging-examples/living-1-before.webp",
-      "roomType": "Living Room", "mode": "furnish", "split": "development",
-      "sourceKind": "existing-app-photo", "externalProviderConsent": false,
-      "requiredFurniture": ["sofa", "coffee table", "complete area rug"],
-      "preserve": ["fireplace and surround", "left windows", "right doorway", "wood flooring", "ceiling fan"],
-      "knownRisks": ["doorway clearance", "window perspective", "table legs", "rug/floor boundary"]
+      "roomType": "Living Room",
+      "mode": "furnish",
+      "split": "development",
+      "sourceKind": "existing-app-photo",
+      "externalProviderConsent": false,
+      "requiredFurniture": [
+        "sofa",
+        "coffee table",
+        "complete area rug"
+      ],
+      "preserve": [
+        "fireplace and surround",
+        "left windows",
+        "right doorway",
+        "wood flooring",
+        "ceiling fan"
+      ],
+      "knownRisks": [
+        "doorway clearance",
+        "window perspective",
+        "table legs",
+        "rug/floor boundary"
+      ],
+      "roomIdentity": "living-fireplace-wood"
     },
     {
       "id": "bedroom-small-window",
       "source": "client/public/sample-images/bed-before.webp",
-      "roomType": "Bedroom", "mode": "furnish", "split": "development",
-      "sourceKind": "existing-app-photo", "externalProviderConsent": false,
-      "requiredFurniture": ["bed", "bedside table", "complete area rug"],
-      "preserve": ["window", "tray ceiling", "fan", "carpet and baseboards"],
-      "knownRisks": ["tight layout", "camera near room corner"]
+      "roomType": "Bedroom",
+      "mode": "furnish",
+      "split": "development",
+      "sourceKind": "existing-app-photo",
+      "externalProviderConsent": false,
+      "requiredFurniture": [
+        "bed",
+        "bedside table",
+        "complete area rug"
+      ],
+      "preserve": [
+        "window",
+        "tray ceiling",
+        "fan",
+        "carpet and baseboards"
+      ],
+      "knownRisks": [
+        "tight layout",
+        "camera near room corner"
+      ],
+      "roomIdentity": "bedroom-small-window"
     },
     {
       "id": "living-low-resolution",
       "source": "client/public/sample-images/living-before.jpg",
-      "roomType": "Living Room", "mode": "furnish", "split": "development",
-      "sourceKind": "existing-app-photo", "externalProviderConsent": false,
-      "requiredFurniture": ["sofa", "coffee table", "complete area rug"],
-      "preserve": ["arched windows", "fireplace", "wood flooring"],
-      "knownRisks": ["low-resolution source", "vaulted ceiling", "strong sunlight"],
-      "expectedInputOutcome": "review-resolution-before-generation"
+      "roomType": "Living Room",
+      "mode": "furnish",
+      "split": "development",
+      "sourceKind": "existing-app-photo",
+      "externalProviderConsent": false,
+      "requiredFurniture": [
+        "sofa",
+        "coffee table",
+        "complete area rug"
+      ],
+      "preserve": [
+        "arched windows",
+        "fireplace",
+        "wood flooring"
+      ],
+      "knownRisks": [
+        "low-resolution source",
+        "vaulted ceiling",
+        "strong sunlight"
+      ],
+      "expectedInputOutcome": "review-resolution-before-generation",
+      "roomIdentity": "living-low-resolution"
+    },
+    {
+      "id": "public-small-empty-room",
+      "roomIdentity": "polyhaven-small-empty-room",
+      "source": "benchmarks/staging/sources/small-empty-room.jpg",
+      "roomType": "Bedroom",
+      "mode": "furnish",
+      "split": "development",
+      "sourceKind": "cc0-photographic-panorama-projection",
+      "externalProviderConsent": false,
+      "provenance": "benchmarks/staging/sources/provenance.json",
+      "requiredFurniture": [
+        "bed",
+        "bedside table",
+        "complete area rug"
+      ],
+      "preserve": [
+        "balcony door and handle",
+        "curtains",
+        "wall texture",
+        "outlets",
+        "wood flooring and baseboard"
+      ],
+      "knownRisks": [
+        "narrow layout",
+        "door clearance",
+        "wide-angle projection",
+        "supplementary source: not a customer photo"
+      ]
+    },
+    {
+      "id": "public-blue-furnished",
+      "roomIdentity": "polyhaven-blue-photo-studio",
+      "source": "benchmarks/staging/sources/blue-furnished.jpg",
+      "roomType": "Living Room",
+      "mode": "remove",
+      "split": "development",
+      "sourceKind": "cc0-photographic-backplate",
+      "externalProviderConsent": false,
+      "provenance": "benchmarks/staging/sources/provenance.json",
+      "requiredFurniture": [],
+      "preserve": [
+        "ceiling ornament and cornice",
+        "dark wall finish",
+        "window and brick reveal",
+        "wood flooring"
+      ],
+      "knownRisks": [
+        "remove sofa, chair and plants",
+        "low contrast furniture boundaries",
+        "hidden background cannot be verified",
+        "supplementary studio set: not representative housing"
+      ]
+    },
+    {
+      "id": "public-cayley-furnished",
+      "roomIdentity": "polyhaven-cayley-interior",
+      "source": "benchmarks/staging/sources/cayley-furnished.jpg",
+      "roomType": "Dining Room",
+      "mode": "remove",
+      "split": "development",
+      "sourceKind": "cc0-photographic-panorama-projection",
+      "externalProviderConsent": false,
+      "provenance": "benchmarks/staging/sources/provenance.json",
+      "requiredFurniture": [],
+      "preserve": [
+        "glass and exterior view",
+        "fixed kitchen cabinetry",
+        "wall sconces",
+        "ceiling",
+        "tile floor"
+      ],
+      "knownRisks": [
+        "large foreground table and chairs",
+        "strong backlighting",
+        "hidden floor reconstruction",
+        "supplementary panorama projection"
+      ]
     }
   ]
 }

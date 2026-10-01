@@ -1,5 +1,13 @@
 {
   "extends": "./tsconfig.json",
-  "include": ["benchmarks/staging/**/*.ts", "scripts/benchmark-staging.ts", "scripts/assess-staging-benchmark.ts"],
-  "compilerOptions": { "target": "ES2022", "incremental": false }
+  "include": [
+    "benchmarks/staging/**/*.ts",
+    "scripts/benchmark-staging.ts",
+    "scripts/assess-staging-benchmark.ts",
+    "scripts/compare-staging-preservation.ts"
+  ],
+  "compilerOptions": {
+    "target": "ES2022",
+    "incremental": false
+  }
 }

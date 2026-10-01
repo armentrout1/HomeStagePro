@@ -14,7 +14,8 @@
     "optimize:gallery": "node scripts/optimize-gallery-images.mjs",
     "security:probe": "node scripts/security-probe-check.mjs",
     "test": "tsx --test tests/*.test.ts",
-    "migrate:access": "tsx scripts/migrate-access.ts"
+    "migrate:access": "tsx scripts/migrate-access.ts",
+    "benchmark:preservation": "tsx scripts/compare-staging-preservation.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

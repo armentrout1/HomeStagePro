@@ -1,0 +1,70 @@
+[
+  {
+    "id": "small-empty-room",
+    "asset": "small_empty_room_1",
+    "file": "small_empty_room_1.jpg",
+    "author": "Sergej Majboroda",
+    "md5": "3eaac5783a6006d90e3e721c636647f5",
+    "projection": {
+      "yaw": 90,
+      "pitch": -15,
+      "horizontalFov": 100
+    },
+    "page": "https://polyhaven.com/a/small_empty_room_1",
+    "license": "CC0-1.0",
+    "licenseSource": "https://polyhaven.com/license",
+    "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/HDRIs/extra/Tonemapped%20JPG/small_empty_room_1.jpg",
+    "sourceSha256": "25925683b0295bd1f98b73ac230d2dcf5a6941bcff81e893aa992734808148be",
+    "preparedSha256": "d8c66961f7ae8dc0791d73ea3ab2eab75ad76e0f8fa81ad226d6a9794a4ce7f6",
+    "preparation": "Rectilinear perspective from photographic panorama; bilinear sampling; no generative content.",
+    "dimensions": {
+      "width": 1536,
+      "height": 1024
+    },
+    "scope": "Supplementary studio/panorama stress case, not representative customer-photo evidence."
+  },
+  {
+    "id": "cayley-furnished",
+    "asset": "cayley_interior",
+    "file": "cayley_interior.jpg",
+    "author": "Greg Zaal",
+    "md5": "b56ae551991b3cd259cd11f23e4129b5",
+    "projection": {
+      "yaw": -110,
+      "pitch": -12,
+      "horizontalFov": 85
+    },
+    "page": "https://polyhaven.com/a/cayley_interior",
+    "license": "CC0-1.0",
+    "licenseSource": "https://polyhaven.com/license",
+    "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/HDRIs/extra/Tonemapped%20JPG/cayley_interior.jpg",
+    "sourceSha256": "abf4897f4c2f36226a1ffbb2dbc52e5777e04f2ab18a8b46d05f327b98c879cc",
+    "preparedSha256": "754dd7cee53c13de5ddef554a214437d0bc491e6d1ce7dcd312d32f5757f55af",
+    "preparation": "Rectilinear perspective from photographic panorama; bilinear sampling; no generative content.",
+    "dimensions": {
+      "width": 1536,
+      "height": 1024
+    },
+    "scope": "Supplementary studio/panorama stress case, not representative customer-photo evidence."
+  },
+  {
+    "id": "blue-furnished",
+    "asset": "blue_photo_studio",
+    "file": "blue_photo_studio-DSC_0614.jpg",
+    "author": "Sergej Majboroda",
+    "md5": "3f3f28d7f330cba4e03247542d5a8c50",
+    "backplate": "DSC_0614",
+    "page": "https://polyhaven.com/a/blue_photo_studio",
+    "license": "CC0-1.0",
+    "licenseSource": "https://polyhaven.com/license",
+    "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/HDRIs/extra/Backplates/blue_photo_studio/jpg_pretty/DSC_0614.jpg",
+    "sourceSha256": "77a4d72392f5cc7988752480f8d900a7abe6898ba3002c661c6f34b159219b6b",
+    "preparedSha256": "2c7b261501ee66acf303b2aaaec35b803ebecd902914c18063b7e59f5546cc9c",
+    "preparation": "EXIF rotation and bounded resize; no generative content.",
+    "dimensions": {
+      "width": 1024,
+      "height": 1536
+    },
+    "scope": "Supplementary studio/panorama stress case, not representative customer-photo evidence."
+  }
+]
