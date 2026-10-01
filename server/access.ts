@@ -104,7 +104,7 @@ export function registerAccessRoutes(app: Express) {
       if (!grant || !activateGrant(res, grant))
         return res.status(401).json({
           error:
-            "This link has expired. Request your current access links below.",
+            "This pack has expired or is no longer active. Request your current access links below.",
         });
       return res.json({ success: true });
     } catch {

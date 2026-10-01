@@ -15,7 +15,7 @@ export default function Access() {
     setLoadingHistory(true);
     try {
       const r = await fetch(`/api/staging-jobs${before ? `?before=${encodeURIComponent(before)}` : ""}`, { cache: "no-store" });
-      if (!r.ok) { if (r.status !== 401 && r.status !== 403) throw new Error("Could not load your images. Please retry."); return; }
+      if (!r.ok) { if (r.status !== 401 && r.status !== 402 && r.status !== 403) throw new Error("Could not load your images. Please retry."); return; }
       const rows: SavedJob[] = await r.json();
       setJobs((old) => before ? [...old, ...rows.filter((row) => !old.some((j) => j.id === row.id))] : rows);
       setMore(rows.length === 30);

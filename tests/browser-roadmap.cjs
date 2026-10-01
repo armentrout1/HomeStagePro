@@ -9,6 +9,7 @@ fs.mkdirSync(output, {recursive:true});
 let posts = 0, jobId = null, polls = 0;
 let savedReads = 0;
 const exchangedTokens = [];
+let inactivePack = false;
 const savedJobs = Array.from({length:31}, (_, i) => ({id:`00000000-0000-4000-8000-${String(i).padStart(12,'0')}`,state:'completed',created_at:new Date(Date.UTC(2026,8,30,12,0,i)).toISOString()}));
 const submittedIds = new Set();
 const send = (res, data, status = 200) => { res.writeHead(status, {'Content-Type':'application/json'}); res.end(JSON.stringify(data)); };
@@ -16,7 +17,9 @@ const server = createServer(async (req,res) => {
   const url = new URL(req.url,'http://localhost');
   if(url.pathname==='/api/access/exchange') {
     let body=''; for await(const chunk of req) body+=chunk;
-    exchangedTokens.push(JSON.parse(body).token); return send(res,{success:true});
+    const token=JSON.parse(body).token;
+    if(token==='fixture-inactive') {inactivePack=true;return send(res,{error:'This pack has expired or is no longer active. Request your current access links below.'},401);}
+    exchangedTokens.push(token); return send(res,{success:true});
   }
   if(url.pathname==='/api/usage-status') return send(res,{status:'premium',paidRemaining:5,totalRemaining:5,paidGranted:5,paidUsed:0});
   if(url.pathname==='/api/create-checkout-session') return send(res,{url:'/thank-you?session_id=cs_browser_fixture'});
@@ -30,7 +33,7 @@ const server = createServer(async (req,res) => {
   if(url.pathname===`/api/staging-jobs/${jobId}`) {
     polls++; return send(res,{state:'completed',data:{requestId:jobId,promptHash:'fixture',stagedSignedUrl:'/staging-examples/living-1-after.webp'}});
   }
-  if(url.pathname==='/api/staging-jobs') return send(res,url.searchParams.has('before') ? savedJobs.slice(30) : savedJobs.slice(0,30));
+  if(url.pathname==='/api/staging-jobs') return inactivePack ? send(res,{error:'Access required'},402) : send(res,url.searchParams.has('before') ? savedJobs.slice(30) : savedJobs.slice(0,30));
   if(url.pathname.startsWith('/api/staging-jobs/00000000-')) { savedReads++; return send(res,{state:'completed',data:{stagedSignedUrl:'/staging-examples/living-1-after.webp'}}); }
   if(url.pathname.startsWith('/api/')) return send(res,{error:'Fixture does not implement this endpoint'},404);
   const publicRoot=path.join(repo,'dist/public');
@@ -108,7 +111,10 @@ const server = createServer(async (req,res) => {
     }
     assert.deepEqual(exchangedTokens,['fixture-pack-one','fixture-pack-two']);
     assert.equal(await page.getByRole('button',{name:'Download image',exact:true}).count(),0);
-    results.push({test:'emailed links activate an already-open access page and clear the previous preview',result:'pass'});
+    await page.goto('http://127.0.0.1:5181/access#token=fixture-inactive');
+    await page.waitForLoadState('networkidle');
+    await page.getByRole('status').getByText('This pack has expired or is no longer active.',{exact:false}).waitFor();
+    results.push({test:'emailed links activate an open access page, clear old previews and explain inactive packs',result:'pass'});
     assert.deepEqual(errors,[]);
     results.push({test:'production hydration and browser JavaScript errors',result:'pass'});
     fs.writeFileSync(path.join(output,'roadmap-browser-check.json'),JSON.stringify(results,null,2));
