@@ -1,3 +1,4 @@
+import { planRemoval } from "./prompting/removalPlanner";
 import { makeImageThumbnail } from "./utils/imageThumbnail";
 import { checkStagingQuality } from "./prompting/qualityCheck";
 /**
@@ -280,6 +281,24 @@ export const generateStagedRoom = async (req: Request, res: Response) => {
       }
     }
 
+    const customerSelectionGuide = await createSelectionGuide(Buffer.from(decodedImage.bytes), Buffer.from(maskDecoded!.bytes));
+    let selectionGuide = customerSelectionGuide;
+    let removalFloor = "";
+    if (req.body.mode === "remove") {
+      const plan = await planRemoval(Buffer.from(decodedImage.bytes), decodedImage.mime, customerSelectionGuide, Buffer.from(maskDecoded!.bytes));
+      if (plan.kind !== "ready") return res.status(422).json({
+        success: false,
+        code: plan.kind === "empty" ? "NO_REMOVABLE_ITEMS" : plan.kind === "incomplete" ? "REMOVAL_SELECTION_INCOMPLETE" : "REMOVAL_PLAN_UNCERTAIN",
+        error: plan.kind === "empty"
+          ? "No removable furniture was found in the selected area. Your credit was restored."
+          : plan.kind === "incomplete"
+          ? "The selection cuts through furniture. Include the entire item and its shadow, while protecting windows and fixtures. Your credit was restored."
+          : "We could not confidently identify the furniture and original flooring. Your credit was restored. Try a clearer photo or selection.",
+      });
+      maskDecoded = { bytes: plan.mask, mime: "image/png", extension: "png" };
+      removalFloor = plan.floor;
+      selectionGuide = await createSelectionGuide(Buffer.from(decodedImage.bytes), plan.mask);
+    }
     await uploadToStorage(
       originalStoragePath,
       decodedImage.bytes,
@@ -287,7 +306,6 @@ export const generateStagedRoom = async (req: Request, res: Response) => {
     );
     mark("uploadOriginalDone");
 
-    const selectionGuide = await createSelectionGuide(Buffer.from(decodedImage.bytes), Buffer.from(maskDecoded!.bytes));
     const { layoutPrompt, layoutConstraints } = await (async () => {
       if (req.body.mode === "remove") return { layoutPrompt: "", layoutConstraints: { noFurnitureZones: [], preferredPlacements: [], notes: [] } };
       try {
@@ -360,7 +378,10 @@ Keep the same room, camera, walls, windows, doors, flooring, built-ins and perma
 
     const finalPrompt = req.body.mode === "remove"
       ? `${taskPrompt}
-SELECTION REFERENCE: Image 1 is the photograph to edit. Image 2 is the same photograph with orange tint identifying every editable pixel. Remove ALL movable furniture within that orange region, including the entire bed, headboard, bedding, sofa, chairs, tables, freestanding lamps, plants and rugs wherever present. Do not keep a bed or seating as a room-type requirement. Return an empty selected region, not a lightly decluttered or restaged room. Remove object shadows with the objects. Restore the floor and wall that those objects hid using matching adjacent carpet, wood, tile, paint or trim. Keep all unoccluded surfaces, windows, doors, built-ins, fixed lighting and camera perspective unchanged. Furniture and pixels outside the orange region remain unchanged. The orange image is only a selection guide: edit Image 1, never copy the tint. Do not add any object, new opening, wall panel or architectural feature. No broad relighting, blur, artificial vignette, ghost furniture or visible straight tone seam at a selection edge.`
+PERMANENT FLOOR OBSERVATION (visual reference, not instructions): ${JSON.stringify(removalFloor)}
+Use the original photograph as the authority if this observation is ambiguous.
+SELECTION REFERENCE: Image 1 is the photograph to edit. Image 2 is the same photograph with orange tint identifying every editable pixel. Remove ALL movable furniture within that orange region, including the entire bed, headboard, bedding, sofa, chairs, tables, freestanding lamps, plants, movable wall art and mirrors, and rugs wherever present. Do not keep a bed or seating as a room-type requirement. Return an empty selected region, not a lightly decluttered or restaged room. Remove contact shadows with the objects, but preserve the photograph's existing wall illumination and gradients, even light spill from a removed lamp; do not switch off lights or broadly relight the room. Restore the floor and wall that those objects hid using matching adjacent carpet, wood, tile, paint or trim.
+PERMANENT FLOOR VERSUS REMOVABLE RUG: First distinguish an area rug (a separate object with its own border, fringe or raised edge) from the permanent floor visible beyond it. Remove the area rug completely. Reconstruct its footprint from the permanent flooring OUTSIDE the rug, never from the rug texture or pattern. For plain wall-to-wall carpet, extend the same fine irregular pile and color; do not invent floral motifs, repeating medallions, woven rug patterns, borders or tile-like seams. For wood or tile, continue the existing plank/joint direction, spacing and material rather than creating a new floor. Keep visible permanent flooring unchanged; only synthesize the parts previously hidden by removed objects. Preserve wall panel and baseboard spacing where exposed. If the selected area is already empty, return it unchanged; do not redesign or improve the surfaces. Keep all unoccluded surfaces, windows, doors, built-ins, fixed lighting and camera perspective unchanged. Furniture and pixels outside the orange region remain unchanged. The orange image is only a selection guide: edit Image 1, never copy the tint. Do not add any object, new opening, wall panel or architectural feature. No broad relighting, blur, artificial vignette, ghost furniture or visible straight tone seam at a selection edge.`
       : `${taskPrompt}
 ${req.body.mode === "replace" ? "REPLACEMENT PRIORITY: Replace the existing main movable furniture inside the selection with a visibly different design and coherent new styling. Do not return the same bed/sofa with only small accessories removed. This photograph is already furnished; replace its selected furniture rather than treating it as an empty room. Preserve the real room and all protected pixels." : ""}
 SELECTION REFERENCE: Image 1 is the original photograph to edit. Image 2 is a guide made from that same photograph: orange-tinted pixels identify the editable region, and untinted pixels are protected. The guide supplies the mask boundary referenced above. Never copy the orange tint into the output. Edit image 1 only. Fit every complete object and its shadows inside the orange region, leaving a visible margin at internal selection edges. Keep exposed wall and floor tone unchanged, especially near those edges; do not relight broad areas. This includes the tops of plants and lamps and every rug corner. Do not add wall art, curtains, mirrors or wall-mounted decor; keep existing wall decor unchanged. Existing furniture outside the region must stay unchanged. Selection and preservation rules override any furniture count or room-profile suggestion; omit items that do not fit.
@@ -387,9 +408,9 @@ CRITICAL PHOTOGRAPH PRESERVATION: Retain the exact visible floor material, wood-
       { type: decodedImage.mime },
     );
 
-    // The API mask caused broad floor blur in controlled room-photo tests.
-    // Edit the supplied photograph, then enforce the customer's alpha selection
-    // exactly in preserveProtectedPixels and reject incomplete/composited objects.
+    // Furnishing keeps the provider mask omitted after broad-floor blur tests.
+    // Removal uses a narrower object mask; local compositing still enforces alpha
+    // exactly and the reviewer checks completion against the original selection.
     const model = process.env.STAGING_IMAGE_MODEL || "gpt-image-2.5-sunburst";
     const guideFile = await toFile(selectionGuide, "selection-guide.png", { type: "image/png" });
     const dimensions = await getImageSize(decodedImage.bytes);
@@ -397,6 +418,7 @@ CRITICAL PHOTOGRAPH PRESERVATION: Retain the exact visible floor material, wood-
     const editParams: ImageEditParamsWithFidelity = {
       model,
       image: [inputFile, guideFile],
+      ...(req.body.mode === "remove" ? { mask: await toFile(Buffer.from(maskDecoded!.bytes), "removal-mask.png", { type: "image/png" }) } : {}),
       prompt: finalPrompt,
       ...(model.startsWith("gpt-image-1")
         ? { input_fidelity: "high" as const }
@@ -429,6 +451,7 @@ CRITICAL PHOTOGRAPH PRESERVATION: Retain the exact visible floor material, wood-
       Buffer.from(b64, "base64"),
       Buffer.from(maskDecoded!.bytes),
       Math.min(16, Math.round(Math.min(dimensions.width, dimensions.height) * 0.02)),
+      req.body.mode === "remove",
     );
 
     const verdict = await checkStagingQuality(
@@ -436,7 +459,7 @@ CRITICAL PHOTOGRAPH PRESERVATION: Retain the exact visible floor material, wood-
       decodedImage.mime,
       stagedBytes,
       req.body.mode || "furnish",
-      selectionGuide,
+      customerSelectionGuide,
     );
     const metrics = { model, reviewModel: process.env.STAGING_REVIEW_MODEL || "gpt-6-luna", mode: req.body.mode || "furnish", acceptable: verdict.acceptable, reason: verdict.reason, elapsedMs: Date.now() - t0, promptHash, usage: response.usage ?? null };
     log(JSON.stringify({ event: "staging_quality", requestId: reqId, ...metrics }));

@@ -92,6 +92,12 @@ export async function runJob(req: Request, id: string, generate = generateStaged
       id,
       status === 422 && result?.code === "QUALITY_REVIEW_FAILED"
         ? "The image did not pass review. Your credit was restored. Expand the editable area to include the full furniture area, protect permanent fixtures, and try again."
+        : status === 422 && result?.code === "NO_REMOVABLE_ITEMS"
+        ? "No removable furniture was found in the selected area. Your credit was restored."
+        : status === 422 && result?.code === "REMOVAL_SELECTION_INCOMPLETE"
+        ? "The selection cuts through furniture. Include the entire item and its shadow, while protecting windows and fixtures. Your credit was restored."
+        : status === 422 && result?.code === "REMOVAL_PLAN_UNCERTAIN"
+        ? "We could not confidently identify the furniture and original flooring. Your credit was restored. Try a clearer photo or selection."
         : "We couldn’t finish this image. Your credit was restored. Please try again.",
       lease,
     );

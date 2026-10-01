@@ -65,6 +65,7 @@ app.use(cookieParser());
 registerAccessRoutes(app);
 let calls = 0;
 let fail = false;
+let failureCode: string | undefined;
 let release: (() => void) | undefined;
 registerStagingJobs(
   app,
@@ -73,6 +74,7 @@ registerStagingJobs(
     await new Promise<void>((resolve) => {
       release = resolve;
     });
+    if (failureCode) return res.status(422).json({success:false,code:failureCode,error:"controlled preflight failure"});
     return fail
       ? res.status(500).json({ error: "simulated" })
       : res.json({
@@ -281,6 +283,30 @@ test("atomic checkout, private reusable access, credits, saved jobs, and exact m
       const [after] =
         await client`SELECT paid_used FROM usage_entitlements WHERE token_id=${grant.token_id}`;
       assert.equal(after.paid_used, 1);
+    });
+    await t.test("removal preflight failures explain the correction and refund once", async () => {
+      const owner = await fulfillCheckout(session("cs_removal_preflight"));
+      let removalCookie = "";
+      activateGrant({cookie(name: string, value: string){removalCookie=`${name}=${value}`;}}, owner);
+      for (const [code, expected] of [
+        ["NO_REMOVABLE_ITEMS", "No removable furniture"],
+        ["REMOVAL_SELECTION_INCOMPLETE", "selection cuts through furniture"],
+        ["REMOVAL_PLAN_UNCERTAIN", "could not confidently identify"],
+      ]) {
+        failureCode=code;
+        const id=randomUUID();
+        assert.equal((await post("/api/generate-staged-room",{...payload,mode:"remove",requestId:id},removalCookie)).status,202);
+        release!();
+        await waitState(id,"failed");
+        const [job]=await client`SELECT error FROM staging_jobs WHERE id=${id}`;
+        assert.match(job.error,new RegExp(expected));
+        const before=calls;
+        await post("/api/generate-staged-room",{...payload,mode:"remove",requestId:id},removalCookie);
+        assert.equal(calls,before);
+        const [balance]=await client`SELECT paid_used FROM usage_entitlements WHERE token_id=${owner.token_id}`;
+        assert.equal(balance.paid_used,0);
+      }
+      failureCode=undefined;
     });
     await t.test("last credit cannot be spent twice", async () => {
       await client`UPDATE usage_entitlements SET paid_used=4 WHERE token_id=${grant.token_id}`;

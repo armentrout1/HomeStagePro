@@ -1,10 +1,12 @@
 import sharp from "sharp";
+import { matchBoundaryTone } from "./removalTone";
 /** Transparent mask pixels may change. Fully opaque pixels are copied byte-for-byte. */
 export async function preserveProtectedPixels(
   original: Buffer,
   generated: Buffer,
   mask: Buffer,
   featherPixels = 0,
+  correctBoundaryTone = false,
 ): Promise<Buffer> {
   const { data: source, info } = await sharp(original, {
     limitInputPixels: 40_000_000,
@@ -38,6 +40,7 @@ export async function preserveProtectedPixels(
     .toBuffer({ resolveWithObject: true });
   if (maskInfo.width !== info.width || maskInfo.height !== info.height)
     throw new Error("MASK_DIMENSION_MISMATCH");
+  if (correctBoundaryTone) await matchBoundaryTone(source, output, alpha, info.width, info.height);
   // Feather only inward from fully protected pixels. Never blend at the outer
   // photograph edge, and never write into the protected area. A capped distance
   // transform keeps processing linear in the number of pixels.
