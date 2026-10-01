@@ -41,13 +41,13 @@ export default function Access() {
     finally { setBusy(false); }
   };
   useEffect(() => {
-    const token = new URLSearchParams(window.location.hash.slice(1)).get(
-      "token",
-    );
-    window.history.replaceState(null, "", "/access");
-    const load = async () => {
+    const load = async (token: string | null) => {
       if (token) {
         setBusy(true);
+        setJobs([]);
+        setMore(false);
+        setImage(null);
+        setSelectedId(null);
         try {
           const r = await fetch("/api/access/exchange", {
             method: "POST",
@@ -69,7 +69,17 @@ export default function Access() {
       }
       await loadJobs();
     };
-    void load();
+    // Email links may target an already-open /access tab. Hash-only navigation
+    // does not remount this component, so consume both initial and later links.
+    let pending = Promise.resolve();
+    const openLink = () => {
+      const token = new URLSearchParams(window.location.hash.slice(1)).get("token");
+      if (token) window.history.replaceState(null, "", "/access");
+      pending = pending.then(() => load(token));
+    };
+    openLink();
+    window.addEventListener("hashchange", openLink);
+    return () => window.removeEventListener("hashchange", openLink);
   }, []);
   const request = async (e: React.FormEvent) => {
     e.preventDefault();

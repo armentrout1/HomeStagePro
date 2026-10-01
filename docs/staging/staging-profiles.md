@@ -383,3 +383,5 @@ Future ideas / roadmap: [`docs/staging/staging-roadmap.md`](./staging-roadmap.md
 - Preserve exposed flooring grain, joints, wall finishes and sharpness inside the edit selection. The secondary review rejects obvious surface changes, broad blur patches and artificial vignettes as well as geometry changes and clipped objects.
 
 - Provider mask is intentionally omitted: controlled edits with it repeatedly blurred exposed flooring. The alpha selection remains authoritative in local pixel restoration, followed by the image-quality gate. Region-boundary clipping is rejected rather than delivered.
+
+- Full-resolution staging review found a false acceptance: the top of added wall art was clipped at the internal selection boundary. The reviewer now explicitly checks all object outlines, including art frames, plants, lamps and rug corners. New wall art, curtains and wall-mounted decor are omitted. The layout analyzer receives the same orange selection guide and must fit complete objects within it; selection rules override placement suggestions. This is a risk reduction, not a guarantee.

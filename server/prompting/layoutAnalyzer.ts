@@ -15,6 +15,7 @@ type AnalyzerArgs = {
   roomType: string;
   imageBase64: string;
   mime: string;
+  selectionGuide?: Buffer;
 };
 
 type ResponseContentPart =
@@ -26,7 +27,7 @@ type ResponsesJSONResult = {
   output?: Array<{
     content?: ResponseContentPart[];
   }>;
-  output_text?: string[];
+  output_text?: string | string[];
 };
 
 const layoutSchema = {
@@ -142,7 +143,7 @@ const extractConstraintsFromResponse = (
     }
   }
 
-  const fallback = response.output_text?.[0];
+  const fallback = typeof response.output_text === "string" ? response.output_text : response.output_text?.[0];
   if (fallback) {
     const parsed = tryParseConstraintsFromText(
       fallback,
@@ -163,6 +164,7 @@ export const analyzeRoomLayout = async ({
   roomType,
   imageBase64,
   mime,
+  selectionGuide,
 }: AnalyzerArgs): Promise<LayoutConstraints> => {
   const dataUrl = `data:${mime};base64,${imageBase64}`;
 
@@ -186,9 +188,10 @@ export const analyzeRoomLayout = async ({
             text: [
               `Room type: ${roomType || "Unknown"}.`,
               "Analyze the uploaded photo and return JSON arrays describing:",
+              ...(selectionGuide ? ["The second image is a selection guide. Only orange-tinted pixels are editable. Recommend placements only when the ENTIRE visible object fits inside that region, including its top, corners and shadows. Treat protected pixels as a placement exclusion zone. Omit optional items that do not fit; describe a constrained layout when the selected region is small. Never suggest new wall art, curtains or wall-mounted decor. The selection takes priority over room symmetry."] : []),
               "1) No-furniture zones with exact locations referenced to walls, doors, windows, or circulation paths.",
               "2) Preferred placements for the largest furniture (beds, sofas, dining tables) so they respect the architecture and keep entry paths clear.",
-              "3) Supplemental notes about lighting, wall art, rugs, ceiling fans, radiators or other fixtures that impact staging.",
+              "3) Supplemental notes about existing lighting, rugs, ceiling fans, radiators or other fixtures that impact staging.",
               "Output short, directive phrases (max ~15 words).",
               "Always keep door swings and the entry circulation path fully clear.",
             ].join(" "),
@@ -198,6 +201,7 @@ export const analyzeRoomLayout = async ({
             image_url: dataUrl,
             detail: "high",
           },
+          ...(selectionGuide ? [{ type: "input_image", image_url: `data:image/png;base64,${selectionGuide.toString("base64")}`, detail: "high" }] : []),
         ],
       },
     ],

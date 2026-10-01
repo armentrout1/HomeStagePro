@@ -286,6 +286,7 @@ export const generateStagedRoom = async (req: Request, res: Response) => {
     );
     mark("uploadOriginalDone");
 
+    const selectionGuide = await createSelectionGuide(Buffer.from(decodedImage.bytes), Buffer.from(maskDecoded!.bytes));
     const { layoutPrompt, layoutConstraints } = await (async () => {
       if (req.body.mode === "remove") return { layoutPrompt: "", layoutConstraints: { noFurnitureZones: [], preferredPlacements: [], notes: [] } };
       try {
@@ -293,6 +294,7 @@ export const generateStagedRoom = async (req: Request, res: Response) => {
           roomType: req.body.roomType || "Unknown",
           imageBase64: req.body.image,
           mime: decodedImage.mime,
+          selectionGuide,
         });
 
         if (process.env.NODE_ENV !== "production") {
@@ -356,8 +358,8 @@ Editing task: ${req.body.mode === "remove" ? "Remove movable furniture and clutt
 Keep the same room, camera, walls, windows, doors, flooring, built-ins and permanent fixtures. Never remodel or invent architecture. Respect the original perspective and lighting. The mask's transparent area is editable; its opaque area must remain untouched.`;
 
     const finalPrompt = `${taskPrompt}
-SELECTION REFERENCE: Image 1 is the original photograph to edit. Image 2 is a guide made from that same photograph: orange-tinted pixels identify the editable region, and untinted pixels are protected. The guide supplies the mask boundary referenced above. Never copy the orange tint into the output. Edit image 1 only. Fit complete furniture and its shadows inside the orange region. Existing furniture outside the region must stay unchanged. Selection and preservation rules override any furniture count or room-profile suggestion; omit items that do not fit.
-CRITICAL PHOTOGRAPH PRESERVATION: Retain the exact visible floor material, wood-grain texture, plank/tile joints, wall finish and photographic sharpness wherever a new object does not cover them, including within the editable selection. The transparent mask permits object edits; it is not a request to repaint or blur the entire area. No vignette, artificial depth-of-field blur, smooth gray floor, dramatic relighting or broad dark shadow. Add only physically plausible localized contact shadows beneath furniture. Keep all furniture and rugs complete within the editable region; reduce their size or omit optional pieces rather than intersecting a protected mask boundary.`;
+SELECTION REFERENCE: Image 1 is the original photograph to edit. Image 2 is a guide made from that same photograph: orange-tinted pixels identify the editable region, and untinted pixels are protected. The guide supplies the mask boundary referenced above. Never copy the orange tint into the output. Edit image 1 only. Fit every complete object and its shadows inside the orange region, leaving a visible margin at internal selection edges. This includes the tops of plants and lamps and every rug corner. Do not add wall art, curtains, mirrors or wall-mounted decor; keep existing wall decor unchanged. Existing furniture outside the region must stay unchanged. Selection and preservation rules override any furniture count or room-profile suggestion; omit items that do not fit.
+CRITICAL PHOTOGRAPH PRESERVATION: Retain the exact visible floor material, wood-grain texture, plank/tile joints, wall finish and photographic sharpness wherever a new object does not cover them, including within the editable selection. The transparent mask permits object edits; it is not a request to repaint or blur the entire area. No vignette, artificial depth-of-field blur, smooth gray floor, dramatic relighting or broad dark shadow. Add only physically plausible localized contact shadows beneath furniture. Keep all objects complete within the editable region; reduce their size or omit optional pieces rather than intersecting a protected mask boundary.`;
 
     const promptHashFull = crypto
       .createHash("sha256")
@@ -384,7 +386,6 @@ CRITICAL PHOTOGRAPH PRESERVATION: Retain the exact visible floor material, wood-
     // Edit the supplied photograph, then enforce the customer's alpha selection
     // exactly in preserveProtectedPixels and reject incomplete/composited objects.
     const model = process.env.STAGING_IMAGE_MODEL || "gpt-image-2.5-sunburst";
-    const selectionGuide = await createSelectionGuide(Buffer.from(decodedImage.bytes), Buffer.from(maskDecoded!.bytes));
     const guideFile = await toFile(selectionGuide, "selection-guide.png", { type: "image/png" });
     const dimensions = await getImageSize(decodedImage.bytes);
     mark("openaiEditStart");

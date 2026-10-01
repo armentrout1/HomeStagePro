@@ -8,11 +8,16 @@ const output = process.env.BROWSER_TEST_OUTPUT || path.join(repo, 'temp', 'brows
 fs.mkdirSync(output, {recursive:true});
 let posts = 0, jobId = null, polls = 0;
 let savedReads = 0;
+const exchangedTokens = [];
 const savedJobs = Array.from({length:31}, (_, i) => ({id:`00000000-0000-4000-8000-${String(i).padStart(12,'0')}`,state:'completed',created_at:new Date(Date.UTC(2026,8,30,12,0,i)).toISOString()}));
 const submittedIds = new Set();
 const send = (res, data, status = 200) => { res.writeHead(status, {'Content-Type':'application/json'}); res.end(JSON.stringify(data)); };
 const server = createServer(async (req,res) => {
   const url = new URL(req.url,'http://localhost');
+  if(url.pathname==='/api/access/exchange') {
+    let body=''; for await(const chunk of req) body+=chunk;
+    exchangedTokens.push(JSON.parse(body).token); return send(res,{success:true});
+  }
   if(url.pathname==='/api/usage-status') return send(res,{status:'premium',paidRemaining:5,totalRemaining:5,paidGranted:5,paidUsed:0});
   if(url.pathname==='/api/create-checkout-session') return send(res,{url:'/thank-you?session_id=cs_browser_fixture'});
   if(url.pathname==='/api/checkout-status') return send(res,{status:'complete',planName:'Quick Pack',usageAllowed:5,orderId:'order_fixture',livePayment:false,price:9,emailDeliveryConfigured:true});
@@ -94,6 +99,16 @@ const server = createServer(async (req,res) => {
     assert.equal((await downloadEvent).suggestedFilename(),'virtually-staged-room.png');
     assert.equal(savedReads,2);
     results.push({test:'older saved images load and download refreshes the private URL',result:'pass'});
+    // Emulate opening an emailed link while /access is already mounted.
+    for(const token of ['fixture-pack-one','fixture-pack-two']) {
+      await page.goto('http://127.0.0.1:5181/access#token='+token);
+      await page.waitForFunction(()=>window.location.hash==='');
+      await page.getByRole('status').getByText('Your pack is open on this device.',{exact:false}).waitFor();
+      await page.getByRole('button',{name:/Ready · open image/}).nth(29).waitFor();
+    }
+    assert.deepEqual(exchangedTokens,['fixture-pack-one','fixture-pack-two']);
+    assert.equal(await page.getByRole('button',{name:'Download image',exact:true}).count(),0);
+    results.push({test:'emailed links activate an already-open access page and clear the previous preview',result:'pass'});
     assert.deepEqual(errors,[]);
     results.push({test:'production hydration and browser JavaScript errors',result:'pass'});
     fs.writeFileSync(path.join(output,'roadmap-browser-check.json'),JSON.stringify(results,null,2));
