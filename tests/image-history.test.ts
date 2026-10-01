@@ -248,6 +248,22 @@ test("saved image ownership, recoverable Trash and retryable permanent deletion"
         assert.ok(row.purged_at);
         assert.equal(row.input_hash, "a".repeat(64));
         assert.equal(row.result.stagedStoragePath, undefined);
+        const input = await sharp({
+          create: { width: 128, height: 96, channels: 3, background: "#aaa" },
+        })
+          .png()
+          .toBuffer();
+        assert.equal(
+          (
+            await request("/api/generate-staged-room", "POST", owner, {
+              requestId: a.id,
+              image: input.toString("base64"),
+              roomType: "Bedroom",
+              mode: "furnish",
+            })
+          ).status,
+          410,
+        );
         const [balance] =
           await client`SELECT paid_granted,paid_used FROM usage_entitlements WHERE token_id=${owner}`;
         assert.deepEqual({ ...balance }, { paid_granted: 5, paid_used: 2 });

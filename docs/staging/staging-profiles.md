@@ -385,3 +385,8 @@ Future ideas / roadmap: [`docs/staging/staging-roadmap.md`](./staging-roadmap.md
 - Provider mask is intentionally omitted: controlled edits with it repeatedly blurred exposed flooring. The alpha selection remains authoritative in local pixel restoration, followed by the image-quality gate. Region-boundary clipping is rejected rather than delivered.
 
 - Full-resolution staging review found a false acceptance: the top of added wall art was clipped at the internal selection boundary. The reviewer now explicitly checks all object outlines, including art frames, plants, lamps and rug corners. New wall art, curtains and wall-mounted decor are omitted. The layout analyzer receives the same orange selection guide and must fit complete objects within it; selection rules override placement suggestions. This is a risk reduction, not a guarantee.
+
+### September 30 bedroom selection follow-up
+A follow-up public bedroom fixture protected the actual window outline instead of a large rectangle crossing the proposed bed. The current pipeline accepted it in 35.7 seconds with zero changed protected pixels and no clipped bed. This is one sample, not an acceptance-rate estimate. A visible wall-tone seam at the selection boundary remains a quality limitation; broader bedroom/replace/removal coverage is still required before release. No model or compositor change was made for this diagnostic.
+
+Editor guidance: include the complete furniture item, bedding and shadow in the editable region. Trace windows and trim with Protect rather than cutting a large protected rectangle through the furniture area. Customers must still review changes inside the selection.

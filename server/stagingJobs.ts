@@ -168,11 +168,12 @@ export function registerStagingJobs(
         const outcome = await client.begin(async (tx) => {
           await tx`SELECT pg_advisory_xact_lock(hashtextextended(${payload.requestId}, 2))`;
           const [old] =
-            await tx`SELECT token_id,input_hash FROM staging_jobs WHERE id=${payload.requestId}`;
-          if (old)
-            return old.token_id === tokenId && old.input_hash === hash
-              ? "existing"
-              : "conflict";
+            await tx`SELECT token_id,input_hash,deleted_at,purged_at FROM staging_jobs WHERE id=${payload.requestId}`;
+          if (old) {
+            if (old.token_id !== tokenId) return "conflict";
+            if (old.deleted_at || old.purged_at) return "removed";
+            return old.input_hash === hash ? "existing" : "conflict";
+          }
           const durable = process.env.STAGING_DURABLE_QUEUE === "true";
           const inputPath = `${storagePrefix()}/inputs/${payload.requestId}/${hash}`;
           const [credit] =
@@ -184,6 +185,7 @@ export function registerStagingJobs(
           if (durable) await tx`INSERT INTO staging_work(job_id,input_path,room_type,edit_mode,has_mask) VALUES (${payload.requestId},${inputPath},${payload.roomType},${payload.mode},${Boolean(payload.mask)})`;
           return "created";
         });
+        if (outcome === "removed") return res.status(410).json({error:"This attempt was removed. Restore it from Trash if available, or start a new staging request."});
         if (outcome === "empty")
           return res.status(402).json({
             error:

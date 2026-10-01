@@ -123,12 +123,9 @@ export function registerImageHistory(
         await client`UPDATE staging_jobs SET deleted_at=NULL WHERE id=${req.params.id}
         AND token_id=${getTokenIdFromRequest(req)!} AND purged_at IS NULL AND purge_started_at IS NULL RETURNING id`;
       if (!row)
-        return res
-          .status(409)
-          .json({
-            error:
-              "This image is unavailable or permanent deletion has started.",
-          });
+        return res.status(409).json({
+          error: "This image is unavailable or permanent deletion has started.",
+        });
       res.json({ success: true });
     } catch {
       res
@@ -168,7 +165,10 @@ export function registerImageHistory(
         const paths = [
           r.originalStoragePath,
           r.stagedStoragePath,
-          ...(r.thumbnailStoragePath ? [r.thumbnailStoragePath] : []),
+          r.thumbnailStoragePath ||
+            (typeof r.stagedStoragePath === "string"
+              ? r.stagedStoragePath.replace(/staged\.png$/, "thumbnail.webp")
+              : null),
         ];
         if (
           r.storageBucket !== jobBucket ||
@@ -208,12 +208,10 @@ export function registerImageHistory(
       }
       res.json({ success: true });
     } catch {
-      res
-        .status(503)
-        .json({
-          error:
-            "Deletion is not finished. Keep this item in Trash and retry permanent deletion.",
-        });
+      res.status(503).json({
+        error:
+          "Deletion is not finished. Keep this item in Trash and retry permanent deletion.",
+      });
     }
   });
 }

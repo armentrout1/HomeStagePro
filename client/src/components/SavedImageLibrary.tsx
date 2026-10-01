@@ -244,7 +244,9 @@ export default function SavedImageLibrary() {
                 onClick={() => void open(j)}
                 className="block w-full text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-500"
               >
-                <div className="relative flex aspect-[3/2] items-center justify-center bg-slate-100 text-slate-400">
+                <div
+                  className={`relative flex items-center justify-center bg-slate-100 text-slate-400 ${j.thumbnailUrl ? "aspect-[3/2]" : "h-24"}`}
+                >
                   <ImageIcon aria-hidden="true" className="h-9 w-9" />
                   {j.thumbnailUrl && (
                     <img
@@ -255,6 +257,9 @@ export default function SavedImageLibrary() {
                       width="384"
                       height="256"
                       className="absolute inset-0 h-full w-full object-cover"
+                      onLoad={(e) => {
+                        e.currentTarget.style.visibility = "visible";
+                      }}
                       onError={(e) => {
                         e.currentTarget.style.visibility = "hidden";
                       }}

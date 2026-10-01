@@ -201,7 +201,7 @@ export function EditArea({
         </button>
       </div>
       <p className="text-xs text-slate-500">
-        Include the entire furniture item and its shadow in your selection. The original pixels outside your selection are preserved. Review AI
+        Include the entire furniture item and its shadow in your selection. For bedrooms, allow room for the full bed and bedding; use Protect to trace the window and trim instead of leaving a large protected rectangle through the furniture area. The original pixels outside your selection are preserved. Review AI
         changes inside the selection before using the result.
       </p>
     </section>
