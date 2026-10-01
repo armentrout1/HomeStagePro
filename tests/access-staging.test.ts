@@ -69,22 +69,24 @@ let failureCode: string | undefined;
 let release: (() => void) | undefined;
 registerStagingJobs(
   app,
-  async (_req, res) => {
+  async () => {
     calls++;
     await new Promise<void>((resolve) => {
       release = resolve;
     });
-    if (failureCode) return res.status(422).json({success:false,code:failureCode,error:"controlled preflight failure"});
+    if (failureCode) return {success:false,code:failureCode,error:"controlled preflight failure"};
     return fail
-      ? res.status(500).json({ error: "simulated" })
-      : res.json({
+      ? { success: false, code: "PROVIDER_FAILED", error: "simulated" }
+      : {
           success: true,
           requestId: randomUUID(),
           promptHash: "test",
           storageBucket: "test",
           originalStoragePath: "original",
           stagedStoragePath: "staged",
-        });
+          thumbnailStoragePath: null,
+          metrics: { promptHash: "test" },
+        };
   },
   async (_b, p) => `https://example.invalid/${p}`,
 );

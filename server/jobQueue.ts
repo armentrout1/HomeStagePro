@@ -2,14 +2,14 @@ import { createHash, randomUUID } from "node:crypto";
 import { client } from "./db";
 import { createDurableWorker, type DurableTask, type DurableStore } from "./durableWorker";
 import { jobFiles, type JobFiles } from "./jobFiles";
-import { generateStagedRoom } from "./openai";
+import { stageRoom } from "./staging/production";
+import type { StagingRequest, StagingService } from "../shared/staging/contracts";
 import { refundFailed, runJob } from "./stagingJobs";
-import type { Request } from "express";
 
-type Claimed = DurableTask & { tokenId: string; roomType: string; mode: string; hasMask: boolean; inputHash: string };
+type Claimed = DurableTask & { tokenId: string; roomType: StagingRequest["roomType"]; mode: StagingRequest["mode"]; hasMask: boolean; inputHash: string };
 const concurrencyLimit = () => Math.max(1, Math.min(4, Number(process.env.STAGING_CONCURRENCY) || 2));
 
-export function createJobWorker(generate = generateStagedRoom, files: JobFiles = jobFiles) {
+export function createJobWorker(generate: StagingService = stageRoom, files: JobFiles = jobFiles) {
   const store: DurableStore = {
     async claim() {
       return client.begin(async (tx) => {
@@ -48,7 +48,7 @@ export function createJobWorker(generate = generateStagedRoom, files: JobFiles =
     const [marked] = await client`UPDATE staging_work SET provider_started_at=now() WHERE job_id=${job.id} AND lease=${job.lease} AND phase='running'
       AND lease_until>now() AND EXISTS (SELECT 1 FROM access_grants WHERE token_id=${job.tokenId} AND revoked_at IS NULL AND NOT billing_blocked AND expires_at>now()) RETURNING job_id`;
     if (!marked) throw new Error("Job lease or pack is no longer active");
-    await runJob({ body: payload, stagingEntitlement: { quality: "high" } } as Request, job.id, generate, job.lease);
+    await runJob(payload, job.id, generate, job.lease);
   }, concurrencyLimit());
 }
 

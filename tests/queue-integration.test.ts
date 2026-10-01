@@ -23,10 +23,10 @@ const { createJobWorker, recoverDurableJobs, cleanTemporaryInputs } = await impo
 const inputs = new Map<string, {image: string; mask?: string}>();
 const files: JobFiles = { async put(path,value) { inputs.set(path,{image:value.image,mask:value.mask}); }, async get(path) { const input=inputs.get(path); if(!input) throw new Error("missing input"); return input; }, async remove(path) { inputs.delete(path); } };
 const calls: string[] = []; const release = new Map<string,()=>void>();
-const generate: typeof import("../server/openai").generateStagedRoom = async (req,res) => {
-  calls.push(req.body.requestId);
-  await new Promise<void>(resolve=>release.set(req.body.requestId,resolve));
-  return res.json({success:true,requestId:req.body.requestId,promptHash:"fixture",storageBucket:"test",originalStoragePath:"source",stagedStoragePath:"result"});
+const generate: import("../shared/staging/contracts").StagingService = async input => {
+  calls.push(input.requestId);
+  await new Promise<void>(resolve=>release.set(input.requestId,resolve));
+  return {success:true,requestId:input.requestId,promptHash:"fixture",storageBucket:"test",originalStoragePath:"source",stagedStoragePath:"result",thumbnailStoragePath:null,metrics:{promptHash:"fixture"}};
 };
 const app=express(); app.use(express.json()); app.use(cookieParser());
 registerStagingJobs(app,generate,async()=>"https://example.invalid/image",files);

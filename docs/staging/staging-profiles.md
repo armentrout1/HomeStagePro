@@ -1,6 +1,8 @@
 # Staging Profiles — Canonical Specification
 
 ## A) Purpose & Scope
+October 1 engine-roadmap status: the typed application boundary is documented in [engine-boundary.md](./engine-boundary.md). The customer engine remains the conservative one-furnishing profile; full-room experiments under `benchmarks/staging` are not production capabilities. Benchmark criteria require complete coordinated arrangements and must not inherit the current single-item restriction as a definition of success.
+
 This document is the single source of truth for all AI staging behavior across the HomeStagePro stack. Prompt changes, analyzer tweaks, and UI selections **must match this spec**. If the code and this document disagree, treat this doc as correct and adjust the code immediately.
 Future ideas / roadmap: [`docs/staging/staging-roadmap.md`](./staging-roadmap.md)
 

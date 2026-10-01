@@ -1,0 +1,44 @@
+{
+  "version": "roomstager-benchmark-v1",
+  "target": { "development": 30, "heldOut": 10, "repeatedCases": 10 },
+  "status": "incomplete-source-coverage",
+  "cases": [
+    {
+      "id": "bedroom-panelled-carpet",
+      "source": "client/public/staging-examples/bed-1-before.webp",
+      "roomType": "Bedroom", "mode": "furnish", "split": "development",
+      "sourceKind": "existing-app-photo", "externalProviderConsent": false,
+      "requiredFurniture": ["bed", "bedside table", "complete area rug"],
+      "preserve": ["panelled left wall", "double window and blinds", "tray ceiling and fan", "permanent carpet", "outlets and trim"],
+      "knownRisks": ["original clipping regression", "rug corners", "window/bed occlusion", "nightstand floor contact"]
+    },
+    {
+      "id": "living-fireplace-wood",
+      "source": "client/public/staging-examples/living-1-before.webp",
+      "roomType": "Living Room", "mode": "furnish", "split": "development",
+      "sourceKind": "existing-app-photo", "externalProviderConsent": false,
+      "requiredFurniture": ["sofa", "coffee table", "complete area rug"],
+      "preserve": ["fireplace and surround", "left windows", "right doorway", "wood flooring", "ceiling fan"],
+      "knownRisks": ["doorway clearance", "window perspective", "table legs", "rug/floor boundary"]
+    },
+    {
+      "id": "bedroom-small-window",
+      "source": "client/public/sample-images/bed-before.webp",
+      "roomType": "Bedroom", "mode": "furnish", "split": "development",
+      "sourceKind": "existing-app-photo", "externalProviderConsent": false,
+      "requiredFurniture": ["bed", "bedside table", "complete area rug"],
+      "preserve": ["window", "tray ceiling", "fan", "carpet and baseboards"],
+      "knownRisks": ["tight layout", "camera near room corner"]
+    },
+    {
+      "id": "living-low-resolution",
+      "source": "client/public/sample-images/living-before.jpg",
+      "roomType": "Living Room", "mode": "furnish", "split": "development",
+      "sourceKind": "existing-app-photo", "externalProviderConsent": false,
+      "requiredFurniture": ["sofa", "coffee table", "complete area rug"],
+      "preserve": ["arched windows", "fireplace", "wood flooring"],
+      "knownRisks": ["low-resolution source", "vaulted ceiling", "strong sunlight"],
+      "expectedInputOutcome": "review-resolution-before-generation"
+    }
+  ]
+}

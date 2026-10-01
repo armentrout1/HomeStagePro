@@ -25,7 +25,6 @@ import {
 import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import {
-  generateStagedRoom,
   saveStagedImage,
   getUserStagedImages,
 } from "./openai";

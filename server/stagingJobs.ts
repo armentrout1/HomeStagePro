@@ -1,8 +1,9 @@
 import { registerImageHistory, type ImageHistoryFiles } from "./imageHistory";
 import { createHash } from "node:crypto";
-import type { Express, Request, Response } from "express";
+import type { Express } from "express";
 import { z } from "zod";
-import sharp from "sharp";
+import { stagingRequestSchema as schema, type StagingRequest, type StagingService, type StagingFailure } from "../shared/staging/contracts";
+import { validateStagingInput } from "./staging/input";
 import { client } from "./db";
 import {
   checkAccessToken,
@@ -11,27 +12,10 @@ import {
   getTokenIdFromRequest,
 } from "./tokenManager";
 import { stagingRateLimiter } from "./middleware/stagingRateLimiter";
-import { generateStagedRoom } from "./openai";
+import { stageRoom } from "./staging/production";
 import { getSignedImageUrl } from "./supabase";
 import { jobFiles, storagePrefix, type JobFiles } from "./jobFiles";
 
-const schema = z.object({
-  requestId: z.string().uuid(),
-  image: z.string().min(20).max(14_000_000),
-  mask: z.string().max(14_000_000).optional(),
-  roomType: z.enum([
-    "Living Room",
-    "Bedroom",
-    "Kitchen",
-    "Dining Room",
-    "Bathroom",
-    "Home Office",
-    "Outdoor Space",
-    "Entry / Foyer",
-    "Other",
-  ]),
-  mode: z.enum(["furnish", "replace", "remove"]).default("furnish"),
-});
 export async function refundFailed(id: string, message: string, lease?: string) {
   await client.begin(async (tx) => {
     const [job] =
@@ -52,23 +36,14 @@ export async function recoverStaleJobs() {
       "This staging was interrupted. Your credit was restored; please try again.",
     );
 }
-export async function runJob(req: Request, id: string, generate = generateStagedRoom, lease?: string) {
-  let status = 200;
-  let result: any;
-  const receiver = {
-    status(code: number) {
-      status = code;
-      return this;
-    },
-    json(body: any) {
-      result = body;
-      return this;
-    },
-  };
+export async function runJob(input: StagingRequest, id: string, generate: StagingService = stageRoom, lease?: string) {
+  let failure: StagingFailure | undefined;
   try {
-    await generate({ ...req, body: { ...req.body, resultPathsOnly: true } } as Request, receiver as Response);
-    if (status >= 400 || !result?.success)
-      throw new Error(result?.error || "Staging failed. Please try again.");
+    const result = await generate(input);
+    if (!result.success) {
+      failure = result;
+      throw new Error(result.error);
+    }
     // Store paths, not expiring URLs or image payloads; signed links are regenerated on read.
     await client`UPDATE staging_jobs SET state='completed', completed_at=now(), result=${JSON.stringify(
       {
@@ -78,8 +53,8 @@ export async function runJob(req: Request, id: string, generate = generateStaged
         stagedStoragePath: result.stagedStoragePath,
         thumbnailStoragePath: result.thumbnailStoragePath,
         storageBucket: result.storageBucket,
-        roomType: req.body.roomType,
-        mode: req.body.mode,
+        roomType: input.roomType,
+        mode: input.mode,
         metrics: result.metrics,
       },
     )}::jsonb WHERE id=${id} AND state='processing'
@@ -90,23 +65,23 @@ export async function runJob(req: Request, id: string, generate = generateStaged
     });
     await refundFailed(
       id,
-      status === 422 && result?.code === "QUALITY_REVIEW_FAILED"
+      failure?.code === "QUALITY_REVIEW_FAILED"
         ? "We could not produce a clean, complete result. Your credit was restored. Try another photo or adjust the editable area; no result was saved."
-        : status === 422 && result?.code === "NO_REMOVABLE_ITEMS"
+        : failure?.code === "NO_REMOVABLE_ITEMS"
         ? "No removable furniture was found in the selected area. Your credit was restored."
-        : status === 422 && result?.code === "REMOVAL_SELECTION_INCOMPLETE"
+        : failure?.code === "REMOVAL_SELECTION_INCOMPLETE"
         ? "The selection cuts through furniture. Include the entire item and its shadow, while protecting windows and fixtures. Your credit was restored."
-        : status === 422 && result?.code === "REMOVAL_PLAN_UNCERTAIN"
+        : failure?.code === "REMOVAL_PLAN_UNCERTAIN"
         ? "We could not confidently identify the furniture and original flooring. Your credit was restored. Try a clearer photo or selection."
         : "We couldn’t finish this image. Your credit was restored. Please try again.",
       lease,
     );
-    if (result?.metrics) await client`UPDATE staging_jobs SET result=${JSON.stringify({ metrics: result.metrics, roomType: req.body.roomType, mode: req.body.mode })}::jsonb WHERE id=${id} AND state='failed'`;
+    if (failure?.metrics) await client`UPDATE staging_jobs SET result=${JSON.stringify({ metrics: failure.metrics, roomType: input.roomType, mode: input.mode })}::jsonb WHERE id=${id} AND state='failed'`;
   }
 }
 export function registerStagingJobs(
   app: Express,
-  generate = generateStagedRoom,
+  generate: StagingService = stageRoom,
   sign = getSignedImageUrl,
   files: JobFiles = jobFiles,
   historyFiles?: ImageHistoryFiles,
@@ -125,41 +100,7 @@ export function registerStagingJobs(
           .json({ error: "Choose a valid room photo and room type." });
       const payload = parsed.data;
       try {
-        // Decode before reserving a credit or making any billable call.
-        const input = Buffer.from(payload.image, "base64");
-        const metadata = await sharp(input, {
-          limitInputPixels: 40_000_000,
-        }).metadata();
-        if (
-          !metadata.width ||
-          !metadata.height || metadata.width > 2048 || metadata.height > 2048 ||
-          !["png", "jpeg", "webp"].includes(metadata.format || "") ||
-          (metadata.pages || 1) > 1 ||
-          input.length > 10 * 1024 * 1024
-          || metadata.width / metadata.height > 3 || metadata.width / metadata.height < 1 / 3
-        )
-          throw new Error("invalid_image");
-        if (payload.mask) {
-          const mask = await sharp(Buffer.from(payload.mask, "base64"), {
-            limitInputPixels: 40_000_000,
-          }).metadata();
-          const { data: alpha } = await sharp(
-            Buffer.from(payload.mask, "base64"),
-          )
-            .ensureAlpha()
-            .extractChannel(3)
-            .raw()
-            .toBuffer({ resolveWithObject: true });
-          if (!alpha.some((v: number) => v < 255))
-            throw new Error("empty_mask");
-          if (
-            mask.format !== "png" ||
-            !mask.hasAlpha ||
-            mask.width !== metadata.width ||
-            mask.height !== metadata.height
-          )
-            throw new Error("invalid_mask");
-        }
+        await validateStagingInput(payload);
       } catch {
         return res.status(400).json({
           error:
@@ -202,8 +143,7 @@ export function registerStagingJobs(
             .status(409)
             .json({ error: "This request identifier is already in use." });
         if (outcome === "created" && process.env.STAGING_DURABLE_QUEUE !== "true") {
-          req.body = payload;
-          void runJob(req, payload.requestId, generate).catch(() =>
+          void runJob(payload, payload.requestId, generate).catch(() =>
             console.error(
               "Staging persistence failed; recovery will reconcile the credit",
             ),
