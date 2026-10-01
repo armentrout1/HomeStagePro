@@ -91,7 +91,7 @@ export async function runJob(req: Request, id: string, generate = generateStaged
     await refundFailed(
       id,
       status === 422 && result?.code === "QUALITY_REVIEW_FAILED"
-        ? "The image did not pass review. Your credit was restored. Expand the editable area to include the full furniture area, protect permanent fixtures, and try again."
+        ? "We could not produce a clean, complete result. Your credit was restored. Try another photo or adjust the editable area; no result was saved."
         : status === 422 && result?.code === "NO_REMOVABLE_ITEMS"
         ? "No removable furniture was found in the selected area. Your credit was restored."
         : status === 422 && result?.code === "REMOVAL_SELECTION_INCOMPLETE"
@@ -132,7 +132,7 @@ export function registerStagingJobs(
         }).metadata();
         if (
           !metadata.width ||
-          !metadata.height ||
+          !metadata.height || metadata.width > 2048 || metadata.height > 2048 ||
           !["png", "jpeg", "webp"].includes(metadata.format || "") ||
           (metadata.pages || 1) > 1 ||
           input.length > 10 * 1024 * 1024
@@ -163,7 +163,7 @@ export function registerStagingJobs(
       } catch {
         return res.status(400).json({
           error:
-            "Use a still JPG, PNG or WebP image under 10 MB and a matching edit selection.",
+            "Use a still JPG, PNG or WebP image under 10 MB, at most 2048 pixels per side, and a matching edit selection. The upload tool resizes photos automatically.",
         });
       }
       const tokenId = getTokenIdFromRequest(req)!;

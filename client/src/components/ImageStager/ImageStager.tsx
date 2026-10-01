@@ -255,6 +255,9 @@ export default function ImageStager() {
                   <option value="remove">Remove furniture & clutter</option>
                 </select>
               </label>
+              <p className="text-sm text-slate-600">
+                Furnish and replace add one main piece, such as a bed or sofa, without rugs or separate decor. Images that fail our quality checks are not saved, and the credit is restored.
+              </p>
               {originalImage && (
                 <EditArea
                   image={originalImage}
