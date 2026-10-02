@@ -1,6 +1,6 @@
 # R1 — Scene Understanding: Technical Design
 
-Status: **R1.1 contracts and R1.2 offline preprocessing implemented; R1.3 and later remain proposed**. Updated October 2, 2026. Parent: [canonical staging roadmap](./staging-roadmap.md). Behavior authority: [staging-profiles.md](./staging-profiles.md). Application contract: [engine-boundary.md](./engine-boundary.md).
+Status: **R1.1 contracts, R1.2 offline preprocessing and R1.3 synthetic component harness implemented; R1.4 and later remain proposed**. Updated October 2, 2026. Parent: [canonical staging roadmap](./staging-roadmap.md). Behavior authority: [staging-profiles.md](./staging-profiles.md). Application contract: [engine-boundary.md](./engine-boundary.md).
 
 ## 1. Scope and boundary
 
@@ -296,7 +296,7 @@ The offline implementation is `server/staging/scene/{preprocess,coordinates,arti
 - **Crash/filesystem scope:** a run-wide exclusive lock serializes writers. Interrupted artifacts, temporary files or a stale lock are not publication; a stale lock fails closed with `ARTIFACT_BUSY` and requires offline operator review/a new run, not automatic deletion or retry. Existing ancestors, run/artifact directories and read files are checked for symlinks/junctions/realpath escape; hard-linked read-file substitutions reject. Windows junction and hard-link cases are executable tests. This is a private single-owner offline store, not a hostile concurrent-filesystem sandbox: Node path checks are not directory-handle-relative race-proof authorization. Callers must prevent external writers. Atomic name visibility is tested; power-loss durability across OS/filesystem caches is not claimed. Temporary-file crash remnants can remain unpublished for later reviewed cleanup.
 - **Errors/testing:** `SceneInputError.code` and message are bounded categories; native filesystem/decoder messages, causes, source bytes, filenames and EXIF values are not forwarded. Consumers should expose the code, not diagnostic stacks. Tests generate synthetic fixtures, use task-owned temporary directories and clean them up. The network-blocking test preload rejects fetch/socket/HTTP/TLS/datagram transport. Parent-directory metadata access is required for ancestry checks; a filesystem sandbox denying that access causes a closed failure rather than skipping the check.
 
-R1.2 does not implement model adapters, a CLI analyzer, global scheduling, retention automation, customer artifact ownership or full SceneMap/diagnostic publication. The store API's preprocessing bundle is the only published artifact family here; no R1.3 work is activated.
+R1.2 does not implement model adapters, a CLI analyzer, global scheduling, retention automation, customer artifact ownership or full SceneMap/diagnostic publication. The store API's preprocessing bundle remains the only published artifact family. R1.3 adds the separate, offline synthetic component harness described below; it does not activate a production pipeline.
 
 ## 5. Protection, occlusion and placement
 
@@ -318,7 +318,7 @@ Example: doorway opening-7 -> polygon + uncertain hinge -> referenced conservati
 
 ## 6. Replaceable component interfaces
 
-Proposed internal interfaces, not current application interfaces:
+Implemented in R1.3 under `server/staging/scene/components/`. These are offline internal interfaces, not customer application interfaces. The schemas reuse R1.1 types. Simplified signatures:
 
 ```ts
 type AnalysisInput = {
@@ -345,11 +345,6 @@ type ComponentResult =
       frames: Frame[]; artifacts: ArtifactRef[] }
   | { status: "failed" | "timed-out" | "cancelled";
       run: ComponentRun; code: string };
-interface SceneArtifactStore {
-  read(ref: ArtifactRef): Promise<Uint8Array>;
-  writeRunArtifact(runId: Id, bytes: Uint8Array, mediaType: string): Promise<ArtifactRef>;
-  publishManifest(runId: Id, scene: SceneMap, artifacts: ArtifactRef[]): Promise<ArtifactRef>;
-}
 interface VisionComponent {
   readonly id: string;
   readonly version: string;
@@ -357,22 +352,38 @@ interface VisionComponent {
   readonly supportedClasses: readonly ElementClass[];
   readonly execution: "local";
   analyze(input: AnalysisInput, context: {
-    runId: Id;
-    artifacts: SceneArtifactStore;
+    run: ComponentRun;
+    putArtifact(bytes: Uint8Array, description: ArtifactDescription): Promise<SceneArtifact>;
     dependencies: readonly ComponentResult[];
     signal: AbortSignal;
-    deadlineMs: number;
-    memoryLimitBytes: number;
-    seed: number | null;
-  }): Promise<ComponentResult>;
+    policy: ExecutionPolicy;
+  }): Promise<unknown>; // Always validate at the host boundary; never trust this return value.
 }
 ```
 
-The orchestrator checks task, status, component identity, input hash, frame and approved license/artifact registry. Components cannot approve themselves, invent dependency results or fetch arbitrary URLs. A deterministic floor fitter consumes validated segmentation/depth/edges through explicit dependencies; reject missing/cyclic graph dependencies. Retain conflicting observations instead of letting the last component win.
+The component runner checks task, status, component identity/version, exact host-issued run metadata, input hash/frame, and approved license/artifact registry. Components cannot approve themselves or invent dependency results. A synthetic floor fitter consumes validated segmentation/depth/edges through explicit dependencies. The full orchestrator remains deferred.
 
 Returned frames must map to the same canonical image and all returned artifacts must be owned by this run. For floor geometry, verify orthonormal basis axes, plane membership of its origin and consistency between basis, normal and any homography; do not accept a plane equation and unrelated projection. Unresolved alternative hypotheses are retained in component result artifacts and force partial status rather than silently choosing one.
 
-Heavy native/CV runtimes run in isolated subprocesses. Cancellation/deadline terminates work and releases memory, not merely abandons a promise. Enforce compute/memory limits and no network egress during inference. Initial offline harness requires explicit caps; exact values follow measurement. Separate pinned artifact acquisition from execution. No automatic remote or prompt-only fallback.
+Heavy native/CV runtimes must eventually run in isolated subprocesses with verified OS resource/egress restrictions. R1.3 implements actual child-process termination for synthetic computation, with the precise limits below. It does not certify a production native-model sandbox. No automatic remote or prompt-only fallback.
+
+### R1.3 implemented guarantees and limits
+
+- **Registry:** explicit adapter ID/version/task, supported classes, local declaration, required dependency tasks, resource policy and license record. Duplicate identity, unknown adapters, mismatched runtime identity/classes/task, arbitrary implementations/paths, non-local execution, duplicate roles and task-level dependency cycles reject. Only frozen implementations from the fixed synthetic factory are accepted. The execution backend is a replaceable internal interface; the only registered backend is `synthetic-subprocess-v1`. Adding real backends is a code-review change, not model-controlled module loading.
+- **Inputs/dependencies:** the runner verifies actual canonical RGB PNG bytes through the R1.2 store, identity canonical frame and any aligned binary selection restriction. Dependencies must be completed, have the required unique task, and carry the exact immutable receipt issued by this runner for the same store and full input (including selection). Cloned/deserialized/forged receipts, changed source, different run store, missing/failed/incompatible dependencies reject. Referenced dependency bytes are re-read before use. Receipts are process-local, not serialized authority or durable orchestration state.
+- **Outputs:** strict status-specific envelopes use the R1.1 observation schemas. Host-issued metadata must match exactly; the host supplies elapsed time and terminal disposition. All frames are unique, retain the canonical frame, and map valid pixels within the same canonical bounds. Raster dimensions must match their declared frames. Output references, element references, supported classes, coverage counts and floor supports resolve. These checks establish structural consistency, not that a model's geometry or observations are factually correct.
+- **Artifacts/manifests:** a separate bounded binary pipe carries synthetic raster bytes; JSON contains metadata/references only. The host validates actual content, writes it using R1.2-generated keys, re-reads it, and substitutes only exact temporary references. Foreign/substituted/unreferenced artifacts reject. Per-component byte/count ceilings supplement R1.2 per-artifact/per-run limits. Stable config/runtime JSON artifacts record policy, synthetic scenario, worker hash, runtime/backend and license ID; config SHA equals the persisted manifest SHA. Artifacts remain unpublished in a writable run; this phase adds no full SceneMap publication. Failed runs can leave bounded unpublished artifacts for later offline cleanup; no automatic retries/deletion.
+- **Trust:** component observations may remain estimated/unknown/not-established, including a raw score of 0.999. Verified confidence, evidence grants, independently-reviewed absence, model-issued calibration/metric claims and unknown authority fields reject. No component API accepts or constructs `TrustedSceneContext`, enforces placement, edits images, charges credits or approves a customer result. Separate adjudication is still required.
+- **Process lifecycle:** one known `.mjs` entrypoint runs with `shell=false`, a fixed Node executable and explicit environment. Input, stdout, stderr and binary artifacts have byte limits. Deadline/cancellation sends termination, escalates to SIGKILL after 100 ms where supported, and awaits process exit plus stream closure before returning. Synchronous infinite-loop workers are tested, including no remaining PID after completion and no automatic retry. Windows termination semantics differ from POSIX signals. Workers cannot spawn descendants through the guarded Node child-process APIs; arbitrary native process trees are not supported or certified. A host OS failure to kill a process is not hidden by returning a fabricated terminal success.
+- **Deadline scope:** the measured deadline starts after input/dependency verification and manifest persistence and covers the worker plus subsequent acceptance checks. Bounded parent-side store/decoder/validation operations are awaited and checked between steps; they are not forcibly interruptible OS jobs. An I/O stall can therefore exceed the compute deadline. No `Promise.race` is presented as terminating computation. A future production supervisor needs end-to-end job deadlines and stalled-I/O recovery.
+- **Memory:** `memoryLimitBytes` is explicitly advisory metadata; it is not an RSS cap. `peakMemoryBytes` is null because no reliable OS peak measurement is implemented. Serialized input/output/artifact/stderr ceilings are enforced; memory consumed by Node, sharp/native decoding or allocations before pipe writes is not a portable hard cap. OS containers/job objects and measured native peak memory remain a production gate. No OOM-containment guarantee is claimed.
+- **Network:** no network client or downloader is in the component API or runner. The worker blocks fetch, HTTP/HTTPS, socket/TLS/datagram transports and child-process spawning before synthetic analysis; tests run under an additional network-blocking preload. Spawn does not inherit PATH, NODE_OPTIONS, proxy variables or API credentials. Windows/native-library environment additions are scrubbed inside the worker. This is application-level prohibition for reviewed synthetic code, not an OS firewall, hostile-code sandbox or proof that arbitrary native libraries cannot send traffic. Future real-model execution must verify OS egress restrictions before production.
+- **Licensing/acquisition:** `licenses.ts` and `licenses/staging-components/` implement exact synthetic provenance decisions and hash/revision-verified local availability. Separate code/weight terms and hash-verified dated snapshots are required; pending/rejected/unclear/noncommercial/incompatible terms block use. Evaluation approval does not permit production. The actual fixed worker digest must match its code pin. The registry is an operator decision/evidence mechanism, not legal advice or independent verification of upstream rights. Only synthetic records are currently accepted, and no real model is selected, downloaded or approved. Acquisition accepts already-obtained synthetic bytes through a separate method; inference only verifies already-present content. URLs are data only. Persistent model caches and a reviewed real acquisition command remain deferred.
+- **Failure handling:** pre-execution registration/license/input/dependency failures reject with bounded `SceneInputError` codes; executed failures return matching `ComponentRun`/terminal envelopes. Errors expose codes, not native messages, paths, stderr, environment values or source images. Configuration/runtime persistence failure rejects before a run can claim valid manifests. Full retention, scheduling, durable receipts and diagnostics remain later work.
+
+Synthetic tests cover all five tasks, partial/unsupported coverage, strict envelopes, deterministic computational output (excluding run IDs/time), actual bytes/ownership, source/identity/frame substitution, dependencies, self-granted trust, license permissions and provenance, network attempts, environment filtering, bounded streams, timeout and cancellation. Passing these tests qualifies the harness only; it does not establish staging image quality or R1 model accuracy.
+
+Run the offline suites with the checked-in preload, for example `node --require ./tests/scene-no-network.cjs --import tsx --test tests/scene-component-types.test.ts tests/scene-component-registry.test.ts tests/scene-component-runner.test.ts`. R1.3 validation also includes the R1.1/R1.2 suites, existing staging service/pipeline/benchmark regressions, and application/benchmark/test typechecks. Artifact-store tests require local filesystem ancestry metadata access; an access denial is a closed failure, not a skipped security check.
 
 ## 7. Candidate classes and licensing
 
@@ -440,13 +451,13 @@ Reproduction manifest includes source/selection hashes, canonicalizer/config, tr
 
 ## 11. Reviewable implementation sequence
 
-R1.1 and the R1.2 foundation paths are now implemented as described above. R1.3 and later paths remain **proposed**.
+R1.1, R1.2 and the R1.3 synthetic harness are implemented as described above. R1.4 and later paths remain **proposed**.
 
 | Commit | Proposed files | Local checks |
 | --- | --- | --- |
 | R1.1 | `shared/staging/scene-map.ts`; `tests/scene-map-contract.test.ts`; `benchmarks/staging/annotations/` synthetic fixtures | Strict schema, references, unknowns, topology, finite values and invalid metric claims. No models/network. |
 | R1.2 | `server/staging/scene/preprocess.ts`, `coordinates.ts`, `artifacts.ts`; focused tests | EXIF/selection alignment, polarity, odd dimensions, transforms, hashes, quotas and incomplete publication. |
-| R1.3 | `server/staging/scene/components/{types,registry,runner}.ts`; `licenses/staging-components/` evidence | Fake adapters first; cancellation/OOM/timeout, task mismatch, blocked unapproved weights and disabled egress. |
+| R1.3 (implemented) | `server/staging/scene/components/`; `server/staging/scene/licenses.ts`; `licenses/staging-components/`; synthetic tests | Actual subprocess cancellation/timeout, bounded streams/artifacts, task/dependency/trust rejection, license pins and application-level network blocking. Hard OS memory/egress gates remain deferred. |
 | R1.4 | Selected local detection/segmentation adapters | Annotated surfaces/openings/objects, small fixture misses, permanence uncertainty and class coverage. |
 | R1.5 | Selected depth/edge adapters; deterministic `floor-estimator.ts` and `region-proposals.ts` | Depth validity, mixed frames, hypotheses, mirrors, unknown scale/swing, no unsafe permissions. |
 | R1.6 | `server/staging/scene/analyze.ts`; `scripts/benchmark-scene.ts`; `benchmarks/staging/scene-diagnostics.ts` | Immutable publication, scene lineage, six aligned panels, missing-task panels, escaped/private diagnostics. |
@@ -458,4 +469,4 @@ Do not wire these commits into `production.ts`, remove legacy pipeline/model ass
 
 Unresolved: exact artifacts/licenses; deployment hardware/memory; per-class annotation coverage; confidence thresholds; geometry uncertainty margins; scale-evidence UX; door-swing inference; renderer control fidelity; shadow allowances; derivative retention; numeric cost ceilings; independent review procedure. The design exposes these questions rather than assuming newer models solve them.
 
-R1.1 and R1.2 now provide contracts and the offline preprocessing/artifact foundation. The next separate implementation slice would be R1.3 fake adapters and the component harness, subject to its own authorization. Adoption of local models follows evaluation/license review. No staging-provider subscription, API key or production change is needed for the initial contracts/harness. This implementation stops after R1.2 validation and publication to the existing draft branch; it does not merge, deploy or start R1.3.
+R1.1 through R1.3 now provide contracts, offline preprocessing/artifacts and the synthetic component execution boundary. Adoption of real local models is R1.4 and requires separate authorization and evaluation/license review. No staging-provider subscription, API key or production change is needed for this harness. This implementation stops after R1.3 validation and publication to the existing draft branch; it does not merge, deploy or start R1.4.

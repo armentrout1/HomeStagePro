@@ -1,0 +1,1 @@
+Synthetic test-only permission fixture; no third-party model or production approval.
