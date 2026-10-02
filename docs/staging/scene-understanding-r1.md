@@ -2,6 +2,8 @@
 
 Status: **R1.1 contracts, R1.2 offline preprocessing and R1.3 synthetic component harness implemented; R1.4 and later remain proposed**. Updated October 2, 2026. Parent: [canonical staging roadmap](./staging-roadmap.md). Behavior authority: [staging-profiles.md](./staging-profiles.md). Application contract: [engine-boundary.md](./engine-boundary.md).
 
+R1.4A qualification is documented in [detection/segmentation candidates](./r1-model-candidates.md): Grounding DINO Tiny plus SAM 2.1 Hiera Small are the primary evaluation plan, Florence-2 is a gated comparator, and noncommercial SegFormer/ADE20K and MaskFormer model-zoo routes are excluded. Exact artifact pins, hardware findings, R1.3 generalization requirements and predeclared benchmark gates are recorded there. No real adapter is enabled; R1.4B implementation/acquisition/execution requires separate authorization.
+
 ## 1. Scope and boundary
 
 R1 converts an authorized photograph into inspectable, immutable engine state. It identifies visible structure/objects, estimates relative geometry where supported, and records unknowns. It does not generate furnishings, remove objects, reconstruct hidden surfaces, select a production model, change customer behavior, or certify physical clearance. A schema-valid SceneMap is not a staging approval.
