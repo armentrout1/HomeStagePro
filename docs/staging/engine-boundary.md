@@ -1,6 +1,8 @@
 # Staging engine boundary — October 1, 2026
 
-The roadmap's application boundary is implemented locally. This does not complete the engine rebuild or establish full-room image quality.
+The application boundary is implemented on `refactor/staging-engine-boundary` in open draft [PR #3](https://github.com/armentrout1/HomeStagePro/pull/3), introduced in `d5b86ea` and inspected through `64d1106`. It is not merged or production-qualified by this documentation review. The PR's aggregate diff includes earlier layer/segmentation work as well as this boundary; the compatibility claims below concern the boundary refactor. This does not complete the engine rebuild or establish full-room quality.
+
+The canonical plan is [staging-roadmap.md](./staging-roadmap.md); [scene-understanding-r1.md](./scene-understanding-r1.md) defines the next proposed phase. The first-party decision supersedes earlier specialized-staging-provider comparison work. Preserve this boundary while replacing internal components in future reviewed phases.
 
 ## Current call path
 
@@ -21,10 +23,11 @@ Type checking covers both application and benchmark sources. Service tests verif
 
 ## Still required
 
-- Expand the rights-cleared benchmark and obtain a specialized-provider comparison if selected.
-- Choose an engine that meets complete-arrangement and preservation requirements.
-- Add per-stage persistence/provider reconciliation only once actual provider capabilities are known. Whole-job durability exists; resumable removal/planning/rendering stages are not yet implemented.
-- Implement furnished-room removal, room packages, measured geometry/assets/rendering if selected, and the revised customer flow.
+- Expand the rights-cleared benchmark and independently annotated scene-understanding evidence. No third-party staging API is a dependency.
+- Implement R1 offline: typed, immutable SceneMap state, replaceable local CV adapters and inspectable diagnostics. No furnishing generation or production wiring in R1.
+- Implement deterministic protection/planning, structured styles and a controlled first-party renderer behind the existing `StagingProvider`; prompts cannot override geometry or policy.
+- Add reviewed per-stage persistence/reconciliation and budget handling. Whole-job durability exists; durable SceneMap and resumable analysis/removal/planning/rendering stages are not yet implemented.
+- Evolve the existing legacy removal/replacement path into the separate R8 clearing pipeline, preserving cleared-room QA; implement complete room packages and any later customer-flow changes only after validation.
 - Run independent visual/held-out acceptance, physical-device tests, operating-cost analysis and rollback rehearsal before production promotion.
 
 Do not retire the legacy image pipeline/model assets yet. Do not describe this refactor or the full-scene benchmark as a finished complete-room staging product.

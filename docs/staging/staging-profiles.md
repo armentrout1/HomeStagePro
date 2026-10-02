@@ -6,6 +6,8 @@ October 1 engine-roadmap status: the typed application boundary is documented in
 This document is the single source of truth for all AI staging behavior across the HomeStagePro stack. Prompt changes, analyzer tweaks, and UI selections **must match this spec**. If the code and this document disagree, treat this doc as correct and adjust the code immediately.
 Future ideas / roadmap: [`docs/staging/staging-roadmap.md`](./staging-roadmap.md)
 
+Documentation reconciliation (October 1): the canonical roadmap now describes a **planned first-party engine** and [R1 SceneMap design](./scene-understanding-r1.md). Neither is current runtime behavior. The October 1 complete-layer delivery override below remains authoritative over earlier profile counts and historical implementation notes. R1 will first run offline with no furnishing generation; durable scene geometry, spatial planning and complete style packages are not implemented by this documentation update. The current `LayoutConstraints` contract remains the three string arrays in section L until a separately reviewed behavior change.
+
 ## B) Global Rules (Apply to Every Room)
 - **Preserve architecture**: never remodel, repaint, or change finishes, fixtures, doors, windows, or built-ins.
 - **Door/doorway clearance**: keep every doorway completely clear; never place furniture within door swings.
