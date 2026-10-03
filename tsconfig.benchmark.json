@@ -4,7 +4,8 @@
     "benchmarks/staging/**/*.ts",
     "scripts/benchmark-staging.ts",
     "scripts/assess-staging-benchmark.ts",
-    "scripts/compare-staging-preservation.ts"
+    "scripts/compare-staging-preservation.ts",
+    "scripts/scene-understanding-smoke.ts"
   ],
   "compilerOptions": {
     "target": "ES2022",

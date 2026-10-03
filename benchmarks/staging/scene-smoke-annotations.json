@@ -1,0 +1,1220 @@
+{
+  "version": "agent-smoke-annotations-v1",
+  "date": "2026-10-02",
+  "reviewTiming": "source inspection before model predictions",
+  "scope": "Visible smoke observations only. No hidden geometry, independent human ground truth, or absence certification. Window panes/opening assemblies are approximate; grouping disagreements require review.",
+  "cases": [
+    {
+      "id": "bedroom-panelled-carpet",
+      "roomIdentity": "bedroom-panelled-carpet",
+      "source": "client/public/staging-examples/bed-1-before.webp",
+      "sourceSha256": "069f500c4e2ce19cd6fba496f72dcc45eaa0aee693ec74ab658b52f1aef6d03c",
+      "localEvaluationApproved": true,
+      "authorization": "User R1.4B2 instruction: seven existing development sources only",
+      "provenance": "existing-app-photo; user-authorized local evaluation; ownership not independently audited",
+      "annotations": [
+        {
+          "id": "a-0",
+          "class": "window",
+          "box": [
+            0.56,
+            0.22,
+            0.69,
+            0.61
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "visible",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-1",
+          "class": "window",
+          "box": [
+            0.69,
+            0.22,
+            0.84,
+            0.62
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "visible",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-2",
+          "class": "fixed-light",
+          "box": [
+            0.37,
+            0,
+            0.66,
+            0.1
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "visible",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-3",
+          "class": "vent",
+          "box": [
+            0.8,
+            0.1,
+            0.88,
+            0.15
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "visible",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-4",
+          "class": "outlet",
+          "box": [
+            0.762,
+            0.639,
+            0.781,
+            0.677
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "visible",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-5",
+          "class": "floor",
+          "box": [
+            0,
+            0.67,
+            1,
+            1
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "uncertain",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true,
+          "polygon": [
+            [
+              0,
+              0.843
+            ],
+            [
+              0.502,
+              0.674
+            ],
+            [
+              1,
+              0.796
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "maskMetric": "coarse-agent-visible-floor-smoke-only",
+          "boundaryUncertaintyPixels": 8
+        },
+        {
+          "id": "a-6",
+          "class": "wall",
+          "box": [
+            0,
+            0.06,
+            0.5,
+            0.83
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "uncertain",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-7",
+          "class": "wall",
+          "box": [
+            0.5,
+            0.06,
+            1,
+            0.78
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "uncertain",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-8",
+          "class": "ceiling",
+          "box": [
+            0,
+            0,
+            1,
+            0.29
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "uncertain",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        }
+      ]
+    },
+    {
+      "id": "living-fireplace-wood",
+      "roomIdentity": "living-fireplace-wood",
+      "source": "client/public/staging-examples/living-1-before.webp",
+      "sourceSha256": "c474f94ce37cc262434105e2c07f2cd44d43c08ecdfee29b47d1c5f1e38840d0",
+      "localEvaluationApproved": true,
+      "authorization": "User R1.4B2 instruction: seven existing development sources only",
+      "provenance": "existing-app-photo; user-authorized local evaluation; ownership not independently audited",
+      "annotations": [
+        {
+          "id": "a-0",
+          "class": "window",
+          "box": [
+            0.052,
+            0.197,
+            0.193,
+            0.34
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "visible",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-1",
+          "class": "window",
+          "box": [
+            0.052,
+            0.34,
+            0.193,
+            0.684
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "visible",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-2",
+          "class": "window",
+          "box": [
+            0.372,
+            0.326,
+            0.429,
+            0.4
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "visible",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-3",
+          "class": "window",
+          "box": [
+            0.373,
+            0.4,
+            0.429,
+            0.615
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "visible",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-4",
+          "class": "opening",
+          "box": [
+            0.763,
+            0.35,
+            0.907,
+            0.741
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "visible",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-5",
+          "class": "fireplace",
+          "box": [
+            0.205,
+            0.447,
+            0.377,
+            0.698
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "visible",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-6",
+          "class": "fixed-light",
+          "box": [
+            0.36,
+            0.06,
+            0.586,
+            0.24
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "visible",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-7",
+          "class": "vent",
+          "box": [
+            0.09,
+            0.05,
+            0.16,
+            0.098
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "visible",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-8",
+          "class": "outlet",
+          "box": [
+            0.581,
+            0.597,
+            0.595,
+            0.627
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "visible",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-9",
+          "class": "floor",
+          "box": [
+            0,
+            0.625,
+            1,
+            1
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "uncertain",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true,
+          "polygon": [
+            [
+              0,
+              0.766
+            ],
+            [
+              0.444,
+              0.625
+            ],
+            [
+              0.765,
+              0.71
+            ],
+            [
+              0.765,
+              0.668
+            ],
+            [
+              0.899,
+              0.707
+            ],
+            [
+              0.924,
+              0.76
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "maskMetric": "coarse-agent-visible-floor-smoke-only",
+          "boundaryUncertaintyPixels": 8
+        },
+        {
+          "id": "a-10",
+          "class": "wall",
+          "box": [
+            0.435,
+            0.08,
+            0.922,
+            0.709
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "uncertain",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-11",
+          "class": "wall",
+          "box": [
+            0.026,
+            0.08,
+            0.44,
+            0.744
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "uncertain",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-12",
+          "class": "ceiling",
+          "box": [
+            0.023,
+            0,
+            0.94,
+            0.313
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "uncertain",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        }
+      ]
+    },
+    {
+      "id": "bedroom-small-window",
+      "roomIdentity": "bedroom-small-window",
+      "source": "client/public/sample-images/bed-before.webp",
+      "sourceSha256": "969768da3a3799c156095ead5fa0cc6c57cce7f8300932ec4888ec783ec839db",
+      "localEvaluationApproved": true,
+      "authorization": "User R1.4B2 instruction: seven existing development sources only",
+      "provenance": "existing-app-photo; user-authorized local evaluation; ownership not independently audited",
+      "annotations": [
+        {
+          "id": "a-0",
+          "class": "window",
+          "box": [
+            0.253,
+            0.36,
+            0.373,
+            0.62
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "visible",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-1",
+          "class": "window",
+          "box": [
+            0.382,
+            0.376,
+            0.475,
+            0.615
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "visible",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-2",
+          "class": "fixed-light",
+          "box": [
+            0.416,
+            0.03,
+            0.689,
+            0.247
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "visible",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-3",
+          "class": "vent",
+          "box": [
+            0.232,
+            0.22,
+            0.29,
+            0.247
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "visible",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-4",
+          "class": "outlet",
+          "box": [
+            0.872,
+            0.67,
+            0.894,
+            0.702
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "visible",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-5",
+          "class": "floor",
+          "box": [
+            0,
+            0.65,
+            1,
+            1
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "uncertain",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true,
+          "polygon": [
+            [
+              0,
+              0.83
+            ],
+            [
+              0.018,
+              0.794
+            ],
+            [
+              0.561,
+              0.652
+            ],
+            [
+              1,
+              0.808
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "maskMetric": "coarse-agent-visible-floor-smoke-only",
+          "boundaryUncertaintyPixels": 8
+        },
+        {
+          "id": "a-6",
+          "class": "wall",
+          "box": [
+            0.019,
+            0.17,
+            0.563,
+            0.777
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "uncertain",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-7",
+          "class": "wall",
+          "box": [
+            0.563,
+            0.13,
+            1,
+            0.804
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "uncertain",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-8",
+          "class": "ceiling",
+          "box": [
+            0,
+            0,
+            1,
+            0.337
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "uncertain",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        }
+      ]
+    },
+    {
+      "id": "living-low-resolution",
+      "roomIdentity": "living-low-resolution",
+      "source": "client/public/sample-images/living-before.jpg",
+      "sourceSha256": "30dcfc9c8965500b19291a710d6437aa515f9043fb0019f37827654345b31970",
+      "localEvaluationApproved": true,
+      "authorization": "User R1.4B2 instruction: seven existing development sources only",
+      "provenance": "existing-app-photo; user-authorized local evaluation; ownership not independently audited",
+      "annotations": [
+        {
+          "id": "a-0",
+          "class": "window",
+          "box": [
+            0.052,
+            0.351,
+            0.253,
+            0.635
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "visible",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true,
+          "lowResolutionStress": true
+        },
+        {
+          "id": "a-1",
+          "class": "window",
+          "box": [
+            0.751,
+            0.068,
+            0.956,
+            0.729
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "visible",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true,
+          "lowResolutionStress": true
+        },
+        {
+          "id": "a-2",
+          "class": "fireplace",
+          "box": [
+            0.446,
+            0.514,
+            0.578,
+            0.682
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "visible",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true,
+          "lowResolutionStress": true
+        },
+        {
+          "id": "a-3",
+          "class": "opening",
+          "box": [
+            0,
+            0.1,
+            0.3,
+            0.77
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "visible",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true,
+          "lowResolutionStress": true
+        },
+        {
+          "id": "a-4",
+          "class": "floor",
+          "box": [
+            0,
+            0.65,
+            1,
+            1
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "uncertain",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true,
+          "lowResolutionStress": true
+        },
+        {
+          "id": "a-5",
+          "class": "wall",
+          "box": [
+            0.32,
+            0.33,
+            0.749,
+            0.669
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "uncertain",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true,
+          "lowResolutionStress": true
+        },
+        {
+          "id": "a-6",
+          "class": "ceiling",
+          "box": [
+            0.176,
+            0,
+            0.823,
+            0.351
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "uncertain",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true,
+          "lowResolutionStress": true
+        }
+      ]
+    },
+    {
+      "id": "public-small-empty-room",
+      "roomIdentity": "polyhaven-small-empty-room",
+      "source": "benchmarks/staging/sources/small-empty-room.jpg",
+      "sourceSha256": "d8c66961f7ae8dc0791d73ea3ab2eab75ad76e0f8fa81ad226d6a9794a4ce7f6",
+      "localEvaluationApproved": true,
+      "authorization": "User R1.4B2 instruction: seven existing development sources only",
+      "provenance": "benchmarks/staging/sources/provenance.json",
+      "annotations": [
+        {
+          "id": "a-0",
+          "class": "door",
+          "box": [
+            0,
+            0,
+            0.25,
+            0.97
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "partly-occluded-or-truncated",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-1",
+          "class": "outlet",
+          "box": [
+            0.776,
+            0.58,
+            0.854,
+            0.656
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "partly-occluded-or-truncated",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-2",
+          "class": "floor",
+          "box": [
+            0,
+            0.705,
+            0.776,
+            1
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "uncertain",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-3",
+          "class": "wall",
+          "box": [
+            0.4,
+            0,
+            1,
+            1
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "uncertain",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        }
+      ]
+    },
+    {
+      "id": "public-blue-furnished",
+      "roomIdentity": "polyhaven-blue-photo-studio",
+      "source": "benchmarks/staging/sources/blue-furnished.jpg",
+      "sourceSha256": "2c7b261501ee66acf303b2aaaec35b803ebecd902914c18063b7e59f5546cc9c",
+      "localEvaluationApproved": true,
+      "authorization": "User R1.4B2 instruction: seven existing development sources only",
+      "provenance": "benchmarks/staging/sources/provenance.json",
+      "annotations": [
+        {
+          "id": "a-0",
+          "class": "window",
+          "box": [
+            0,
+            0.304,
+            0.095,
+            0.703
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "partly-occluded-or-truncated",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-1",
+          "class": "furniture",
+          "box": [
+            0.487,
+            0.595,
+            1,
+            0.736
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "partly-occluded-or-truncated",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-2",
+          "class": "furniture",
+          "box": [
+            0,
+            0.67,
+            0.171,
+            0.806
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "partly-occluded-or-truncated",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-3",
+          "class": "foreground-object",
+          "box": [
+            0.306,
+            0.451,
+            0.5,
+            0.69
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "partly-occluded-or-truncated",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-4",
+          "class": "floor",
+          "box": [
+            0,
+            0.666,
+            1,
+            1
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "uncertain",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-5",
+          "class": "wall",
+          "box": [
+            0.303,
+            0.24,
+            1,
+            0.687
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "uncertain",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-6",
+          "class": "wall",
+          "box": [
+            0,
+            0.18,
+            0.304,
+            0.692
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "uncertain",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-7",
+          "class": "ceiling",
+          "box": [
+            0,
+            0,
+            1,
+            0.282
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "uncertain",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        }
+      ]
+    },
+    {
+      "id": "public-cayley-furnished",
+      "roomIdentity": "polyhaven-cayley-interior",
+      "source": "benchmarks/staging/sources/cayley-furnished.jpg",
+      "sourceSha256": "754dd7cee53c13de5ddef554a214437d0bc491e6d1ce7dcd312d32f5757f55af",
+      "localEvaluationApproved": true,
+      "authorization": "User R1.4B2 instruction: seven existing development sources only",
+      "provenance": "benchmarks/staging/sources/provenance.json",
+      "annotations": [
+        {
+          "id": "a-0",
+          "class": "window",
+          "box": [
+            0.661,
+            0,
+            1,
+            0.637
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "partly-occluded-or-truncated",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-1",
+          "class": "built-in",
+          "box": [
+            0,
+            0.146,
+            0.202,
+            0.365
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "partly-occluded-or-truncated",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-2",
+          "class": "fixed-light",
+          "box": [
+            0.219,
+            0.154,
+            0.253,
+            0.211
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "partly-occluded-or-truncated",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-3",
+          "class": "fixed-light",
+          "box": [
+            0.415,
+            0.082,
+            0.458,
+            0.159
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "partly-occluded-or-truncated",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-4",
+          "class": "furniture",
+          "box": [
+            0,
+            0.42,
+            0.788,
+            0.935
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "partly-occluded-or-truncated",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-5",
+          "class": "furniture",
+          "box": [
+            0.009,
+            0.359,
+            0.236,
+            0.52
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "partly-occluded-or-truncated",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-6",
+          "class": "furniture",
+          "box": [
+            0.249,
+            0.345,
+            0.404,
+            0.481
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "partly-occluded-or-truncated",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-7",
+          "class": "furniture",
+          "box": [
+            0.61,
+            0.352,
+            0.738,
+            0.452
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "partly-occluded-or-truncated",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-8",
+          "class": "furniture",
+          "box": [
+            0.596,
+            0.45,
+            1,
+            0.881
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "partly-occluded-or-truncated",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-9",
+          "class": "furniture",
+          "box": [
+            0.367,
+            0.654,
+            0.956,
+            1
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "partly-occluded-or-truncated",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-10",
+          "class": "furniture",
+          "box": [
+            0,
+            0.655,
+            0.311,
+            1
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "partly-occluded-or-truncated",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-11",
+          "class": "furniture",
+          "box": [
+            0.0,
+            0.347,
+            0.461,
+            0.496
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "partly-occluded-or-truncated",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-12",
+          "class": "floor",
+          "box": [
+            0,
+            0.588,
+            1,
+            1
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "uncertain",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-13",
+          "class": "wall",
+          "box": [
+            0.209,
+            0,
+            0.462,
+            0.377
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "uncertain",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        },
+        {
+          "id": "a-14",
+          "class": "ceiling",
+          "box": [
+            0,
+            0,
+            0.307,
+            0.149
+          ],
+          "geometry": "reviewed-visible-box",
+          "boundaryUncertain": true,
+          "occlusionOrTruncation": "uncertain",
+          "reviewerType": "agent",
+          "reviewer": "Codex visual source review",
+          "notIndependentHumanGroundTruth": true
+        }
+      ]
+    }
+  ]
+}

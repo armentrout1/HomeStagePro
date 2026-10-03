@@ -1,0 +1,21 @@
+{
+  "version": "scene-local/1",
+  "qualificationCommit": "dab2a2d8f3a09088f5cd277aa2632ef118841fda",
+  "runtimeImage": "sha256:fa3d2775b699b548515cc11efb615102d46d642b463a2d513930b6e84fc99c29",
+  "sourceSha256": {
+    "scene_worker.py": "78880ba45df17161d94667215d8c5cfd3daebd217988e74da008a4ca2b79e729",
+    "scene_protocol.py": "c5a6e4b96d8c2f0478cf41415867ccf64d2dd24950805e05877763b0178bf592",
+    "compat_worker.py": "0091dde3f65e31218a36b0f134075632ce88701b809d5264b8f6efdbefadb1f4",
+    "compat_protocol.py": "2d0eb51182b3cea76447733d79ce6727d131b3c51001048594ecba4662cf5a6b",
+    "protocol.py": "9c15c3ee71f4e5e9f5ca82c12e5d9acc943e3b8ef7c8c1399878d8d35b784705",
+    "admission.py": "5efee620f24234018af8ac764abfcc92aa2a6ef9ff4d35429fc0bb3052813840",
+    "bindings/scene-vocabulary.json": "b6d5c6eac170017a9dc88396924d1bee670d99b1bed3541599469d52f525afcc",
+    "bindings/sam-static-config.json": "52738ad9c085088680c3bb6fcf55fb357514dd859606689b2b1f78e3d5e747d6",
+    "bindings/sam-video-exclusions.json": "2d62c820f6f64853fca8ed3214eaf27c497cfc5365628dc0355e37ccabd3bec3",
+    "requirements.lock": "fc2ddd17269a6e050b76aba2fe0a1d4a70ea99bf55db1433d6a2329f18ab5fb9",
+    "wheels.lock.json": "4a09d44bc1db86528aa7f7318cc91bb43effcdcbd772bb215e74b11afd324356"
+  },
+  "baselineDescriptorsSha256": "edfcd94b963a97ea4d402ea76630e39515b0ead51cb39c000cd449d5c4eab416",
+  "qualificationSha256": "33ad0b6e08ba0cbb18efbdbd814dd1c6aac807608f54b35ac56f30d784192bf4",
+  "recordsSha256": "0546229c886d2d7be5b96c883750922a798312d242ce66f219637e5500e4d42a"
+}

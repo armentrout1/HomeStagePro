@@ -1,0 +1,783 @@
+{
+  "phase": "R1.4B2",
+  "scope": "seven-development-source-smoke-only",
+  "annotationType": "agent-created-before-predictions-not-independent-human-ground-truth",
+  "runId": "155e1378-f1f2-44dc-b73c-709dd807864f",
+  "runtimeBinding": {
+    "version": "scene-local/1",
+    "qualificationCommit": "dab2a2d8f3a09088f5cd277aa2632ef118841fda",
+    "runtimeImage": "sha256:fa3d2775b699b548515cc11efb615102d46d642b463a2d513930b6e84fc99c29",
+    "sourceSha256": {
+      "scene_worker.py": "78880ba45df17161d94667215d8c5cfd3daebd217988e74da008a4ca2b79e729",
+      "scene_protocol.py": "c5a6e4b96d8c2f0478cf41415867ccf64d2dd24950805e05877763b0178bf592",
+      "compat_worker.py": "0091dde3f65e31218a36b0f134075632ce88701b809d5264b8f6efdbefadb1f4",
+      "compat_protocol.py": "2d0eb51182b3cea76447733d79ce6727d131b3c51001048594ecba4662cf5a6b",
+      "protocol.py": "9c15c3ee71f4e5e9f5ca82c12e5d9acc943e3b8ef7c8c1399878d8d35b784705",
+      "admission.py": "5efee620f24234018af8ac764abfcc92aa2a6ef9ff4d35429fc0bb3052813840",
+      "bindings/scene-vocabulary.json": "b6d5c6eac170017a9dc88396924d1bee670d99b1bed3541599469d52f525afcc",
+      "bindings/sam-static-config.json": "52738ad9c085088680c3bb6fcf55fb357514dd859606689b2b1f78e3d5e747d6",
+      "bindings/sam-video-exclusions.json": "2d62c820f6f64853fca8ed3214eaf27c497cfc5365628dc0355e37ccabd3bec3",
+      "requirements.lock": "fc2ddd17269a6e050b76aba2fe0a1d4a70ea99bf55db1433d6a2329f18ab5fb9",
+      "wheels.lock.json": "4a09d44bc1db86528aa7f7318cc91bb43effcdcbd772bb215e74b11afd324356"
+    },
+    "baselineDescriptorsSha256": "edfcd94b963a97ea4d402ea76630e39515b0ead51cb39c000cd449d5c4eab416",
+    "qualificationSha256": "33ad0b6e08ba0cbb18efbdbd814dd1c6aac807608f54b35ac56f30d784192bf4",
+    "recordsSha256": "0546229c886d2d7be5b96c883750922a798312d242ce66f219637e5500e4d42a"
+  },
+  "annotationsSha256": "f5f57f911e3853ee358b3d1eafe68098a378380427c213db66a7a14c49d2bf25",
+  "promptVersion": "roomstager-r1-detection-v1",
+  "promptHash": "b6d5c6eac170017a9dc88396924d1bee670d99b1bed3541599469d52f525afcc",
+  "mappingVersion": "roomstager-r1-mapping-v1",
+  "thresholds": {
+    "box": 0.2,
+    "text": 0.2,
+    "duplicateIoU": 0.8
+  },
+  "initialAdmission": {
+    "totalHostBytes": 33454284800,
+    "availableHostBytes": 16030793728,
+    "availableGpuMiB": 14501,
+    "status": "MEMORY_ADMISSION_PASSED_NOT_EXECUTION_APPROVAL"
+  },
+  "cases": [
+    {
+      "caseId": "bedroom-panelled-carpet",
+      "roomIdentity": "bedroom-panelled-carpet",
+      "sourceSha256": "069f500c4e2ce19cd6fba496f72dcc45eaa0aee693ec74ab658b52f1aef6d03c",
+      "detectionCount": 49,
+      "maskCount": 0,
+      "timings": {
+        "detectionSeconds": 17.7327282,
+        "segmentationSeconds": 0.2209367999999995,
+        "wholeSequenceSeconds": 18.067695200000003
+      },
+      "lowResolutionStress": false,
+      "maskMetrics": [
+        {
+          "annotation": "a-5",
+          "class": "floor",
+          "prediction": null,
+          "coarseAgentMaskIoU": null,
+          "maskAvailable": false,
+          "scope": "Approximate visible-floor smoke polygon; not precision ground truth"
+        }
+      ],
+      "detectionStatus": "completed",
+      "segmentationStatus": "failed",
+      "segmentationCode": "COMPONENT_RESOURCE_LIMIT",
+      "objectBoxMetrics": {
+        "annotatedObjects": 5,
+        "matchedObjects": 4,
+        "boxRecall": 0.8,
+        "matches": [
+          {
+            "annotation": "a-0",
+            "class": "window",
+            "match": "det-component-7d7b54a6-1566-43f8-9592-18991cc690ad-33",
+            "iou": 0.5759889827935173
+          },
+          {
+            "annotation": "a-1",
+            "class": "window",
+            "match": "det-component-7d7b54a6-1566-43f8-9592-18991cc690ad-21",
+            "iou": 0.7339375537541484
+          },
+          {
+            "annotation": "a-2",
+            "class": "fixed-light",
+            "match": "det-component-7d7b54a6-1566-43f8-9592-18991cc690ad-1",
+            "iou": 0.8118181870292785
+          },
+          {
+            "annotation": "a-3",
+            "class": "vent",
+            "match": "det-component-7d7b54a6-1566-43f8-9592-18991cc690ad-3",
+            "iou": 0.8469745855324693
+          },
+          {
+            "annotation": "a-4",
+            "class": "outlet",
+            "match": null,
+            "iou": 0
+          }
+        ],
+        "criticalMisses": [],
+        "normalizedBoundaryError": null,
+        "falseSafeRegionRate": null
+      },
+      "classCounts": {
+        "floor": 1,
+        "fixed-light": 1,
+        "window": 3,
+        "vent": 2,
+        "wall": 5,
+        "unknown": 16,
+        "furniture": 5,
+        "ceiling": 4,
+        "opening": 3,
+        "door": 9
+      },
+      "detectorResources": {
+        "loadSeconds": 5.185067033999985,
+        "inferenceSeconds": 3.3956318049999936,
+        "hostRssBytes": 1876787200,
+        "gpuPeakAllocatedBytes": 2063067136,
+        "gpuPeakReservedBytes": 2438987776,
+        "gpuFreeBytes": 13489930240,
+        "gpuTotalBytes": 17175150592
+      },
+      "segmentationResources": null,
+      "canonicalSha256": "0199d3ba0b3dc747cb8c090d71c53947ed1ac03340ce9d1bfcfb98f90308927d",
+      "privateReportSha256": "f72ee38814460d44560960f4abdea2645e6b4d510ce28fc55722b27ccab6aafc"
+    },
+    {
+      "caseId": "living-fireplace-wood",
+      "roomIdentity": "living-fireplace-wood",
+      "sourceSha256": "c474f94ce37cc262434105e2c07f2cd44d43c08ecdfee29b47d1c5f1e38840d0",
+      "detectionCount": 53,
+      "maskCount": 0,
+      "timings": {
+        "detectionSeconds": 13.3745146,
+        "segmentationSeconds": 0.25013429999999787,
+        "wholeSequenceSeconds": 13.753712800000004
+      },
+      "lowResolutionStress": false,
+      "maskMetrics": [
+        {
+          "annotation": "a-9",
+          "class": "floor",
+          "prediction": null,
+          "coarseAgentMaskIoU": null,
+          "maskAvailable": false,
+          "scope": "Approximate visible-floor smoke polygon; not precision ground truth"
+        }
+      ],
+      "detectionStatus": "completed",
+      "segmentationStatus": "failed",
+      "segmentationCode": "COMPONENT_RESOURCE_LIMIT",
+      "objectBoxMetrics": {
+        "annotatedObjects": 9,
+        "matchedObjects": 4,
+        "boxRecall": 0.4444444444444444,
+        "matches": [
+          {
+            "annotation": "a-0",
+            "class": "window",
+            "match": null,
+            "iou": 0.26814544836102755
+          },
+          {
+            "annotation": "a-1",
+            "class": "window",
+            "match": "det-component-90a00cd8-b360-43b7-ae11-d6b7d7f124c6-13",
+            "iou": 0.9376018483136501
+          },
+          {
+            "annotation": "a-2",
+            "class": "window",
+            "match": null,
+            "iou": 0
+          },
+          {
+            "annotation": "a-3",
+            "class": "window",
+            "match": null,
+            "iou": 0
+          },
+          {
+            "annotation": "a-4",
+            "class": "opening",
+            "match": null,
+            "iou": 0.49265797067815265
+          },
+          {
+            "annotation": "a-5",
+            "class": "fireplace",
+            "match": "det-component-90a00cd8-b360-43b7-ae11-d6b7d7f124c6-38",
+            "iou": 0.9722521720443285
+          },
+          {
+            "annotation": "a-6",
+            "class": "fixed-light",
+            "match": "det-component-90a00cd8-b360-43b7-ae11-d6b7d7f124c6-2",
+            "iou": 0.9733156538019548
+          },
+          {
+            "annotation": "a-7",
+            "class": "vent",
+            "match": "det-component-90a00cd8-b360-43b7-ae11-d6b7d7f124c6-3",
+            "iou": 0.8142612343681697
+          },
+          {
+            "annotation": "a-8",
+            "class": "outlet",
+            "match": null,
+            "iou": 0
+          }
+        ],
+        "criticalMisses": [
+          {
+            "annotation": "a-0",
+            "class": "window",
+            "match": null,
+            "iou": 0.26814544836102755
+          },
+          {
+            "annotation": "a-2",
+            "class": "window",
+            "match": null,
+            "iou": 0
+          },
+          {
+            "annotation": "a-3",
+            "class": "window",
+            "match": null,
+            "iou": 0
+          },
+          {
+            "annotation": "a-4",
+            "class": "opening",
+            "match": null,
+            "iou": 0.49265797067815265
+          }
+        ],
+        "normalizedBoundaryError": null,
+        "falseSafeRegionRate": null
+      },
+      "classCounts": {
+        "ceiling": 1,
+        "floor": 1,
+        "fixed-light": 4,
+        "vent": 2,
+        "door": 4,
+        "fireplace": 2,
+        "wall": 7,
+        "unknown": 23,
+        "window": 3,
+        "foreground-object": 2,
+        "stairs": 1,
+        "furniture": 1,
+        "opening": 2
+      },
+      "detectorResources": {
+        "loadSeconds": 4.6831813119997605,
+        "inferenceSeconds": 2.927393626999674,
+        "hostRssBytes": 1881964544,
+        "gpuPeakAllocatedBytes": 2054617088,
+        "gpuPeakReservedBytes": 2434793472,
+        "gpuFreeBytes": 13494124544,
+        "gpuTotalBytes": 17175150592
+      },
+      "segmentationResources": null,
+      "canonicalSha256": "e26f7364ec8d211d08dc47cc1308f5cc07b18c01eb492b56c8fe93231d73ccdd",
+      "privateReportSha256": "4874a1e8fafaf32d04ab38e92dc4894419ca2dee9027d685760587d53b6a6d1e"
+    },
+    {
+      "caseId": "bedroom-small-window",
+      "roomIdentity": "bedroom-small-window",
+      "sourceSha256": "969768da3a3799c156095ead5fa0cc6c57cce7f8300932ec4888ec783ec839db",
+      "detectionCount": 45,
+      "maskCount": 0,
+      "timings": {
+        "detectionSeconds": 12.807457000000003,
+        "segmentationSeconds": 0.19257629999999334,
+        "wholeSequenceSeconds": 13.108315499999996
+      },
+      "lowResolutionStress": false,
+      "maskMetrics": [
+        {
+          "annotation": "a-5",
+          "class": "floor",
+          "prediction": null,
+          "coarseAgentMaskIoU": null,
+          "maskAvailable": false,
+          "scope": "Approximate visible-floor smoke polygon; not precision ground truth"
+        }
+      ],
+      "detectionStatus": "completed",
+      "segmentationStatus": "failed",
+      "segmentationCode": "COMPONENT_RESOURCE_LIMIT",
+      "objectBoxMetrics": {
+        "annotatedObjects": 5,
+        "matchedObjects": 3,
+        "boxRecall": 0.6,
+        "matches": [
+          {
+            "annotation": "a-0",
+            "class": "window",
+            "match": "det-component-0969cce8-39c6-4f11-9f7a-4dfa88a7870e-18",
+            "iou": 0.9768385480802261
+          },
+          {
+            "annotation": "a-1",
+            "class": "window",
+            "match": null,
+            "iou": 0.3165973308733586
+          },
+          {
+            "annotation": "a-2",
+            "class": "fixed-light",
+            "match": "det-component-0969cce8-39c6-4f11-9f7a-4dfa88a7870e-2",
+            "iou": 0.9674944555869536
+          },
+          {
+            "annotation": "a-3",
+            "class": "vent",
+            "match": "det-component-0969cce8-39c6-4f11-9f7a-4dfa88a7870e-5",
+            "iou": 0.5915649176804696
+          },
+          {
+            "annotation": "a-4",
+            "class": "outlet",
+            "match": null,
+            "iou": 0
+          }
+        ],
+        "criticalMisses": [
+          {
+            "annotation": "a-1",
+            "class": "window",
+            "match": null,
+            "iou": 0.3165973308733586
+          }
+        ],
+        "normalizedBoundaryError": null,
+        "falseSafeRegionRate": null
+      },
+      "classCounts": {
+        "floor": 1,
+        "ceiling": 2,
+        "fixed-light": 1,
+        "window": 2,
+        "wall": 4,
+        "vent": 2,
+        "unknown": 22,
+        "door": 6,
+        "foreground-object": 2,
+        "opening": 1,
+        "outlet": 1,
+        "furniture": 1
+      },
+      "detectorResources": {
+        "loadSeconds": 4.617731072999959,
+        "inferenceSeconds": 2.6134649860000536,
+        "hostRssBytes": 1864052736,
+        "gpuPeakAllocatedBytes": 1911789056,
+        "gpuPeakReservedBytes": 2258632704,
+        "gpuFreeBytes": 13670285312,
+        "gpuTotalBytes": 17175150592
+      },
+      "segmentationResources": null,
+      "canonicalSha256": "842a58323a01877d4af86d9081c79131a0e0d541a68a045b58b43365e159fe2c",
+      "privateReportSha256": "7ba6539dd31ee9aaed79647a0b4280478d533348462998dd92755c27cd9da3c5"
+    },
+    {
+      "caseId": "living-low-resolution",
+      "roomIdentity": "living-low-resolution",
+      "sourceSha256": "30dcfc9c8965500b19291a710d6437aa515f9043fb0019f37827654345b31970",
+      "detectionCount": 48,
+      "maskCount": 0,
+      "timings": {
+        "detectionSeconds": 13.150777900000001,
+        "segmentationSeconds": 0.18641339999999765,
+        "wholeSequenceSeconds": 13.442764800000004
+      },
+      "lowResolutionStress": true,
+      "maskMetrics": [],
+      "detectionStatus": "completed",
+      "segmentationStatus": "failed",
+      "segmentationCode": "COMPONENT_RESOURCE_LIMIT",
+      "objectBoxMetrics": {
+        "annotatedObjects": 4,
+        "matchedObjects": 2,
+        "boxRecall": 0.5,
+        "matches": [
+          {
+            "annotation": "a-0",
+            "class": "window",
+            "match": null,
+            "iou": 0
+          },
+          {
+            "annotation": "a-1",
+            "class": "window",
+            "match": "det-component-908ea67b-62bd-46de-b8ee-a0ffb08cfaf9-13",
+            "iou": 0.9664142151088306
+          },
+          {
+            "annotation": "a-2",
+            "class": "fireplace",
+            "match": "det-component-908ea67b-62bd-46de-b8ee-a0ffb08cfaf9-6",
+            "iou": 0.8673277559671135
+          },
+          {
+            "annotation": "a-3",
+            "class": "opening",
+            "match": null,
+            "iou": 0
+          }
+        ],
+        "criticalMisses": [
+          {
+            "annotation": "a-0",
+            "class": "window",
+            "match": null,
+            "iou": 0
+          },
+          {
+            "annotation": "a-3",
+            "class": "opening",
+            "match": null,
+            "iou": 0
+          }
+        ],
+        "normalizedBoundaryError": null,
+        "falseSafeRegionRate": null
+      },
+      "classCounts": {
+        "floor": 1,
+        "fireplace": 2,
+        "unknown": 23,
+        "furniture": 4,
+        "window": 3,
+        "wall": 4,
+        "door": 3,
+        "ceiling": 3,
+        "foreground-object": 2,
+        "vent": 2,
+        "stairs": 1
+      },
+      "detectorResources": {
+        "loadSeconds": 4.728019403000417,
+        "inferenceSeconds": 2.9947216270002173,
+        "hostRssBytes": 1868533760,
+        "gpuPeakAllocatedBytes": 2194543616,
+        "gpuPeakReservedBytes": 2608857088,
+        "gpuFreeBytes": 13320060928,
+        "gpuTotalBytes": 17175150592
+      },
+      "segmentationResources": null,
+      "canonicalSha256": "d6e1f0efaee9653eb3e5c8ff402319f69754c19879202cbc5a90c0ef2a2522ac",
+      "privateReportSha256": "c8c4ee8f38b5bbf26d1325569e0bd6ff437de379dea1c955b7ef3650be177977"
+    },
+    {
+      "caseId": "public-small-empty-room",
+      "roomIdentity": "polyhaven-small-empty-room",
+      "sourceSha256": "d8c66961f7ae8dc0791d73ea3ab2eab75ad76e0f8fa81ad226d6a9794a4ce7f6",
+      "detectionCount": 37,
+      "maskCount": 0,
+      "timings": {
+        "detectionSeconds": 12.891711399999993,
+        "segmentationSeconds": 0.22988180000000283,
+        "wholeSequenceSeconds": 13.2344389
+      },
+      "lowResolutionStress": false,
+      "maskMetrics": [],
+      "detectionStatus": "completed",
+      "segmentationStatus": "failed",
+      "segmentationCode": "COMPONENT_RESOURCE_LIMIT",
+      "objectBoxMetrics": {
+        "annotatedObjects": 2,
+        "matchedObjects": 0,
+        "boxRecall": 0,
+        "matches": [
+          {
+            "annotation": "a-0",
+            "class": "door",
+            "match": null,
+            "iou": 0.17225297590940108
+          },
+          {
+            "annotation": "a-1",
+            "class": "outlet",
+            "match": null,
+            "iou": 0
+          }
+        ],
+        "criticalMisses": [
+          {
+            "annotation": "a-0",
+            "class": "door",
+            "match": null,
+            "iou": 0.17225297590940108
+          }
+        ],
+        "normalizedBoundaryError": null,
+        "falseSafeRegionRate": null
+      },
+      "classCounts": {
+        "floor": 1,
+        "wall": 1,
+        "unknown": 20,
+        "window": 2,
+        "furniture": 5,
+        "door": 2,
+        "ceiling": 3,
+        "opening": 2,
+        "stairs": 1
+      },
+      "detectorResources": {
+        "loadSeconds": 4.490362000999994,
+        "inferenceSeconds": 2.8473064089998843,
+        "hostRssBytes": 1883090944,
+        "gpuPeakAllocatedBytes": 2054617088,
+        "gpuPeakReservedBytes": 2434793472,
+        "gpuFreeBytes": 13494124544,
+        "gpuTotalBytes": 17175150592
+      },
+      "segmentationResources": null,
+      "canonicalSha256": "c24157167ee48e6beded079ae281a5d48c225b11cbda92159d278986f543581d",
+      "privateReportSha256": "34e4477e8ed403558a3e81220eb8290d395d5cbf225a8aea97b4b8e3c9c6da02"
+    },
+    {
+      "caseId": "public-blue-furnished",
+      "roomIdentity": "polyhaven-blue-photo-studio",
+      "sourceSha256": "2c7b261501ee66acf303b2aaaec35b803ebecd902914c18063b7e59f5546cc9c",
+      "detectionCount": 32,
+      "maskCount": 32,
+      "timings": {
+        "detectionSeconds": 12.96805339999999,
+        "segmentationSeconds": 16.586989099999993,
+        "wholeSequenceSeconds": 29.670834499999998
+      },
+      "lowResolutionStress": false,
+      "maskMetrics": [],
+      "detectionStatus": "completed",
+      "segmentationStatus": "completed",
+      "segmentationCode": null,
+      "objectBoxMetrics": {
+        "annotatedObjects": 4,
+        "matchedObjects": 1,
+        "boxRecall": 0.25,
+        "matches": [
+          {
+            "annotation": "a-0",
+            "class": "window",
+            "match": null,
+            "iou": 0
+          },
+          {
+            "annotation": "a-1",
+            "class": "furniture",
+            "match": "det-component-4d135e8a-18ad-4377-af5e-cf8c7eb25d1d-1",
+            "iou": 0.934469846992227
+          },
+          {
+            "annotation": "a-2",
+            "class": "furniture",
+            "match": null,
+            "iou": 0
+          },
+          {
+            "annotation": "a-3",
+            "class": "foreground-object",
+            "match": null,
+            "iou": 0.013173239555511619
+          }
+        ],
+        "criticalMisses": [
+          {
+            "annotation": "a-0",
+            "class": "window",
+            "match": null,
+            "iou": 0
+          }
+        ],
+        "normalizedBoundaryError": null,
+        "falseSafeRegionRate": null
+      },
+      "classCounts": {
+        "floor": 1,
+        "furniture": 3,
+        "unknown": 13,
+        "ceiling": 1,
+        "wall": 3,
+        "foreground-object": 2,
+        "opening": 4,
+        "plumbing-fixture": 1,
+        "fixed-light": 2,
+        "fireplace": 1,
+        "door": 1
+      },
+      "detectorResources": {
+        "loadSeconds": 4.477811901000223,
+        "inferenceSeconds": 2.8224274059998606,
+        "hostRssBytes": 1879465984,
+        "gpuPeakAllocatedBytes": 2054618112,
+        "gpuPeakReservedBytes": 2434793472,
+        "gpuFreeBytes": 13494124544,
+        "gpuTotalBytes": 17175150592
+      },
+      "segmentationResources": {
+        "loadSeconds": 2.3956868900004338,
+        "inferenceSeconds": 1.0936690240000644,
+        "hostRssBytes": 1630797824,
+        "gpuPeakAllocatedBytes": 479818752,
+        "gpuPeakReservedBytes": 715128832,
+        "gpuFreeBytes": 15215886336,
+        "gpuTotalBytes": 17175150592
+      },
+      "canonicalSha256": "a302db9090b19197599151dbcf899cb865ff3a19b178962df614fa43a7f7904e",
+      "privateReportSha256": "a60922f35c06b90cc9f955313fd473067ee111fe3b8fbb83fd34b4e96af76347"
+    },
+    {
+      "caseId": "public-cayley-furnished",
+      "roomIdentity": "polyhaven-cayley-interior",
+      "sourceSha256": "754dd7cee53c13de5ddef554a214437d0bc491e6d1ce7dcd312d32f5757f55af",
+      "detectionCount": 89,
+      "maskCount": 0,
+      "timings": {
+        "detectionSeconds": 13.721708100000004,
+        "segmentationSeconds": 0.23246190000000932,
+        "wholeSequenceSeconds": 14.059167499999996
+      },
+      "lowResolutionStress": false,
+      "maskMetrics": [],
+      "detectionStatus": "completed",
+      "segmentationStatus": "failed",
+      "segmentationCode": "COMPONENT_RESOURCE_LIMIT",
+      "objectBoxMetrics": {
+        "annotatedObjects": 12,
+        "matchedObjects": 7,
+        "boxRecall": 0.5833333333333334,
+        "matches": [
+          {
+            "annotation": "a-0",
+            "class": "window",
+            "match": "det-component-32e8bfef-fc4b-4b2f-8a2f-bffd1be07050-67",
+            "iou": 0.982285715093
+          },
+          {
+            "annotation": "a-1",
+            "class": "built-in",
+            "match": null,
+            "iou": 0
+          },
+          {
+            "annotation": "a-2",
+            "class": "fixed-light",
+            "match": null,
+            "iou": 0
+          },
+          {
+            "annotation": "a-3",
+            "class": "fixed-light",
+            "match": null,
+            "iou": 0
+          },
+          {
+            "annotation": "a-4",
+            "class": "furniture",
+            "match": "det-component-32e8bfef-fc4b-4b2f-8a2f-bffd1be07050-0",
+            "iou": 0.8808632377140073
+          },
+          {
+            "annotation": "a-5",
+            "class": "furniture",
+            "match": "det-component-32e8bfef-fc4b-4b2f-8a2f-bffd1be07050-27",
+            "iou": 0.9416611687395582
+          },
+          {
+            "annotation": "a-6",
+            "class": "furniture",
+            "match": "det-component-32e8bfef-fc4b-4b2f-8a2f-bffd1be07050-22",
+            "iou": 0.7052736272797921
+          },
+          {
+            "annotation": "a-7",
+            "class": "furniture",
+            "match": null,
+            "iou": 0.3358901566406884
+          },
+          {
+            "annotation": "a-8",
+            "class": "furniture",
+            "match": "det-component-32e8bfef-fc4b-4b2f-8a2f-bffd1be07050-60",
+            "iou": 0.7368372551670815
+          },
+          {
+            "annotation": "a-9",
+            "class": "furniture",
+            "match": "det-component-32e8bfef-fc4b-4b2f-8a2f-bffd1be07050-68",
+            "iou": 0.6185602281724811
+          },
+          {
+            "annotation": "a-10",
+            "class": "furniture",
+            "match": "det-component-32e8bfef-fc4b-4b2f-8a2f-bffd1be07050-21",
+            "iou": 0.7493111740693733
+          },
+          {
+            "annotation": "a-11",
+            "class": "furniture",
+            "match": null,
+            "iou": 0.44378068931929515
+          }
+        ],
+        "criticalMisses": [],
+        "normalizedBoundaryError": null,
+        "falseSafeRegionRate": null
+      },
+      "classCounts": {
+        "furniture": 22,
+        "ceiling": 1,
+        "unknown": 45,
+        "floor": 3,
+        "foreground-object": 2,
+        "wall": 3,
+        "door": 5,
+        "plumbing-fixture": 1,
+        "window": 4,
+        "fixed-light": 1,
+        "fixed-appliance": 2
+      },
+      "detectorResources": {
+        "loadSeconds": 5.010735033000401,
+        "inferenceSeconds": 2.9416698710001583,
+        "hostRssBytes": 1887768576,
+        "gpuPeakAllocatedBytes": 2054618112,
+        "gpuPeakReservedBytes": 2434793472,
+        "gpuFreeBytes": 13494124544,
+        "gpuTotalBytes": 17175150592
+      },
+      "segmentationResources": null,
+      "canonicalSha256": "b3f36f990026714c61ac3931388113e2f302aae1c586414cc401d4060fda07a0",
+      "privateReportSha256": "438e813f9999563899e634b2c5715934b83ce66bd86d06e3f215e7e52dd4c7b6"
+    }
+  ],
+  "postRunModelAndSidecarHashes": "verified-unchanged",
+  "remainingEvaluationContainers": 0,
+  "productionQualified": false,
+  "modelEvaluationCompleted": true,
+  "surfaceMaskAccuracyQualified": false,
+  "falseSafeRegionRate": null,
+  "falseSafeRegionReason": "N/A: R2 does not exist",
+  "notes": [
+    "Six explicit segmentation resource-cap abstentions, not out-of-memory failures.",
+    "Only public-blue-furnished produced masks. It has no adequate source polygon annotations: mask IoU N/A.",
+    "Three preannotated floor polygons have no produced mask due to cap abstention: IoU N/A, not zero.",
+    "No thresholds changed after predictions. No held-out samples used.",
+    "Two pre-inference attempts stopped: insufficient RAM, then missing ProgramFiles caused NVIDIA NVML startup error.",
+    "One complete inference run; overlays were regenerated from saved artifacts after fixing single-channel decoding.",
+    "Host code subsequently extracted the unchanged mask-conversion routine for tests, added descriptor digest to config manifests, and made any admission failure sticky across the run. These host-only changes were tested without rerunning inference."
+  ],
+  "validation": {
+    "typescriptTests": {
+      "passed": 263,
+      "failed": 0,
+      "skipped": 0
+    },
+    "pinnedRuntimePythonTests": {
+      "passed": 36,
+      "failed": 0,
+      "skipped": 0
+    },
+    "typechecks": [
+      "application",
+      "benchmark",
+      "focused-tests"
+    ],
+    "gitDiffCheck": "passed",
+    "productionDatabaseUsed": false
+  }
+}

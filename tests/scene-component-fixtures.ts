@@ -12,7 +12,7 @@ import { ComponentRegistry } from "../server/staging/scene/components/registry";
 import { ComponentRunner } from "../server/staging/scene/components/runner";
 import { syntheticComponent } from "../server/staging/scene/components/fake";
 import { syntheticWorkerSha256 } from "../server/staging/scene/components/backend";
-import type { Task, ExecutionPolicy } from "../server/staging/scene/components/types";
+import type { Task, SyntheticExecutionPolicy as ExecutionPolicy } from "../server/staging/scene/components/types";
 // Synthetic exact-revision fixture, not an assertion that this is an upstream commit.
 export const revision = "1".repeat(40);
 export const evidenceBytes = readFileSync(new URL("../licenses/staging-components/synthetic-test-evidence.txt", import.meta.url));

@@ -1,5 +1,10 @@
 # R1 — Scene Understanding: Technical Design
 
+
+## Current implementation status: R1.4B2
+
+R1.1 through R1.3, the R1.4A design, R1.4B1 compatibility qualification and the R1.4B2 local detection/mask smoke path are implemented for evaluation. See [R1.4B2 measured results](r1-detection-segmentation-smoke.md) and its JSON evidence. DINO completed seven authorized development sources; SAM produced 32 validated masks in one and explicitly abstained at the prompt cap in six. Nine critical opening/window/door annotations failed box matching. This is not architecture-safe or production-qualified. The older proposed-R1.4 and stops-at-R1.3 wording below describes historical design scope; this status supersedes it. R1.5/R1.6 remain unimplemented and unauthorized here. No production wiring changed.
+
 Status: **R1.1 contracts, R1.2 offline preprocessing and R1.3 synthetic component harness implemented; R1.4 and later remain proposed**. Updated October 2, 2026. Parent: [canonical staging roadmap](./staging-roadmap.md). Behavior authority: [staging-profiles.md](./staging-profiles.md). Application contract: [engine-boundary.md](./engine-boundary.md).
 
 R1.4A qualification is documented in [detection/segmentation candidates](./r1-model-candidates.md): Grounding DINO Tiny plus SAM 2.1 Hiera Small are the primary evaluation plan, Florence-2 is a gated comparator, and noncommercial SegFormer/ADE20K and MaskFormer model-zoo routes are excluded. Exact artifact pins, hardware findings, R1.3 generalization requirements and predeclared benchmark gates are recorded there. No real adapter is enabled; R1.4B implementation/acquisition/execution requires separate authorization.

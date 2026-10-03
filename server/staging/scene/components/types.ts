@@ -29,7 +29,7 @@ export const componentResultSchema = z.discriminatedUnion("status", [
 });
 export type ComponentResult = z.infer<typeof componentResultSchema>;
 export type ComponentOutput = z.infer<typeof outputSchema>;
-export const policySchema = z.object({
+const syntheticPolicySchema = z.object({
     id: z.string().regex(/^[A-Za-z0-9_-]{1,64}$/), task: taskSchema,
     deadlineMs: z.number().int().min(50).max(60000), memoryLimitBytes: z.number().int().min(16 * 1024 * 1024).max(1024 * 1024 * 1024),
     memoryEnforcement: z.literal("advisory"), inputByteLimit: z.number().int().min(1024).max(1024 * 1024),
@@ -37,6 +37,14 @@ export const policySchema = z.object({
     stderrByteLimit: z.number().int().min(128).max(65536), seed: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER),
     network: z.literal("disabled"), backend: z.literal("synthetic-subprocess-v1"),
 }).strict();
+const realPolicySchema = z.object({
+    id: z.string().regex(/^real-(detection|segmentation)-v1$/), task: z.enum(["detection", "segmentation"]),
+    deadlineMs: z.literal(120000), memoryLimitBytes: z.literal(8589934592), memoryEnforcement: z.literal("host-cgroup"),
+    inputByteLimit: z.literal(1048576), outputByteLimit: z.literal(1048576), artifactByteLimit: z.literal(16777216),
+    stderrByteLimit: z.literal(65536), seed: z.literal(0), network: z.literal("disabled"), backend: z.literal("qualified-local-container-v1")
+}).strict();
+export const policySchema = z.union([syntheticPolicySchema, realPolicySchema]);
+export type SyntheticExecutionPolicy = z.infer<typeof syntheticPolicySchema>;
 export type ExecutionPolicy = z.infer<typeof policySchema>;
 export interface ComponentContext {
     run: ComponentRun;
@@ -44,6 +52,7 @@ export interface ComponentContext {
     signal: AbortSignal;
     policy: ExecutionPolicy;
     // No publication, file paths, network client or authority surface.
+    readCanonical(): Promise<Buffer>;
     putArtifact(bytes: Uint8Array, description: ArtifactDescription): Promise<SceneArtifact>;
 }
 export interface VisionComponent {

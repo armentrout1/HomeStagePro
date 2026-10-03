@@ -1,0 +1,23 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import sharp from "sharp";
+import path from "node:path";
+import { fixture } from "./scene-component-fixtures";
+import { diagnostic } from "../benchmarks/staging/scene-smoke";
+import { consolidate, detectionElements } from "../server/staging/scene/components/real-mapping";
+import type { MaskRef, SceneElement } from "../shared/staging/scene-map";
+test("private diagnostic preserves one-channel mask pixel positions and abstains from absent-mask IoU", async t => {
+ const f=await fixture(t), original=await f.store.read(f.input.canonical);
+ const raw=Buffer.alloc(15); raw[7]=255;
+ const png=await sharp(raw,{raw:{width:5,height:3,channels:1}}).toColourspace("b-w").png().toBuffer();
+ const ref=await f.store.put(png,{mediaType:"image/png",frameId:"canonical",width:5,height:3,channels:1,dtype:"uint8",encoding:"png",semantics:"binary-membership"}) as MaskRef;
+ const det=detectionElements(consolidate([{group:"surfaces",label:"floor",score:.8,box:[0,0,5,3]}],5,3),"detector","canonical",5,3);
+ const mask:SceneElement={...det[0],id:"mask",shape:{kind:"mask",mask:ref,outline:null}};
+ const dir=path.join(f.root,"synthetic");
+ await diagnostic(dir,original,det,[mask],f.store,[],{});
+ const pixels=await sharp(path.join(dir,"classes.png")).raw().toBuffer();
+ for(let p=0;p<15;p++) assert.deepEqual([...pixels.subarray(p*3,p*3+3)],p===7?[245,158,11]:[35,35,35]);
+ const empty=await diagnostic(dir,original,det,[],f.store,[{id:"floor",class:"floor",box:[0,0,1,1],polygon:[[0,0],[1,0],[1,1],[0,1]],boundaryUncertain:true,occlusionOrTruncation:"none",reviewerType:"agent"}],{});
+ assert.equal(empty.maskMetrics[0].maskAvailable,false);
+ assert.equal(empty.maskMetrics[0].coarseAgentMaskIoU,null);
+});

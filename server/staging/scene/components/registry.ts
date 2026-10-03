@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { idSchema, elementClassSchema } from "../../../../shared/staging/scene-map";
 import { reject } from "../errors";
+import { isRealImplementation, realRegistrationMatches } from "./real";
 import { isRegisteredImplementation } from "./fake";
 import { freeze, policySchema, taskSchema, type VisionComponent, type Task } from "./types";
 const registrationSchema = z.object({
@@ -19,7 +20,9 @@ export class ComponentRegistry {
         if (!parsed.success)
             reject("COMPONENT_NOT_REGISTERED");
         const v = parsed.data, key = `${v.id}@${v.version}`;
-        if (this.entries.has(key) || !isRegisteredImplementation(component) || component.execution !== "local" || component.id !== v.id || component.version !== v.version)
+        if (this.entries.has(key) || (!isRegisteredImplementation(component) && !isRealImplementation(component)) || component.execution !== "local" || component.id !== v.id || component.version !== v.version)
+            reject("COMPONENT_NOT_REGISTERED");
+        if (isRealImplementation(component) ? !realRegistrationMatches(v, component) : v.policy.backend !== "synthetic-subprocess-v1")
             reject("COMPONENT_NOT_REGISTERED");
         if (component.task !== v.task || v.policy.task !== v.task)
             reject("COMPONENT_TASK_MISMATCH");

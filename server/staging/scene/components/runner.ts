@@ -1,3 +1,4 @@
+import { isRealImplementation, realLicense, realConfiguration } from "./real";
 import { randomUUID } from "node:crypto";
 import { performance } from "node:perf_hooks";
 import type { ComponentRun, Frame, ElementClass } from "../../../../shared/staging/scene-map";
@@ -31,20 +32,21 @@ export class ComponentRunner {
         use?: LicenseUse;
     }): Promise<ComponentResult> {
         const entry = this.registry.get(request.id, request.version, request.task);
-        const license = this.licenses.approved(entry.licenseId, entry.id, entry.version, request.use ?? "evaluation");
+        const real = isRealImplementation(entry.component);
+        const license = real ? await realLicense(entry.component, request.use ?? "evaluation") : this.licenses.approved(entry.licenseId, entry.id, entry.version, request.use ?? "evaluation");
         let actualCodeHash: string;
         try {
-            actualCodeHash = await syntheticWorkerSha256();
+            actualCodeHash = real ? license.codeSha256 : await syntheticWorkerSha256();
         }
         catch {
             reject("COMPONENT_LICENSE_BLOCKED");
         }
         if (license.revision !== entry.codeRevision || license.codeSha256 !== actualCodeHash || (license.noWeights && license.sha256 !== license.codeSha256))
             reject("COMPONENT_LICENSE_BLOCKED");
-        if (!license.noWeights) {
+        if (!real && !license.noWeights) {
             if (!this.cache)
                 reject("COMPONENT_LICENSE_BLOCKED");
-            await this.cache.verify(license);
+            await this.cache.verify(license as import("../licenses").LicenseRecord);
         }
         const parsed = analysisInputSchema.safeParse(request.input);
         if (!parsed.success)
@@ -88,7 +90,7 @@ export class ComponentRunner {
         if (entry.dependencies.some(task => !roles.has(task)))
             reject("COMPONENT_DEPENDENCY_MISSING");
         const config = {
-            schemaVersion: "component-config/1", adapterId: entry.id, adapterVersion: entry.version, task: entry.task, supportedClasses: entry.supportedClasses, dependencies: entry.dependencies, policy: entry.policy, implementation: syntheticConfiguration(entry.component), codeSha256: license.codeSha256
+            schemaVersion: "component-config/1", adapterId: entry.id, adapterVersion: entry.version, task: entry.task, supportedClasses: entry.supportedClasses, dependencies: entry.dependencies, policy: entry.policy, implementation: real ? realConfiguration(entry.component) : syntheticConfiguration(entry.component), codeSha256: license.codeSha256
         };
         const persistManifest = async (value: unknown) => {
             try {
@@ -102,16 +104,16 @@ export class ComponentRunner {
         };
         const configManifest = await persistManifest(config);
         const runtimeManifest = await persistManifest({
-            schemaVersion: "component-runtime/1", node: process.version, platform: process.platform, arch: process.arch, backend: entry.policy.backend, resourcePolicyId: entry.policy.id, memory: "advisory-no-os-cap", network: "application-blocked-no-os-firewall", worker: "synthetic-worker-v1", licenseId: license.id
+            schemaVersion: "component-runtime/1", node: process.version, platform: process.platform, arch: process.arch, backend: entry.policy.backend, resourcePolicyId: entry.policy.id, memory: real ? "host-cgroup-8GiB-gpu-advisory" : "advisory-no-os-cap", network: real ? "docker-network-none" : "application-blocked-no-os-firewall", worker: real ? "scene-local-1" : "synthetic-worker-v1", licenseId: license.id
         });
         const started = performance.now(), signal = request.signal ?? new AbortController().signal;
         const run: ComponentRun = {
             id: `component-${randomUUID()}`, adapterId: entry.id, adapterVersion: entry.version, task: entry.task, codeRevision: entry.codeRevision,
             weights: license.noWeights ? [] : [{
-                    name: license.artifactName, revision: license.revision, sha256: license.sha256, licenseEvidenceId: license.weightsLicense!.snapshot.evidenceId
+                    name: license.artifactName, revision: "modelRevision" in license ? license.modelRevision : license.revision, sha256: license.sha256, licenseEvidenceId: license.weightsLicense!.snapshot.evidenceId
                 }],
             runtimeManifest, configManifest, configSha256: configManifest.sha256, inputSha256: input.canonical.sha256, inputFrameId: input.frame.id,
-            seed: entry.policy.seed, deterministic: true, nondeterminism: [], startedAt: new Date().toISOString(), elapsedMs: 0, peakMemoryBytes: null, status: "completed", failureCode: null,
+            seed: entry.policy.seed, deterministic: !real, nondeterminism: real ? ["cuda-numerical-determinism-not-qualified"] : [], startedAt: new Date().toISOString(), elapsedMs: 0, peakMemoryBytes: null, status: "completed", failureCode: null,
         };
         const written = new Map<string, SceneArtifact>();
         let bytesWritten = 0;
@@ -125,6 +127,7 @@ export class ComponentRunner {
             check();
             const raw = await entry.component.analyze(input, {
                 run: freeze(structuredClone(run)), dependencies: freeze(dependencies), signal, policy: entry.policy,
+                readCanonical: async () => { check(); return store.read(input.canonical); },
                 putArtifact: async (bytes, description) => {
                     check();
                     bytesWritten += bytes.byteLength;
