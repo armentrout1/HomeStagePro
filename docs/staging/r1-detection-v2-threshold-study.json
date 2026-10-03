@@ -1,0 +1,1423 @@
+{
+  "version": "r1-v2-development-threshold-study",
+  "runId": "636e5ab7-a573-4629-99d9-4d9319097cb2",
+  "profiles": [
+    0.1,
+    0.15,
+    0.2,
+    0.25
+  ],
+  "pairedBoxText": true,
+  "noncritical": 0.25,
+  "totals": [
+    {
+      "profile": "t20",
+      "failed": false,
+      "criticalMisses": 0,
+      "regressions": 0,
+      "criticalOverflow": 1,
+      "unmatchedCritical": 151,
+      "criticalHypotheses": 166
+    },
+    {
+      "profile": "t15",
+      "failed": false,
+      "criticalMisses": 0,
+      "regressions": 0,
+      "criticalOverflow": 5,
+      "unmatchedCritical": 232,
+      "criticalHypotheses": 247
+    },
+    {
+      "profile": "t10",
+      "failed": false,
+      "criticalMisses": 0,
+      "regressions": 0,
+      "criticalOverflow": 7,
+      "unmatchedCritical": 400,
+      "criticalHypotheses": 415
+    },
+    {
+      "profile": "t25",
+      "failed": false,
+      "criticalMisses": 1,
+      "regressions": 0,
+      "criticalOverflow": 1,
+      "unmatchedCritical": 99,
+      "criticalHypotheses": 113
+    }
+  ],
+  "selected": "t20",
+  "sourceAnnotationsUnchanged": true,
+  "cases": [
+    {
+      "caseId": "bedroom-panelled-carpet",
+      "sourceSha256": "069f500c4e2ce19cd6fba496f72dcc45eaa0aee693ec74ab658b52f1aef6d03c",
+      "seconds": 19.898,
+      "rows": [
+        {
+          "profile": "t10",
+          "criticalMisses": 0,
+          "regressions": 0,
+          "criticalOverflow": true,
+          "criticalHypotheses": 81,
+          "unmatchedCritical": 79,
+          "hypotheses": 107,
+          "unknown": 20,
+          "matches": [
+            {
+              "annotation": "a-0",
+              "class": "window",
+              "match": "det-study-26",
+              "iou": 0.5615869995143303
+            },
+            {
+              "annotation": "a-1",
+              "class": "window",
+              "match": "det-study-22",
+              "iou": 0.7343170241693955
+            },
+            {
+              "annotation": "a-2",
+              "class": "fixed-light",
+              "match": "det-study-5",
+              "iou": 0.8118181870292785
+            },
+            {
+              "annotation": "a-3",
+              "class": "vent",
+              "match": "det-study-7",
+              "iou": 0.8469745855324693
+            },
+            {
+              "annotation": "a-4",
+              "class": "outlet",
+              "match": "det-study-16",
+              "iou": 0.7889803439044976
+            }
+          ]
+        },
+        {
+          "profile": "t15",
+          "criticalMisses": 0,
+          "regressions": 0,
+          "criticalOverflow": true,
+          "criticalHypotheses": 41,
+          "unmatchedCritical": 39,
+          "hypotheses": 67,
+          "unknown": 16,
+          "matches": [
+            {
+              "annotation": "a-0",
+              "class": "window",
+              "match": "det-study-26",
+              "iou": 0.5615869995143303
+            },
+            {
+              "annotation": "a-1",
+              "class": "window",
+              "match": "det-study-22",
+              "iou": 0.7343170241693955
+            },
+            {
+              "annotation": "a-2",
+              "class": "fixed-light",
+              "match": "det-study-5",
+              "iou": 0.8118181870292785
+            },
+            {
+              "annotation": "a-3",
+              "class": "vent",
+              "match": "det-study-7",
+              "iou": 0.8469745855324693
+            },
+            {
+              "annotation": "a-4",
+              "class": "outlet",
+              "match": "det-study-16",
+              "iou": 0.7889803439044976
+            }
+          ]
+        },
+        {
+          "profile": "t20",
+          "criticalMisses": 0,
+          "regressions": 0,
+          "criticalOverflow": false,
+          "criticalHypotheses": 28,
+          "unmatchedCritical": 26,
+          "hypotheses": 54,
+          "unknown": 12,
+          "matches": [
+            {
+              "annotation": "a-0",
+              "class": "window",
+              "match": "det-study-26",
+              "iou": 0.5615869995143303
+            },
+            {
+              "annotation": "a-1",
+              "class": "window",
+              "match": "det-study-22",
+              "iou": 0.7343170241693955
+            },
+            {
+              "annotation": "a-2",
+              "class": "fixed-light",
+              "match": "det-study-5",
+              "iou": 0.8118181870292785
+            },
+            {
+              "annotation": "a-3",
+              "class": "vent",
+              "match": "det-study-7",
+              "iou": 0.8469745855324693
+            },
+            {
+              "annotation": "a-4",
+              "class": "outlet",
+              "match": "det-study-16",
+              "iou": 0.7889803439044976
+            }
+          ]
+        },
+        {
+          "profile": "t25",
+          "criticalMisses": 0,
+          "regressions": 0,
+          "criticalOverflow": false,
+          "criticalHypotheses": 15,
+          "unmatchedCritical": 13,
+          "hypotheses": 41,
+          "unknown": 9,
+          "matches": [
+            {
+              "annotation": "a-0",
+              "class": "window",
+              "match": "det-study-26",
+              "iou": 0.5615869995143303
+            },
+            {
+              "annotation": "a-1",
+              "class": "window",
+              "match": "det-study-22",
+              "iou": 0.7343170241693955
+            },
+            {
+              "annotation": "a-2",
+              "class": "fixed-light",
+              "match": "det-study-5",
+              "iou": 0.8118181870292785
+            },
+            {
+              "annotation": "a-3",
+              "class": "vent",
+              "match": "det-study-7",
+              "iou": 0.8469745855324693
+            },
+            {
+              "annotation": "a-4",
+              "class": "outlet",
+              "match": "det-study-16",
+              "iou": 0.7889803439044976
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "caseId": "living-fireplace-wood",
+      "sourceSha256": "c474f94ce37cc262434105e2c07f2cd44d43c08ecdfee29b47d1c5f1e38840d0",
+      "seconds": 16.083,
+      "rows": [
+        {
+          "profile": "t10",
+          "criticalMisses": 0,
+          "regressions": 0,
+          "criticalOverflow": true,
+          "criticalHypotheses": 59,
+          "unmatchedCritical": 54,
+          "hypotheses": 91,
+          "unknown": 18,
+          "matches": [
+            {
+              "annotation": "a-0",
+              "class": "window",
+              "match": "det-study-55",
+              "iou": 0.9422788861163766
+            },
+            {
+              "annotation": "a-1",
+              "class": "window",
+              "match": "det-study-27",
+              "iou": 0.9542016091721471
+            },
+            {
+              "annotation": "a-2",
+              "class": "window",
+              "match": "det-study-36",
+              "iou": 0.790692537170025
+            },
+            {
+              "annotation": "a-3",
+              "class": "window",
+              "match": "det-study-31",
+              "iou": 0.8279591694759808
+            },
+            {
+              "annotation": "a-4",
+              "class": "opening",
+              "match": "det-study-67",
+              "iou": 0.8457426685078286
+            },
+            {
+              "annotation": "a-5",
+              "class": "fireplace",
+              "match": null,
+              "iou": 0.25082314302171005
+            },
+            {
+              "annotation": "a-6",
+              "class": "fixed-light",
+              "match": "det-study-1",
+              "iou": 0.9733156538019548
+            },
+            {
+              "annotation": "a-7",
+              "class": "vent",
+              "match": "det-study-7",
+              "iou": 0.8142612343681697
+            },
+            {
+              "annotation": "a-8",
+              "class": "outlet",
+              "match": "det-study-46",
+              "iou": 0.8749710453846715
+            }
+          ]
+        },
+        {
+          "profile": "t15",
+          "criticalMisses": 0,
+          "regressions": 0,
+          "criticalOverflow": true,
+          "criticalHypotheses": 45,
+          "unmatchedCritical": 40,
+          "hypotheses": 77,
+          "unknown": 13,
+          "matches": [
+            {
+              "annotation": "a-0",
+              "class": "window",
+              "match": "det-study-55",
+              "iou": 0.9422788861163766
+            },
+            {
+              "annotation": "a-1",
+              "class": "window",
+              "match": "det-study-27",
+              "iou": 0.9542016091721471
+            },
+            {
+              "annotation": "a-2",
+              "class": "window",
+              "match": "det-study-36",
+              "iou": 0.790692537170025
+            },
+            {
+              "annotation": "a-3",
+              "class": "window",
+              "match": "det-study-31",
+              "iou": 0.8279591694759808
+            },
+            {
+              "annotation": "a-4",
+              "class": "opening",
+              "match": "det-study-67",
+              "iou": 0.8457426685078286
+            },
+            {
+              "annotation": "a-5",
+              "class": "fireplace",
+              "match": null,
+              "iou": 0.25082314302171005
+            },
+            {
+              "annotation": "a-6",
+              "class": "fixed-light",
+              "match": "det-study-1",
+              "iou": 0.9733156538019548
+            },
+            {
+              "annotation": "a-7",
+              "class": "vent",
+              "match": "det-study-7",
+              "iou": 0.8142612343681697
+            },
+            {
+              "annotation": "a-8",
+              "class": "outlet",
+              "match": "det-study-46",
+              "iou": 0.8749710453846715
+            }
+          ]
+        },
+        {
+          "profile": "t20",
+          "criticalMisses": 0,
+          "regressions": 0,
+          "criticalOverflow": true,
+          "criticalHypotheses": 38,
+          "unmatchedCritical": 33,
+          "hypotheses": 70,
+          "unknown": 14,
+          "matches": [
+            {
+              "annotation": "a-0",
+              "class": "window",
+              "match": "det-study-55",
+              "iou": 0.9422788861163766
+            },
+            {
+              "annotation": "a-1",
+              "class": "window",
+              "match": "det-study-27",
+              "iou": 0.9542016091721471
+            },
+            {
+              "annotation": "a-2",
+              "class": "window",
+              "match": "det-study-36",
+              "iou": 0.790692537170025
+            },
+            {
+              "annotation": "a-3",
+              "class": "window",
+              "match": "det-study-31",
+              "iou": 0.8279591694759808
+            },
+            {
+              "annotation": "a-4",
+              "class": "opening",
+              "match": "det-study-5",
+              "iou": 0.7935655784295811
+            },
+            {
+              "annotation": "a-5",
+              "class": "fireplace",
+              "match": null,
+              "iou": 0.25082314302171005
+            },
+            {
+              "annotation": "a-6",
+              "class": "fixed-light",
+              "match": "det-study-1",
+              "iou": 0.9733156538019548
+            },
+            {
+              "annotation": "a-7",
+              "class": "vent",
+              "match": "det-study-7",
+              "iou": 0.8142612343681697
+            },
+            {
+              "annotation": "a-8",
+              "class": "outlet",
+              "match": "det-study-46",
+              "iou": 0.8749710453846715
+            }
+          ]
+        },
+        {
+          "profile": "t25",
+          "criticalMisses": 0,
+          "regressions": 0,
+          "criticalOverflow": true,
+          "criticalHypotheses": 33,
+          "unmatchedCritical": 28,
+          "hypotheses": 65,
+          "unknown": 13,
+          "matches": [
+            {
+              "annotation": "a-0",
+              "class": "window",
+              "match": "det-study-55",
+              "iou": 0.9422788861163766
+            },
+            {
+              "annotation": "a-1",
+              "class": "window",
+              "match": "det-study-27",
+              "iou": 0.9542016091721471
+            },
+            {
+              "annotation": "a-2",
+              "class": "window",
+              "match": "det-study-36",
+              "iou": 0.790692537170025
+            },
+            {
+              "annotation": "a-3",
+              "class": "window",
+              "match": "det-study-31",
+              "iou": 0.8279591694759808
+            },
+            {
+              "annotation": "a-4",
+              "class": "opening",
+              "match": "det-study-5",
+              "iou": 0.7935655784295811
+            },
+            {
+              "annotation": "a-5",
+              "class": "fireplace",
+              "match": null,
+              "iou": 0.25082314302171005
+            },
+            {
+              "annotation": "a-6",
+              "class": "fixed-light",
+              "match": "det-study-1",
+              "iou": 0.9733156538019548
+            },
+            {
+              "annotation": "a-7",
+              "class": "vent",
+              "match": "det-study-7",
+              "iou": 0.8142612343681697
+            },
+            {
+              "annotation": "a-8",
+              "class": "outlet",
+              "match": "det-study-46",
+              "iou": 0.8749710453846715
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "caseId": "bedroom-small-window",
+      "sourceSha256": "969768da3a3799c156095ead5fa0cc6c57cce7f8300932ec4888ec783ec839db",
+      "seconds": 15.723,
+      "rows": [
+        {
+          "profile": "t10",
+          "criticalMisses": 0,
+          "regressions": 0,
+          "criticalOverflow": true,
+          "criticalHypotheses": 59,
+          "unmatchedCritical": 57,
+          "hypotheses": 84,
+          "unknown": 20,
+          "matches": [
+            {
+              "annotation": "a-0",
+              "class": "window",
+              "match": "det-study-15",
+              "iou": 0.9609050685989954
+            },
+            {
+              "annotation": "a-1",
+              "class": "window",
+              "match": "det-study-14",
+              "iou": 0.8558131117757691
+            },
+            {
+              "annotation": "a-2",
+              "class": "fixed-light",
+              "match": "det-study-1",
+              "iou": 0.9674944555869536
+            },
+            {
+              "annotation": "a-3",
+              "class": "vent",
+              "match": "det-study-8",
+              "iou": 0.5915649176804696
+            },
+            {
+              "annotation": "a-4",
+              "class": "outlet",
+              "match": "det-study-13",
+              "iou": 0.7035799650137463
+            }
+          ]
+        },
+        {
+          "profile": "t15",
+          "criticalMisses": 0,
+          "regressions": 0,
+          "criticalOverflow": true,
+          "criticalHypotheses": 39,
+          "unmatchedCritical": 37,
+          "hypotheses": 64,
+          "unknown": 14,
+          "matches": [
+            {
+              "annotation": "a-0",
+              "class": "window",
+              "match": "det-study-15",
+              "iou": 0.9609050685989954
+            },
+            {
+              "annotation": "a-1",
+              "class": "window",
+              "match": "det-study-14",
+              "iou": 0.8558131117757691
+            },
+            {
+              "annotation": "a-2",
+              "class": "fixed-light",
+              "match": "det-study-1",
+              "iou": 0.9674944555869536
+            },
+            {
+              "annotation": "a-3",
+              "class": "vent",
+              "match": "det-study-8",
+              "iou": 0.5915649176804696
+            },
+            {
+              "annotation": "a-4",
+              "class": "outlet",
+              "match": "det-study-13",
+              "iou": 0.7035799650137463
+            }
+          ]
+        },
+        {
+          "profile": "t20",
+          "criticalMisses": 0,
+          "regressions": 0,
+          "criticalOverflow": false,
+          "criticalHypotheses": 29,
+          "unmatchedCritical": 27,
+          "hypotheses": 54,
+          "unknown": 12,
+          "matches": [
+            {
+              "annotation": "a-0",
+              "class": "window",
+              "match": "det-study-15",
+              "iou": 0.9609050685989954
+            },
+            {
+              "annotation": "a-1",
+              "class": "window",
+              "match": "det-study-14",
+              "iou": 0.8558131117757691
+            },
+            {
+              "annotation": "a-2",
+              "class": "fixed-light",
+              "match": "det-study-1",
+              "iou": 0.9674944555869536
+            },
+            {
+              "annotation": "a-3",
+              "class": "vent",
+              "match": "det-study-8",
+              "iou": 0.5915649176804696
+            },
+            {
+              "annotation": "a-4",
+              "class": "outlet",
+              "match": "det-study-13",
+              "iou": 0.7035799650137463
+            }
+          ]
+        },
+        {
+          "profile": "t25",
+          "criticalMisses": 0,
+          "regressions": 0,
+          "criticalOverflow": false,
+          "criticalHypotheses": 21,
+          "unmatchedCritical": 19,
+          "hypotheses": 46,
+          "unknown": 12,
+          "matches": [
+            {
+              "annotation": "a-0",
+              "class": "window",
+              "match": "det-study-15",
+              "iou": 0.9609050685989954
+            },
+            {
+              "annotation": "a-1",
+              "class": "window",
+              "match": "det-study-14",
+              "iou": 0.8558131117757691
+            },
+            {
+              "annotation": "a-2",
+              "class": "fixed-light",
+              "match": "det-study-1",
+              "iou": 0.9674944555869536
+            },
+            {
+              "annotation": "a-3",
+              "class": "vent",
+              "match": "det-study-8",
+              "iou": 0.5915649176804696
+            },
+            {
+              "annotation": "a-4",
+              "class": "outlet",
+              "match": "det-study-13",
+              "iou": 0.7035799650137463
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "caseId": "living-low-resolution",
+      "sourceSha256": "30dcfc9c8965500b19291a710d6437aa515f9043fb0019f37827654345b31970",
+      "seconds": 17.029,
+      "rows": [
+        {
+          "profile": "t10",
+          "criticalMisses": 0,
+          "regressions": 0,
+          "criticalOverflow": true,
+          "criticalHypotheses": 68,
+          "unmatchedCritical": 65,
+          "hypotheses": 97,
+          "unknown": 12,
+          "matches": [
+            {
+              "annotation": "a-0",
+              "class": "window",
+              "match": "det-study-18",
+              "iou": 0.8622360568765408
+            },
+            {
+              "annotation": "a-1",
+              "class": "window",
+              "match": "det-study-6",
+              "iou": 0.8909527873269202
+            },
+            {
+              "annotation": "a-2",
+              "class": "fireplace",
+              "match": null,
+              "iou": 0.36382050435122015
+            },
+            {
+              "annotation": "a-3",
+              "class": "opening",
+              "match": "det-study-54",
+              "iou": 0.7137680470648217
+            }
+          ]
+        },
+        {
+          "profile": "t15",
+          "criticalMisses": 0,
+          "regressions": 0,
+          "criticalOverflow": true,
+          "criticalHypotheses": 43,
+          "unmatchedCritical": 40,
+          "hypotheses": 72,
+          "unknown": 9,
+          "matches": [
+            {
+              "annotation": "a-0",
+              "class": "window",
+              "match": "det-study-18",
+              "iou": 0.8622360568765408
+            },
+            {
+              "annotation": "a-1",
+              "class": "window",
+              "match": "det-study-6",
+              "iou": 0.8909527873269202
+            },
+            {
+              "annotation": "a-2",
+              "class": "fireplace",
+              "match": null,
+              "iou": 0.36382050435122015
+            },
+            {
+              "annotation": "a-3",
+              "class": "opening",
+              "match": "det-study-54",
+              "iou": 0.7137680470648217
+            }
+          ]
+        },
+        {
+          "profile": "t20",
+          "criticalMisses": 0,
+          "regressions": 0,
+          "criticalOverflow": false,
+          "criticalHypotheses": 28,
+          "unmatchedCritical": 25,
+          "hypotheses": 57,
+          "unknown": 8,
+          "matches": [
+            {
+              "annotation": "a-0",
+              "class": "window",
+              "match": "det-study-18",
+              "iou": 0.8622360568765408
+            },
+            {
+              "annotation": "a-1",
+              "class": "window",
+              "match": "det-study-6",
+              "iou": 0.8909527873269202
+            },
+            {
+              "annotation": "a-2",
+              "class": "fireplace",
+              "match": null,
+              "iou": 0.36382050435122015
+            },
+            {
+              "annotation": "a-3",
+              "class": "opening",
+              "match": "det-study-54",
+              "iou": 0.7137680470648217
+            }
+          ]
+        },
+        {
+          "profile": "t25",
+          "criticalMisses": 1,
+          "regressions": 0,
+          "criticalOverflow": false,
+          "criticalHypotheses": 18,
+          "unmatchedCritical": 16,
+          "hypotheses": 47,
+          "unknown": 7,
+          "matches": [
+            {
+              "annotation": "a-0",
+              "class": "window",
+              "match": "det-study-18",
+              "iou": 0.8622360568765408
+            },
+            {
+              "annotation": "a-1",
+              "class": "window",
+              "match": "det-study-6",
+              "iou": 0.8909527873269202
+            },
+            {
+              "annotation": "a-2",
+              "class": "fireplace",
+              "match": null,
+              "iou": 0.36382050435122015
+            },
+            {
+              "annotation": "a-3",
+              "class": "opening",
+              "match": null,
+              "iou": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "caseId": "public-small-empty-room",
+      "sourceSha256": "d8c66961f7ae8dc0791d73ea3ab2eab75ad76e0f8fa81ad226d6a9794a4ce7f6",
+      "seconds": 16.834,
+      "rows": [
+        {
+          "profile": "t10",
+          "criticalMisses": 0,
+          "regressions": 0,
+          "criticalOverflow": true,
+          "criticalHypotheses": 35,
+          "unmatchedCritical": 34,
+          "hypotheses": 55,
+          "unknown": 9,
+          "matches": [
+            {
+              "annotation": "a-0",
+              "class": "door",
+              "match": "det-study-4",
+              "iou": 0.9194177884483848
+            },
+            {
+              "annotation": "a-1",
+              "class": "outlet",
+              "match": "det-study-9",
+              "iou": 0.8966476009952407
+            }
+          ]
+        },
+        {
+          "profile": "t15",
+          "criticalMisses": 0,
+          "regressions": 0,
+          "criticalOverflow": false,
+          "criticalHypotheses": 19,
+          "unmatchedCritical": 18,
+          "hypotheses": 39,
+          "unknown": 7,
+          "matches": [
+            {
+              "annotation": "a-0",
+              "class": "door",
+              "match": "det-study-4",
+              "iou": 0.9194177884483848
+            },
+            {
+              "annotation": "a-1",
+              "class": "outlet",
+              "match": "det-study-9",
+              "iou": 0.8966476009952407
+            }
+          ]
+        },
+        {
+          "profile": "t20",
+          "criticalMisses": 0,
+          "regressions": 0,
+          "criticalOverflow": false,
+          "criticalHypotheses": 12,
+          "unmatchedCritical": 11,
+          "hypotheses": 32,
+          "unknown": 7,
+          "matches": [
+            {
+              "annotation": "a-0",
+              "class": "door",
+              "match": "det-study-4",
+              "iou": 0.9194177884483848
+            },
+            {
+              "annotation": "a-1",
+              "class": "outlet",
+              "match": "det-study-9",
+              "iou": 0.8966476009952407
+            }
+          ]
+        },
+        {
+          "profile": "t25",
+          "criticalMisses": 0,
+          "regressions": 0,
+          "criticalOverflow": false,
+          "criticalHypotheses": 10,
+          "unmatchedCritical": 9,
+          "hypotheses": 30,
+          "unknown": 8,
+          "matches": [
+            {
+              "annotation": "a-0",
+              "class": "door",
+              "match": "det-study-4",
+              "iou": 0.9194177884483848
+            },
+            {
+              "annotation": "a-1",
+              "class": "outlet",
+              "match": "det-study-9",
+              "iou": 0.8966476009952407
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "caseId": "public-blue-furnished",
+      "sourceSha256": "2c7b261501ee66acf303b2aaaec35b803ebecd902914c18063b7e59f5546cc9c",
+      "seconds": 16.32,
+      "rows": [
+        {
+          "profile": "t10",
+          "criticalMisses": 0,
+          "regressions": 0,
+          "criticalOverflow": true,
+          "criticalHypotheses": 41,
+          "unmatchedCritical": 40,
+          "hypotheses": 60,
+          "unknown": 6,
+          "matches": [
+            {
+              "annotation": "a-0",
+              "class": "window",
+              "match": "det-study-1",
+              "iou": 0.9142266783393191
+            },
+            {
+              "annotation": "a-1",
+              "class": "furniture",
+              "match": "det-study-10",
+              "iou": 0.9355715003836382
+            },
+            {
+              "annotation": "a-2",
+              "class": "furniture",
+              "match": "det-study-12",
+              "iou": 0.9698330934780575
+            },
+            {
+              "annotation": "a-3",
+              "class": "foreground-object",
+              "match": null,
+              "iou": 0.01330385415017622
+            }
+          ]
+        },
+        {
+          "profile": "t15",
+          "criticalMisses": 0,
+          "regressions": 0,
+          "criticalOverflow": false,
+          "criticalHypotheses": 26,
+          "unmatchedCritical": 25,
+          "hypotheses": 45,
+          "unknown": 6,
+          "matches": [
+            {
+              "annotation": "a-0",
+              "class": "window",
+              "match": "det-study-1",
+              "iou": 0.9142266783393191
+            },
+            {
+              "annotation": "a-1",
+              "class": "furniture",
+              "match": "det-study-10",
+              "iou": 0.9355715003836382
+            },
+            {
+              "annotation": "a-2",
+              "class": "furniture",
+              "match": "det-study-12",
+              "iou": 0.9698330934780575
+            },
+            {
+              "annotation": "a-3",
+              "class": "foreground-object",
+              "match": null,
+              "iou": 0.01330385415017622
+            }
+          ]
+        },
+        {
+          "profile": "t20",
+          "criticalMisses": 0,
+          "regressions": 0,
+          "criticalOverflow": false,
+          "criticalHypotheses": 14,
+          "unmatchedCritical": 13,
+          "hypotheses": 33,
+          "unknown": 4,
+          "matches": [
+            {
+              "annotation": "a-0",
+              "class": "window",
+              "match": "det-study-1",
+              "iou": 0.9142266783393191
+            },
+            {
+              "annotation": "a-1",
+              "class": "furniture",
+              "match": "det-study-10",
+              "iou": 0.9355715003836382
+            },
+            {
+              "annotation": "a-2",
+              "class": "furniture",
+              "match": "det-study-12",
+              "iou": 0.9698330934780575
+            },
+            {
+              "annotation": "a-3",
+              "class": "foreground-object",
+              "match": null,
+              "iou": 0.01330385415017622
+            }
+          ]
+        },
+        {
+          "profile": "t25",
+          "criticalMisses": 0,
+          "regressions": 0,
+          "criticalOverflow": false,
+          "criticalHypotheses": 7,
+          "unmatchedCritical": 6,
+          "hypotheses": 26,
+          "unknown": 1,
+          "matches": [
+            {
+              "annotation": "a-0",
+              "class": "window",
+              "match": "det-study-1",
+              "iou": 0.9142266783393191
+            },
+            {
+              "annotation": "a-1",
+              "class": "furniture",
+              "match": "det-study-10",
+              "iou": 0.9355715003836382
+            },
+            {
+              "annotation": "a-2",
+              "class": "furniture",
+              "match": "det-study-12",
+              "iou": 0.9698330934780575
+            },
+            {
+              "annotation": "a-3",
+              "class": "foreground-object",
+              "match": null,
+              "iou": 0.01330385415017622
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "caseId": "public-cayley-furnished",
+      "sourceSha256": "754dd7cee53c13de5ddef554a214437d0bc491e6d1ce7dcd312d32f5757f55af",
+      "seconds": 17.216,
+      "rows": [
+        {
+          "profile": "t10",
+          "criticalMisses": 0,
+          "regressions": 0,
+          "criticalOverflow": true,
+          "criticalHypotheses": 72,
+          "unmatchedCritical": 71,
+          "hypotheses": 129,
+          "unknown": 18,
+          "matches": [
+            {
+              "annotation": "a-0",
+              "class": "window",
+              "match": "det-study-16",
+              "iou": 0.9592252239579677
+            },
+            {
+              "annotation": "a-1",
+              "class": "built-in",
+              "match": null,
+              "iou": 0.3275731752224939
+            },
+            {
+              "annotation": "a-2",
+              "class": "fixed-light",
+              "match": null,
+              "iou": 0
+            },
+            {
+              "annotation": "a-3",
+              "class": "fixed-light",
+              "match": "det-study-51",
+              "iou": 0.6704713285007156
+            },
+            {
+              "annotation": "a-4",
+              "class": "furniture",
+              "match": "det-study-42",
+              "iou": 0.8872281155113914
+            },
+            {
+              "annotation": "a-5",
+              "class": "furniture",
+              "match": "det-study-29",
+              "iou": 0.939505489162026
+            },
+            {
+              "annotation": "a-6",
+              "class": "furniture",
+              "match": "det-study-33",
+              "iou": 0.7053179642379886
+            },
+            {
+              "annotation": "a-7",
+              "class": "furniture",
+              "match": null,
+              "iou": 0.33627978086128674
+            },
+            {
+              "annotation": "a-8",
+              "class": "furniture",
+              "match": "det-study-50",
+              "iou": 0.8267803567189072
+            },
+            {
+              "annotation": "a-9",
+              "class": "furniture",
+              "match": "det-study-19",
+              "iou": 0.6061675996701736
+            },
+            {
+              "annotation": "a-10",
+              "class": "furniture",
+              "match": "det-study-38",
+              "iou": 0.7493297420778989
+            },
+            {
+              "annotation": "a-11",
+              "class": "furniture",
+              "match": null,
+              "iou": 0.4417160547021804
+            }
+          ]
+        },
+        {
+          "profile": "t15",
+          "criticalMisses": 0,
+          "regressions": 0,
+          "criticalOverflow": true,
+          "criticalHypotheses": 34,
+          "unmatchedCritical": 33,
+          "hypotheses": 91,
+          "unknown": 13,
+          "matches": [
+            {
+              "annotation": "a-0",
+              "class": "window",
+              "match": "det-study-16",
+              "iou": 0.9592252239579677
+            },
+            {
+              "annotation": "a-1",
+              "class": "built-in",
+              "match": null,
+              "iou": 0.3275731752224939
+            },
+            {
+              "annotation": "a-2",
+              "class": "fixed-light",
+              "match": null,
+              "iou": 0
+            },
+            {
+              "annotation": "a-3",
+              "class": "fixed-light",
+              "match": "det-study-51",
+              "iou": 0.6704713285007156
+            },
+            {
+              "annotation": "a-4",
+              "class": "furniture",
+              "match": "det-study-42",
+              "iou": 0.8872281155113914
+            },
+            {
+              "annotation": "a-5",
+              "class": "furniture",
+              "match": "det-study-29",
+              "iou": 0.939505489162026
+            },
+            {
+              "annotation": "a-6",
+              "class": "furniture",
+              "match": "det-study-33",
+              "iou": 0.7053179642379886
+            },
+            {
+              "annotation": "a-7",
+              "class": "furniture",
+              "match": null,
+              "iou": 0.33627978086128674
+            },
+            {
+              "annotation": "a-8",
+              "class": "furniture",
+              "match": "det-study-50",
+              "iou": 0.8267803567189072
+            },
+            {
+              "annotation": "a-9",
+              "class": "furniture",
+              "match": "det-study-19",
+              "iou": 0.6061675996701736
+            },
+            {
+              "annotation": "a-10",
+              "class": "furniture",
+              "match": "det-study-38",
+              "iou": 0.7493297420778989
+            },
+            {
+              "annotation": "a-11",
+              "class": "furniture",
+              "match": null,
+              "iou": 0.4417160547021804
+            }
+          ]
+        },
+        {
+          "profile": "t20",
+          "criticalMisses": 0,
+          "regressions": 0,
+          "criticalOverflow": false,
+          "criticalHypotheses": 17,
+          "unmatchedCritical": 16,
+          "hypotheses": 74,
+          "unknown": 9,
+          "matches": [
+            {
+              "annotation": "a-0",
+              "class": "window",
+              "match": "det-study-16",
+              "iou": 0.9592252239579677
+            },
+            {
+              "annotation": "a-1",
+              "class": "built-in",
+              "match": null,
+              "iou": 0.3275731752224939
+            },
+            {
+              "annotation": "a-2",
+              "class": "fixed-light",
+              "match": null,
+              "iou": 0
+            },
+            {
+              "annotation": "a-3",
+              "class": "fixed-light",
+              "match": "det-study-51",
+              "iou": 0.6704713285007156
+            },
+            {
+              "annotation": "a-4",
+              "class": "furniture",
+              "match": "det-study-42",
+              "iou": 0.8872281155113914
+            },
+            {
+              "annotation": "a-5",
+              "class": "furniture",
+              "match": "det-study-29",
+              "iou": 0.939505489162026
+            },
+            {
+              "annotation": "a-6",
+              "class": "furniture",
+              "match": "det-study-33",
+              "iou": 0.7053179642379886
+            },
+            {
+              "annotation": "a-7",
+              "class": "furniture",
+              "match": null,
+              "iou": 0.33627978086128674
+            },
+            {
+              "annotation": "a-8",
+              "class": "furniture",
+              "match": "det-study-50",
+              "iou": 0.8267803567189072
+            },
+            {
+              "annotation": "a-9",
+              "class": "furniture",
+              "match": "det-study-19",
+              "iou": 0.6061675996701736
+            },
+            {
+              "annotation": "a-10",
+              "class": "furniture",
+              "match": "det-study-38",
+              "iou": 0.7493297420778989
+            },
+            {
+              "annotation": "a-11",
+              "class": "furniture",
+              "match": null,
+              "iou": 0.4417160547021804
+            }
+          ]
+        },
+        {
+          "profile": "t25",
+          "criticalMisses": 0,
+          "regressions": 0,
+          "criticalOverflow": false,
+          "criticalHypotheses": 9,
+          "unmatchedCritical": 8,
+          "hypotheses": 66,
+          "unknown": 7,
+          "matches": [
+            {
+              "annotation": "a-0",
+              "class": "window",
+              "match": "det-study-16",
+              "iou": 0.9592252239579677
+            },
+            {
+              "annotation": "a-1",
+              "class": "built-in",
+              "match": null,
+              "iou": 0.3275731752224939
+            },
+            {
+              "annotation": "a-2",
+              "class": "fixed-light",
+              "match": null,
+              "iou": 0
+            },
+            {
+              "annotation": "a-3",
+              "class": "fixed-light",
+              "match": "det-study-51",
+              "iou": 0.6704713285007156
+            },
+            {
+              "annotation": "a-4",
+              "class": "furniture",
+              "match": "det-study-42",
+              "iou": 0.8872281155113914
+            },
+            {
+              "annotation": "a-5",
+              "class": "furniture",
+              "match": "det-study-29",
+              "iou": 0.939505489162026
+            },
+            {
+              "annotation": "a-6",
+              "class": "furniture",
+              "match": "det-study-33",
+              "iou": 0.7053179642379886
+            },
+            {
+              "annotation": "a-7",
+              "class": "furniture",
+              "match": null,
+              "iou": 0.33627978086128674
+            },
+            {
+              "annotation": "a-8",
+              "class": "furniture",
+              "match": "det-study-50",
+              "iou": 0.8267803567189072
+            },
+            {
+              "annotation": "a-9",
+              "class": "furniture",
+              "match": "det-study-19",
+              "iou": 0.6061675996701736
+            },
+            {
+              "annotation": "a-10",
+              "class": "furniture",
+              "match": "det-study-38",
+              "iou": 0.7493297420778989
+            },
+            {
+              "annotation": "a-11",
+              "class": "furniture",
+              "match": null,
+              "iou": 0.4417160547021804
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

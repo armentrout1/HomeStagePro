@@ -1,9 +1,9 @@
 # R1 — Scene Understanding: Technical Design
 
 
-## Current implementation status: R1.4B2
+## Current implementation status: R1.4B3
 
-R1.1 through R1.3, the R1.4A design, R1.4B1 compatibility qualification and the R1.4B2 local detection/mask smoke path are implemented for evaluation. See [R1.4B2 measured results](r1-detection-segmentation-smoke.md) and its JSON evidence. DINO completed seven authorized development sources; SAM produced 32 validated masks in one and explicitly abstained at the prompt cap in six. Nine critical opening/window/door annotations failed box matching. This is not architecture-safe or production-qualified. The older proposed-R1.4 and stops-at-R1.3 wording below describes historical design scope; this status supersedes it. R1.5/R1.6 remain unimplemented and unauthorized here. No production wiring changed.
+R1.1 through R1.4B3 are implemented for evaluation. The [B3 V1/V2/V3 comparison](r1-detection-quality-v2.md) and [structured evidence](r1-detection-quality-v3.json) preserve the R1.4B2 baseline, V2 publication failures and corrected V3 results. Seven authorized development cases now have finalized V3 evidence: zero of 15 annotated critical detections missed, 183 published mask observations, one critical-budget abstention and no publication failures. False architecture and semantic errors remain substantial. Decision: **DETECTOR_ALTERNATIVE_EVALUATION_REQUIRED**; no alternative was implemented. This is not architecture-safe or production-qualified. Historical proposed/blocked wording below remains design history and is superseded by this status. R1.5/R1.6 remain unimplemented; production wiring is unchanged.
 
 Status: **R1.1 contracts, R1.2 offline preprocessing and R1.3 synthetic component harness implemented; R1.4 and later remain proposed**. Updated October 2, 2026. Parent: [canonical staging roadmap](./staging-roadmap.md). Behavior authority: [staging-profiles.md](./staging-profiles.md). Application contract: [engine-boundary.md](./engine-boundary.md).
 

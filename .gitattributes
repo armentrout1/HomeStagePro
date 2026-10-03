@@ -1,0 +1,9 @@
+
+# R1.4B3 host policy pins bind these exact bytes across checkouts.
+server/staging/scene/components/real-v2.ts -text
+server/staging/scene/components/real-v2-mapping.ts -text
+server/staging/scene/components/real-v2-runtime.ts -text
+benchmarks/staging/scene-v2-review.ts -text
+server/staging/scene/components/real-v3.ts -text
+server/staging/scene/components/real-v3-runtime.ts -text
+server/staging/scene/components/mask-publication-v3.ts -text

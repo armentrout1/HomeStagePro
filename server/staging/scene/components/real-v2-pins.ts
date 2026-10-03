@@ -1,0 +1,2 @@
+export const V2_DESCRIPTOR_SHA256 = "2f75ae5398d6e0cafb030853e06c4850579b9c460b3a01a6fb1c7add5d312e89";
+export const V2_PROMPT_HASH = "84bfe361eb9e1f2f1f93a4aec4ef6982bc2ff8a428a12ad252fd94187e4138ac";

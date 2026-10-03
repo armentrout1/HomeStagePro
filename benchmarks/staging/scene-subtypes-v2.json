@@ -1,0 +1,46 @@
+{
+  "reviewer": "Codex-agent-source-review",
+  "reviewTiming": "before-final-V2-run; development-only",
+  "baselineBoxesUnchanged": true,
+  "cases": {
+    "public-blue-furnished": {
+      "a-1": [
+        "sofa"
+      ],
+      "a-2": [
+        "chair"
+      ],
+      "a-3": [
+        "plant",
+        "foreground-object"
+      ]
+    },
+    "public-cayley-furnished": {
+      "a-4": [
+        "dining-table",
+        "table"
+      ],
+      "a-5": [
+        "chair"
+      ],
+      "a-6": [
+        "chair"
+      ],
+      "a-7": [
+        "chair"
+      ],
+      "a-8": [
+        "chair"
+      ],
+      "a-9": [
+        "chair"
+      ],
+      "a-10": [
+        "chair"
+      ],
+      "a-11": [
+        "sofa"
+      ]
+    }
+  }
+}

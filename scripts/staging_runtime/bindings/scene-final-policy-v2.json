@@ -1,0 +1,9 @@
+{
+  "frozen": true,
+  "mappingVersion": "roomstager-r1-mapping-v2",
+  "noncriticalThreshold": 0.25,
+  "profile": "t20",
+  "selectionVersion": "architecture-first-v2",
+  "studyEvidenceSha256": "29949669400f9b1959980896d8e8a1c0ebb4c1648c7000e0aa37db68588809cf",
+  "version": "roomstager-r1-final-policy-v2"
+}

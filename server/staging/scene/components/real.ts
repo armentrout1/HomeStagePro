@@ -59,7 +59,7 @@ export async function realComponent(id: RealId): Promise<{ registration: Omit<Re
 }
 
 /** Host-only conversion; writes pass through the same R1.2 validator used by ComponentRunner. */
-export async function convertMasks(result: NativeResult, binary: Buffer, source: SceneElement[], input: AnalysisInput, context: Pick<ComponentContext, "putArtifact" | "run">) {
+export async function convertMasks(result: Pick<NativeResult, "masks"> & { detections: readonly unknown[] }, binary: Buffer, source: SceneElement[], input: AnalysisInput, context: Pick<ComponentContext, "putArtifact" | "run">) {
     if (result.detections.length || result.masks.length !== source.length) reject("COMPONENT_OUTPUT_INVALID");
     const elements: SceneElement[] = [], artifacts: SceneArtifact[] = [];
     const failed: SceneElement["class"][] = []; let offset = 0;

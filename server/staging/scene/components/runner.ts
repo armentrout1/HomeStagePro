@@ -1,3 +1,5 @@
+import { isRealV3, v3License, v3Configuration } from "./real-v3";
+import { isRealV2, v2License, v2Configuration } from "./real-v2";
 import { isRealImplementation, realLicense, realConfiguration } from "./real";
 import { randomUUID } from "node:crypto";
 import { performance } from "node:perf_hooks";
@@ -32,8 +34,10 @@ export class ComponentRunner {
         use?: LicenseUse;
     }): Promise<ComponentResult> {
         const entry = this.registry.get(request.id, request.version, request.task);
-        const real = isRealImplementation(entry.component);
-        const license = real ? await realLicense(entry.component, request.use ?? "evaluation") : this.licenses.approved(entry.licenseId, entry.id, entry.version, request.use ?? "evaluation");
+        const v3 = isRealV3(entry.component);
+        const v2 = isRealV2(entry.component);
+        const real = v3 || v2 || isRealImplementation(entry.component);
+        const license = v3 ? await v3License(entry.component, request.use ?? "evaluation") : v2 ? await v2License(entry.component, request.use ?? "evaluation") : real ? await realLicense(entry.component, request.use ?? "evaluation") : this.licenses.approved(entry.licenseId, entry.id, entry.version, request.use ?? "evaluation");
         let actualCodeHash: string;
         try {
             actualCodeHash = real ? license.codeSha256 : await syntheticWorkerSha256();
@@ -90,7 +94,7 @@ export class ComponentRunner {
         if (entry.dependencies.some(task => !roles.has(task)))
             reject("COMPONENT_DEPENDENCY_MISSING");
         const config = {
-            schemaVersion: "component-config/1", adapterId: entry.id, adapterVersion: entry.version, task: entry.task, supportedClasses: entry.supportedClasses, dependencies: entry.dependencies, policy: entry.policy, implementation: real ? realConfiguration(entry.component) : syntheticConfiguration(entry.component), codeSha256: license.codeSha256
+            schemaVersion: "component-config/1", adapterId: entry.id, adapterVersion: entry.version, task: entry.task, supportedClasses: entry.supportedClasses, dependencies: entry.dependencies, policy: entry.policy, implementation: v3 ? v3Configuration(entry.component) : v2 ? v2Configuration(entry.component) : real ? realConfiguration(entry.component) : syntheticConfiguration(entry.component), codeSha256: license.codeSha256
         };
         const persistManifest = async (value: unknown) => {
             try {
@@ -104,7 +108,7 @@ export class ComponentRunner {
         };
         const configManifest = await persistManifest(config);
         const runtimeManifest = await persistManifest({
-            schemaVersion: "component-runtime/1", node: process.version, platform: process.platform, arch: process.arch, backend: entry.policy.backend, resourcePolicyId: entry.policy.id, memory: real ? "host-cgroup-8GiB-gpu-advisory" : "advisory-no-os-cap", network: real ? "docker-network-none" : "application-blocked-no-os-firewall", worker: real ? "scene-local-1" : "synthetic-worker-v1", licenseId: license.id
+            schemaVersion: "component-runtime/1", node: process.version, platform: process.platform, arch: process.arch, backend: entry.policy.backend, resourcePolicyId: entry.policy.id, memory: real ? "host-cgroup-8GiB-gpu-advisory" : "advisory-no-os-cap", network: real ? "docker-network-none" : "application-blocked-no-os-firewall", worker: v3 ? "scene-local-3" : v2 ? "scene-local-2" : real ? "scene-local-1" : "synthetic-worker-v1", licenseId: license.id
         });
         const started = performance.now(), signal = request.signal ?? new AbortController().signal;
         const run: ComponentRun = {
