@@ -1,0 +1,61 @@
+{
+  "implementationId": "grounding-dino-tiny-hf-v1",
+  "admission": {
+    "totalHostBytes": 33454284800,
+    "availableHostBytes": 14621204480,
+    "availableGpuMiB": 14625,
+    "status": "MEMORY_ADMISSION_PASSED_NOT_EXECUTION_APPROVAL"
+  },
+  "containerRemoved": true,
+  "transportStatus": "completed",
+  "exitCode": 0,
+  "descriptorSha256": "7d5d5cf8d60ecd5e27a38445aaff4db7c8433e8043692fa20f9d7c7bcadf5f22",
+  "runtimeImage": "sha256:fa3d2775b699b548515cc11efb615102d46d642b463a2d513930b6e84fc99c29",
+  "modelCacheUnchanged": true,
+  "result": {
+    "version": 1,
+    "implementationId": "grounding-dino-tiny-hf-v1",
+    "status": "completed",
+    "task": "detection",
+    "width": 256,
+    "height": 192,
+    "scoreKind": "estimated",
+    "scores": [
+      0.8796204924583435
+    ],
+    "boxes": [
+      [
+        63.5830078125,
+        47.33618927001953,
+        192.64697265625,
+        144.62982177734375
+      ]
+    ],
+    "configurationHash": "eec82c5ab66e16df12a9a212e68ac011779927c2536cf9078658e35d85f0c67a",
+    "networkAttempts": 0,
+    "keys": {
+      "missing": [],
+      "unexpected": [],
+      "excludedVideo": []
+    },
+    "failure": null,
+    "runtime": {
+      "torch": "2.14.1+cu130",
+      "transformers": "5.18.0",
+      "device": "cuda:0",
+      "dtype": "float32",
+      "determinism": "not-qualified"
+    },
+    "resources": {
+      "loadSeconds": 5.059417730000007,
+      "inferenceSeconds": 1.1591544050000095,
+      "hostRssBytes": 1814765568,
+      "gpuPeakAllocatedBytes": 1839614464,
+      "gpuPeakReservedBytes": 2254438400,
+      "gpuTotalBytes": 17175150592,
+      "gpuFreeBytes": 13674479616
+    }
+  },
+  "binaryBytes": 0,
+  "binarySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

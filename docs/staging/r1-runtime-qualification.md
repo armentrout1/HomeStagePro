@@ -1,3 +1,89 @@
+# R1.4B1 runtime qualification — evaluation complete
+
+Date: 2026-10-02. Canonical checkout: `C:/Users/aaron/RoomStager/HomeStagePro`.
+Branch: `refactor/staging-engine-boundary`; draft PR #3. Starting HEAD: `526f0e9b2ac8b5f4ba176f25fd7d74c01145df4b`.
+
+**Both real model compatibility probes passed. R1.4B1 is complete for local evaluation only.**
+This is runtime/serialization/static-image compatibility, not staging accuracy or production approval.
+R1.4B2 and R1.5 have not started. No customer or seven-room benchmark photographs were used.
+The generated 256x192 input is a colored rectangle with a fixed `a chair.` prompt and a fixed SAM box.
+A high score on this synthetic input is explicitly not evidence of chair detection accuracy.
+
+## Admission and final measured runs
+
+Initial available memory: 18,891,173,888 host bytes (17.59 GiB), 14769 MiB GPU.
+Docker Desktop was stopped; it was started without changing its settings. After startup, available host RAM was 15,387,017,216 bytes and GPU memory 14755 MiB. The existing runtime image matched its pinned digest; no downloads or rebuilds occurred.
+
+The original admission thresholds (12 GiB host, 10 GiB GPU) and 8 GiB container host-memory cap remain unchanged.
+Final Grounding DINO admission: 14,621,204,480 host bytes, 14625 MiB GPU.
+After DINO cleanup and cache verification, the explicit pre-SAM admission was 14,285,627,392 host bytes, 14702 MiB GPU; the SAM host immediately repeated it and observed 14,287,224,832 bytes / 14708 MiB.
+
+| Final fresh-process measurement | Grounding DINO Tiny | SAM 2.1 Small |
+| --- | ---: | ---: |
+| Load and preprocessing seconds | 5.0594 | 2.5148 |
+| CUDA inference seconds | 1.1592 | 0.5721 |
+| Peak process host RSS, bytes | 1,814,765,568 | 1,560,182,784 |
+| Peak GPU allocated, bytes | 1,839,614,464 | 483,096,064 |
+| Peak GPU reserved, bytes | 2,254,438,400 | 736,100,352 |
+| Missing / unexplained unexpected keys | 0 / 0 | 0 / 0 |
+| Explicit video-only exclusions | 0 | 160 |
+
+Both use native Transformers 5.18.0 / torch 2.14.1+cu130, float32 on cuda:0. These are individual observations, not latency guarantees. Load measurements include native model/processor setup, transfer and preprocessing; runtime imports precede the timer. Per-worker maxima are recorded; a whole-host or whole-GPU sequence peak was not sampled and remains null. Determinism is not qualified.
+
+Grounding DINO exported one finite, bounded canonical-source box and an estimated score. SAM exported a binary 256x192 mask (49,152 bytes), with an estimated raw IoU score. Neither result grants scene, editing, placement, absence or trusted-evidence authority.
+
+## Boundary and validation
+
+The operator-only [compatibility registry](../../scripts/staging_runtime/compat_registry.py) accepts exactly `synthetic-test-worker`, `grounding-dino-tiny-hf-v1`, and `sam21-small-hf-v1`. Synthetic selection runs the fixed Python isolation probe; real selections resolve strict local descriptors. There is no caller-supplied path/module/command, environment-selected implementation, dynamic provider, Florence route or production SceneMap adapter. The R1.3 TypeScript component registry remains synthetic-only; integrating real SceneElement observations belongs to R1.4B2.
+
+[Descriptors](../../scripts/staging_runtime/bindings/descriptors.json) bind the fixed entrypoint, worker/protocol/config hashes, exact runtime image, dependency locks, model record/revision, every weight/sidecar, version, task, synthetic-only supported-class scope and resource policy. Unknown or extra descriptor fields reject. Model and source hashes are checked before execution; model cache bytes are rechecked after execution. Earlier probe evidence is archived before replacement.
+
+The native DINO head uses negative infinity for padded/masked text logits. The corrected validator permits only finite values or negative infinity internally, then validates finite bounded exported scores/boxes. Positive infinity and NaN reject instead of becoming sigmoid scores. Internal negative infinity is never exported. A native-tensor regression covers this distinction.
+
+SAM uses `Sam2Model(Sam2Config.from_dict(derived))`, explicit `Sam2Processor` and local `Sam2ImageProcessor`, and CPU safetensors loading followed by strict core state loading. No pickle, remote code, repository Python, hub lookup, or video state is used. Exact checkpoint-minus-model keys must equal the 160-name reviewed list; all core keys must match. There is no prefix-based runtime suppression.
+
+The deterministic `sam21-video-to-static-config-v1` transformation copies `vision_config`, `prompt_encoder_config`, `mask_decoder_config`, and `initializer_range`, and sets `model_type=sam2` / `architectures=[Sam2Model]`. The original file is unchanged.
+
+- Original config SHA-256: `97ff9f65b76d107acda4247885f0a5555d0048850ae3c5f97183df289aaecde9`.
+- Derived config SHA-256: `52738ad9c085088680c3bb6fcf55fb357514dd859606689b2b1f78e3d5e747d6`.
+- Exclusion-list SHA-256: `2d62c820f6f64853fca8ed3214eaf27c497cfc5365628dc0355e37ccabd3bec3`.
+
+[Lineage](../../scripts/staging_runtime/bindings/sam-lineage.json) and [per-key justifications](../../scripts/staging_runtime/bindings/sam-video-exclusion-rationale.json) record the mapping. The native image model retains `no_memory_embedding`. Excluded weights belong to video memory attention/encoding, temporal positions, tracking object pointers, mask downsampling, and spatial occlusion memory. Each name has its own recorded rationale against the pinned native image/video source hashes.
+
+## Tests and security evidence
+
+- 33 Python tests passed in the pinned Linux runtime, with no skips. Coverage includes strict descriptors, spoofing/source tampering, malformed frames, finite outputs, masks, network audit denial, native tensor padding, lineage, missing/corrupt cache, memory rejection, cancellation-before-load, active host timeout/cancel cleanup, and existing acquisition infrastructure. A Linux test initially exposed a missing mocked Docker path (the container intentionally has no Docker CLI); the test fixture was corrected and all 33 passed.
+- All 253 R1.1/R1.2/R1.3 and staging regression tests passed with the network-denial preload.
+- Application, benchmark, and focused scene/staging test typechecks passed.
+- Actual Docker synthetic isolation probes passed: network/DNS denied, read-only root/cache, non-root UID, no inherited secrets or Docker socket, bounded resources, timeout/cancellation cleanup, and output-overflow rejection. Host lifecycle mocks additionally exercise the real compatibility runner's termination path.
+- Both final real runs reported zero attempted network calls, removed their containers, and preserved cache hashes. All 14 model files were reverified after execution; 55 wheels and locks were verified before execution. No model was downloaded or rebuilt.
+- No qualification container remains. Linux GPU queries after isolation saw no compute processes. Windows GPU attribution includes desktop applications and one inaccessible PID, so universal absence of GPU processes is not claimed. No VRAM hard cap is claimed.
+- Database-dependent tests were not run; no production database was used. The prior unrelated all-tests implicit-any issue in `tests/image-fidelity.test.ts` remains outside this scope; targeted typechecks passing does not claim that broader check passes.
+
+## Evidence and preserved work
+
+[Current qualification](./r1-runtime-evidence/qualification.json), [DINO run](./r1-runtime-evidence/grounding-dino-tiny-hf-v1-compatibility.json), [SAM run](./r1-runtime-evidence/sam21-small-hf-v1-compatibility.json), and [resumed isolation](./r1-runtime-evidence/isolation-resumed.json) contain exact measurements and hashes.
+[Prior attempts](./r1-runtime-evidence/compatibility-prior-attempts.json) preserve the original internal-padding failure and the first successful resumed probes separately. The prior memory-blocked [infrastructure receipt](./r1-runtime-evidence/qualification-infrastructure-checkpoint.json) is preserved verbatim. Its nulls/status describe that earlier checkpoint, not the current result.
+
+All seven original uncommitted files were retained and completed: `compat_host.py`, `compat_protocol.py`, `compat_worker.py`, `bindings/descriptors.json`, `bindings/sam-lineage.json`, `bindings/sam-static-config.json`, and `bindings/sam-video-exclusions.json` under `scripts/staging_runtime`. Added: `compat_registry.py`, `test_compat.py`, and `bindings/sam-video-exclusion-rationale.json`, plus the evidence files linked above. No application code, production configuration, database, provider, billing, or deployment changes were made. Docker Desktop was started locally; no application processes were killed.
+
+Both model records remain **APPROVED_FOR_EVALUATION**, never APPROVED_FOR_PRODUCTION. Training-data provenance and production/runtime patch review remain unresolved. No merge or deployment is part of this checkpoint. Stop here; R1.4B2/R1.5 require a later task.
+
+## Operator commands
+
+```powershell
+& C:/Python312/python.exe -B scripts/staging_runtime/admission.py
+& C:/Python312/python.exe -B scripts/staging_runtime/compat_registry.py grounding-dino-tiny-hf-v1
+& C:/Python312/python.exe -B scripts/staging_runtime/admission.py
+& C:/Python312/python.exe -B scripts/staging_runtime/compat_registry.py sam21-small-hf-v1
+```
+
+Each real runner independently rechecks admission and artifacts. Run one model at a time. These commands activate only the local evaluation worker; production remains on the legacy provider.
+
+---
+
+The following is the preserved historical report. Statements about unimplemented workers, null measurements and memory blocks apply only to that earlier checkpoint.
+
 # R1.4B1 runtime qualification â€” blocked before real inference
 
 Date: 2026-10-02. Starting commit: `0f776d68c7aff5c18efec3c3a7823120a41f9d24`. Development branch: `refactor/staging-engine-boundary`; draft PR #3. Parent: [candidate qualification](./r1-model-candidates.md).

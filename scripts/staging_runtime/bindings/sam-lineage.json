@@ -1,0 +1,24 @@
+{
+  "transformation": "sam21-video-to-static-config-v1",
+  "parentSha256": "97ff9f65b76d107acda4247885f0a5555d0048850ae3c5f97183df289aaecde9",
+  "derivedSha256": "52738ad9c085088680c3bb6fcf55fb357514dd859606689b2b1f78e3d5e747d6",
+  "copiedKeys": [
+    "vision_config",
+    "prompt_encoder_config",
+    "mask_decoder_config",
+    "initializer_range"
+  ],
+  "newFields": {
+    "model_type": "sam2",
+    "architectures": [
+      "Sam2Model"
+    ]
+  },
+  "excludedVideoTensorCount": 160,
+  "exclusionsSha256": "2d62c820f6f64853fca8ed3214eaf27c497cfc5365628dc0355e37ccabd3bec3",
+  "status": "compatibility-qualified-for-evaluation",
+  "modelClass": "transformers.Sam2Model",
+  "processorClass": "transformers.Sam2Processor",
+  "imageProcessorClass": "transformers.Sam2ImageProcessor",
+  "strictCoreStateLoad": true
+}

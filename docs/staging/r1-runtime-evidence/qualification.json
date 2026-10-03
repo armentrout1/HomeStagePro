@@ -1,12 +1,12 @@
 {
   "phase": "R1.4B1",
-  "status": "BLOCKED_REAL_INFERENCE_HOST_MEMORY",
-  "completed": false,
+  "status": "COMPATIBILITY_QUALIFIED_FOR_EVALUATION",
+  "completed": true,
   "admission": {
     "totalHostBytes": 33454284800,
-    "availableHostBytes": 3997995008,
-    "availableGpuMiB": 14220,
-    "status": "BLOCKED_REAL_INFERENCE_HOST_MEMORY"
+    "availableHostBytes": 18891173888,
+    "availableGpuMiB": 14769,
+    "status": "MEMORY_ADMISSION_PASSED_NOT_EXECUTION_APPROVAL"
   },
   "runtimeImageIndex": "sha256:fa3d2775b699b548515cc11efb615102d46d642b463a2d513930b6e84fc99c29",
   "runtimeImageManifest": "sha256:e2d00eb6f1d7aef2a371fb2ca4fd5991f180a2b49e841e922782ead82575457d",
@@ -20,7 +20,17 @@
     "wheels.py": "2d0e1206e7f9cbee2788724ff2737751ca0c0b51cfb282851e828fa2c5ba3b5f",
     "requirements.lock": "fc2ddd17269a6e050b76aba2fe0a1d4a70ea99bf55db1433d6a2329f18ab5fb9",
     "wheels.lock.json": "4a09d44bc1db86528aa7f7318cc91bb43effcdcbd772bb215e74b11afd324356",
-    "Dockerfile": "db42e8415bc7aeef49ae028e829961fd69ebdb6f196ce6da131ba2b4676c2333"
+    "Dockerfile": "db42e8415bc7aeef49ae028e829961fd69ebdb6f196ce6da131ba2b4676c2333",
+    "compat_host.py": "776ddcfd9578cc6216792f71e7bb51b53bf059af969e429e221fe07072f2484e",
+    "compat_protocol.py": "2d0eb51182b3cea76447733d79ce6727d131b3c51001048594ecba4662cf5a6b",
+    "compat_registry.py": "6a6b8089fac35213c0faefce7f318b31cb86d198e23cb30f837bd963671b8e2e",
+    "compat_worker.py": "0091dde3f65e31218a36b0f134075632ce88701b809d5264b8f6efdbefadb1f4",
+    "bindings/descriptors.json": "edfcd94b963a97ea4d402ea76630e39515b0ead51cb39c000cd449d5c4eab416",
+    "bindings/sam-lineage.json": "65e147ab57fcbb4492a23391bd6a3a9e1d35401c8d3e0b5214833abbe2ca6471",
+    "bindings/sam-static-config.json": "52738ad9c085088680c3bb6fcf55fb357514dd859606689b2b1f78e3d5e747d6",
+    "bindings/sam-video-exclusion-rationale.json": "cf5f171d96c249a96ea78c1d731cd939e1c1cc5f3c89e992119c9c0edd59d845",
+    "bindings/sam-video-exclusions.json": "2d62c820f6f64853fca8ed3214eaf27c497cfc5365628dc0355e37ccabd3bec3",
+    "test_compat.py": "f93a1ffea6eced285c06783275580e521fcbae7c6e8d39aea0b54972ef6447fb"
   },
   "cudaSyntheticProbe": {
     "torch": "2.14.1+cu130",
@@ -32,29 +42,63 @@
   },
   "modelCompatibility": {
     "grounding-dino-tiny-hf-v1": {
-      "status": "NOT_RUN_HOST_MEMORY_GATE",
-      "loadSeconds": null,
-      "inferenceSeconds": null,
-      "hostRssBytes": null,
-      "gpuPeakAllocatedBytes": null,
-      "gpuPeakReservedBytes": null,
-      "workerSha256": null
+      "status": "COMPATIBILITY_QUALIFIED_FOR_EVALUATION",
+      "loadSeconds": 5.059417730000007,
+      "inferenceSeconds": 1.1591544050000095,
+      "hostRssBytes": 1814765568,
+      "gpuPeakAllocatedBytes": 1839614464,
+      "gpuPeakReservedBytes": 2254438400,
+      "gpuTotalBytes": 17175150592,
+      "gpuFreeBytes": 13674479616,
+      "workerSha256": "0091dde3f65e31218a36b0f134075632ce88701b809d5264b8f6efdbefadb1f4",
+      "evidence": "grounding-dino-tiny-hf-v1-compatibility.json"
     },
     "sam21-small-hf-v1": {
-      "status": "NOT_RUN_HOST_MEMORY_GATE",
-      "loadSeconds": null,
-      "inferenceSeconds": null,
-      "hostRssBytes": null,
-      "gpuPeakAllocatedBytes": null,
-      "gpuPeakReservedBytes": null,
-      "workerSha256": null
+      "status": "COMPATIBILITY_QUALIFIED_FOR_EVALUATION",
+      "loadSeconds": 2.514769063999978,
+      "inferenceSeconds": 0.5721375260000059,
+      "hostRssBytes": 1560182784,
+      "gpuPeakAllocatedBytes": 483096064,
+      "gpuPeakReservedBytes": 736100352,
+      "gpuTotalBytes": 17175150592,
+      "gpuFreeBytes": 15194914816,
+      "workerSha256": "0091dde3f65e31218a36b0f134075632ce88701b809d5264b8f6efdbefadb1f4",
+      "evidence": "sam21-small-hf-v1-compatibility.json"
     }
   },
   "wholeModelSequence": {
     "hostPeakBytes": null,
     "gpuPeakBytes": null,
-    "reason": "No model sequence executed"
+    "maximumPerWorkerHostRssBytes": 1814765568,
+    "maximumPerWorkerGpuAllocatedBytes": 1839614464,
+    "maximumPerWorkerGpuReservedBytes": 2254438400,
+    "reason": "Sequential workers; per-process RSS and allocator peaks measured. Whole-host/cgroup and whole-GPU time-series peaks not collected."
   },
   "productionChanged": false,
-  "customerImagesUsed": false
+  "customerImagesUsed": false,
+  "date": "2026-10-02",
+  "priorCheckpoint": "qualification-infrastructure-checkpoint.json",
+  "priorAttempts": "compatibility-prior-attempts.json",
+  "security": {
+    "postRunAllModelFilesVerified": true,
+    "qualificationContainersRemaining": 0,
+    "networkAttemptsInRealWorkers": 0,
+    "downloadsOrRebuilds": false,
+    "isolationEvidence": "isolation-resumed.json",
+    "gpuAttributionLimitation": "Linux nvidia-smi saw no compute processes after isolation sequence; Windows lists desktop processes and one inaccessible PID. No universal process-attribution claim."
+  },
+  "validation": {
+    "pythonTests": 33,
+    "pythonFailures": 0,
+    "pythonSkipped": 0,
+    "sceneStagingTests": 253,
+    "sceneStagingFailures": 0,
+    "applicationTypecheck": "passed",
+    "benchmarkTypecheck": "passed",
+    "focusedTestsTypecheck": "passed",
+    "databaseTests": "not run; isolated database prerequisite remains",
+    "allTestsTypecheck": "not rerun; prior unrelated image-fidelity implicit-any remains outside scope"
+  },
+  "productionApproved": false,
+  "trainingDataProvenance": "unresolved"
 }

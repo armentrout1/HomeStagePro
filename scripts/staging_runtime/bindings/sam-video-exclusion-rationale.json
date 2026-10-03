@@ -1,0 +1,647 @@
+{
+  "nativeImageSourceSha256": "222b0c09b1e0d9e1fcab7998018a62adb27caf961cabec64e18edc5f14a0af6f",
+  "nativeVideoSourceSha256": "8ae7280e8b1f2d7e68d3a8946bd8c4a5d69ab9cdc5c2ea68819a0d39f0d199ed",
+  "source": "Pinned transformers 5.18.0 wheel: models/sam2/modeling_sam2.py and models/sam2_video/modeling_sam2_video.py",
+  "keys": [
+    {
+      "key": "mask_downsample.bias",
+      "reason": "Video-only mask-to-memory downsampling convolution; absent from native Sam2Model state."
+    },
+    {
+      "key": "mask_downsample.weight",
+      "reason": "Video-only mask-to-memory downsampling convolution; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layer_norm.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layer_norm.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.0.cross_attn_image.k_proj.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.0.cross_attn_image.k_proj.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.0.cross_attn_image.o_proj.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.0.cross_attn_image.o_proj.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.0.cross_attn_image.q_proj.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.0.cross_attn_image.q_proj.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.0.cross_attn_image.v_proj.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.0.cross_attn_image.v_proj.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.0.layer_norm1.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.0.layer_norm1.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.0.layer_norm2.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.0.layer_norm2.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.0.layer_norm3.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.0.layer_norm3.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.0.linear1.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.0.linear1.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.0.linear2.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.0.linear2.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.0.self_attn.k_proj.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.0.self_attn.k_proj.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.0.self_attn.o_proj.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.0.self_attn.o_proj.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.0.self_attn.q_proj.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.0.self_attn.q_proj.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.0.self_attn.v_proj.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.0.self_attn.v_proj.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.1.cross_attn_image.k_proj.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.1.cross_attn_image.k_proj.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.1.cross_attn_image.o_proj.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.1.cross_attn_image.o_proj.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.1.cross_attn_image.q_proj.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.1.cross_attn_image.q_proj.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.1.cross_attn_image.v_proj.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.1.cross_attn_image.v_proj.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.1.layer_norm1.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.1.layer_norm1.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.1.layer_norm2.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.1.layer_norm2.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.1.layer_norm3.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.1.layer_norm3.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.1.linear1.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.1.linear1.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.1.linear2.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.1.linear2.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.1.self_attn.k_proj.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.1.self_attn.k_proj.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.1.self_attn.o_proj.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.1.self_attn.o_proj.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.1.self_attn.q_proj.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.1.self_attn.q_proj.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.1.self_attn.v_proj.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.1.self_attn.v_proj.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.2.cross_attn_image.k_proj.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.2.cross_attn_image.k_proj.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.2.cross_attn_image.o_proj.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.2.cross_attn_image.o_proj.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.2.cross_attn_image.q_proj.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.2.cross_attn_image.q_proj.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.2.cross_attn_image.v_proj.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.2.cross_attn_image.v_proj.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.2.layer_norm1.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.2.layer_norm1.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.2.layer_norm2.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.2.layer_norm2.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.2.layer_norm3.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.2.layer_norm3.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.2.linear1.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.2.linear1.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.2.linear2.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.2.linear2.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.2.self_attn.k_proj.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.2.self_attn.k_proj.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.2.self_attn.o_proj.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.2.self_attn.o_proj.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.2.self_attn.q_proj.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.2.self_attn.q_proj.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.2.self_attn.v_proj.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.2.self_attn.v_proj.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.3.cross_attn_image.k_proj.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.3.cross_attn_image.k_proj.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.3.cross_attn_image.o_proj.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.3.cross_attn_image.o_proj.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.3.cross_attn_image.q_proj.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.3.cross_attn_image.q_proj.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.3.cross_attn_image.v_proj.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.3.cross_attn_image.v_proj.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.3.layer_norm1.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.3.layer_norm1.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.3.layer_norm2.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.3.layer_norm2.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.3.layer_norm3.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.3.layer_norm3.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.3.linear1.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.3.linear1.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.3.linear2.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.3.linear2.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.3.self_attn.k_proj.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.3.self_attn.k_proj.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.3.self_attn.o_proj.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.3.self_attn.o_proj.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.3.self_attn.q_proj.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.3.self_attn.q_proj.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.3.self_attn.v_proj.bias",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_attention.layers.3.self_attn.v_proj.weight",
+      "reason": "Video-only cross-frame memory attention; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_encoder.feature_projection.bias",
+      "reason": "Video-only previous-frame mask/feature memory encoder; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_encoder.feature_projection.weight",
+      "reason": "Video-only previous-frame mask/feature memory encoder; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_encoder.mask_downsampler.final_conv.bias",
+      "reason": "Video-only previous-frame mask/feature memory encoder; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_encoder.mask_downsampler.final_conv.weight",
+      "reason": "Video-only previous-frame mask/feature memory encoder; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_encoder.mask_downsampler.layers.0.conv.bias",
+      "reason": "Video-only previous-frame mask/feature memory encoder; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_encoder.mask_downsampler.layers.0.conv.weight",
+      "reason": "Video-only previous-frame mask/feature memory encoder; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_encoder.mask_downsampler.layers.0.layer_norm.bias",
+      "reason": "Video-only previous-frame mask/feature memory encoder; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_encoder.mask_downsampler.layers.0.layer_norm.weight",
+      "reason": "Video-only previous-frame mask/feature memory encoder; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_encoder.mask_downsampler.layers.1.conv.bias",
+      "reason": "Video-only previous-frame mask/feature memory encoder; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_encoder.mask_downsampler.layers.1.conv.weight",
+      "reason": "Video-only previous-frame mask/feature memory encoder; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_encoder.mask_downsampler.layers.1.layer_norm.bias",
+      "reason": "Video-only previous-frame mask/feature memory encoder; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_encoder.mask_downsampler.layers.1.layer_norm.weight",
+      "reason": "Video-only previous-frame mask/feature memory encoder; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_encoder.mask_downsampler.layers.2.conv.bias",
+      "reason": "Video-only previous-frame mask/feature memory encoder; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_encoder.mask_downsampler.layers.2.conv.weight",
+      "reason": "Video-only previous-frame mask/feature memory encoder; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_encoder.mask_downsampler.layers.2.layer_norm.bias",
+      "reason": "Video-only previous-frame mask/feature memory encoder; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_encoder.mask_downsampler.layers.2.layer_norm.weight",
+      "reason": "Video-only previous-frame mask/feature memory encoder; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_encoder.mask_downsampler.layers.3.conv.bias",
+      "reason": "Video-only previous-frame mask/feature memory encoder; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_encoder.mask_downsampler.layers.3.conv.weight",
+      "reason": "Video-only previous-frame mask/feature memory encoder; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_encoder.mask_downsampler.layers.3.layer_norm.bias",
+      "reason": "Video-only previous-frame mask/feature memory encoder; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_encoder.mask_downsampler.layers.3.layer_norm.weight",
+      "reason": "Video-only previous-frame mask/feature memory encoder; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_encoder.memory_fuser.layers.0.depthwise_conv.bias",
+      "reason": "Video-only previous-frame mask/feature memory encoder; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_encoder.memory_fuser.layers.0.depthwise_conv.weight",
+      "reason": "Video-only previous-frame mask/feature memory encoder; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_encoder.memory_fuser.layers.0.layer_norm.bias",
+      "reason": "Video-only previous-frame mask/feature memory encoder; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_encoder.memory_fuser.layers.0.layer_norm.weight",
+      "reason": "Video-only previous-frame mask/feature memory encoder; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_encoder.memory_fuser.layers.0.pointwise_conv1.bias",
+      "reason": "Video-only previous-frame mask/feature memory encoder; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_encoder.memory_fuser.layers.0.pointwise_conv1.weight",
+      "reason": "Video-only previous-frame mask/feature memory encoder; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_encoder.memory_fuser.layers.0.pointwise_conv2.bias",
+      "reason": "Video-only previous-frame mask/feature memory encoder; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_encoder.memory_fuser.layers.0.pointwise_conv2.weight",
+      "reason": "Video-only previous-frame mask/feature memory encoder; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_encoder.memory_fuser.layers.0.scale",
+      "reason": "Video-only previous-frame mask/feature memory encoder; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_encoder.memory_fuser.layers.1.depthwise_conv.bias",
+      "reason": "Video-only previous-frame mask/feature memory encoder; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_encoder.memory_fuser.layers.1.depthwise_conv.weight",
+      "reason": "Video-only previous-frame mask/feature memory encoder; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_encoder.memory_fuser.layers.1.layer_norm.bias",
+      "reason": "Video-only previous-frame mask/feature memory encoder; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_encoder.memory_fuser.layers.1.layer_norm.weight",
+      "reason": "Video-only previous-frame mask/feature memory encoder; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_encoder.memory_fuser.layers.1.pointwise_conv1.bias",
+      "reason": "Video-only previous-frame mask/feature memory encoder; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_encoder.memory_fuser.layers.1.pointwise_conv1.weight",
+      "reason": "Video-only previous-frame mask/feature memory encoder; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_encoder.memory_fuser.layers.1.pointwise_conv2.bias",
+      "reason": "Video-only previous-frame mask/feature memory encoder; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_encoder.memory_fuser.layers.1.pointwise_conv2.weight",
+      "reason": "Video-only previous-frame mask/feature memory encoder; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_encoder.memory_fuser.layers.1.scale",
+      "reason": "Video-only previous-frame mask/feature memory encoder; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_encoder.projection.bias",
+      "reason": "Video-only previous-frame mask/feature memory encoder; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_encoder.projection.weight",
+      "reason": "Video-only previous-frame mask/feature memory encoder; absent from native Sam2Model state."
+    },
+    {
+      "key": "memory_temporal_positional_encoding",
+      "reason": "Video temporal memory-position parameter; single-image path has no frame history."
+    },
+    {
+      "key": "no_memory_positional_encoding",
+      "reason": "Video memory-attention position parameter; native image model retains its separate no_memory_embedding."
+    },
+    {
+      "key": "no_object_pointer",
+      "reason": "Video tracking fallback object pointer; static mask decoder does not track objects across frames."
+    },
+    {
+      "key": "object_pointer_proj.layers.0.bias",
+      "reason": "Video tracking object-pointer projection; absent from native Sam2Model state."
+    },
+    {
+      "key": "object_pointer_proj.layers.0.weight",
+      "reason": "Video tracking object-pointer projection; absent from native Sam2Model state."
+    },
+    {
+      "key": "object_pointer_proj.proj_in.bias",
+      "reason": "Video tracking object-pointer projection; absent from native Sam2Model state."
+    },
+    {
+      "key": "object_pointer_proj.proj_in.weight",
+      "reason": "Video tracking object-pointer projection; absent from native Sam2Model state."
+    },
+    {
+      "key": "object_pointer_proj.proj_out.bias",
+      "reason": "Video tracking object-pointer projection; absent from native Sam2Model state."
+    },
+    {
+      "key": "object_pointer_proj.proj_out.weight",
+      "reason": "Video tracking object-pointer projection; absent from native Sam2Model state."
+    },
+    {
+      "key": "occlusion_spatial_embedding_parameter",
+      "reason": "Video spatial occlusion memory embedding; absent from native Sam2Model state."
+    },
+    {
+      "key": "temporal_positional_encoding_projection_layer.bias",
+      "reason": "Video object-pointer temporal position projection; no frame sequence in image path."
+    },
+    {
+      "key": "temporal_positional_encoding_projection_layer.weight",
+      "reason": "Video object-pointer temporal position projection; no frame sequence in image path."
+    }
+  ]
+}
