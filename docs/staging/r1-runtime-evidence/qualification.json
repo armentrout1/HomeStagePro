@@ -1,0 +1,60 @@
+{
+  "phase": "R1.4B1",
+  "status": "BLOCKED_REAL_INFERENCE_HOST_MEMORY",
+  "completed": false,
+  "admission": {
+    "totalHostBytes": 33454284800,
+    "availableHostBytes": 3997995008,
+    "availableGpuMiB": 14220,
+    "status": "BLOCKED_REAL_INFERENCE_HOST_MEMORY"
+  },
+  "runtimeImageIndex": "sha256:fa3d2775b699b548515cc11efb615102d46d642b463a2d513930b6e84fc99c29",
+  "runtimeImageManifest": "sha256:e2d00eb6f1d7aef2a371fb2ca4fd5991f180a2b49e841e922782ead82575457d",
+  "runtimeImageConfig": "sha256:55238c5e39fe77ea42469151df8f5afa4c3e0be93034a603eda2998fac017ee8",
+  "baseImage": "python@sha256:c0d63ec61d3a1321f8dc2d46ab6bd38465e005237c0a463712020e5d338eae25",
+  "fileSha256": {
+    "acquire.py": "cbfa4da5fc0148dce8d05ef22ad6597cb7607651759d39354138f21f28099357",
+    "admission.py": "5efee620f24234018af8ac764abfcc92aa2a6ef9ff4d35429fc0bb3052813840",
+    "isolation.py": "b5274780f48ac5244ed225f1199026a4cdbea9cb359a2b9b578c82d11122932b",
+    "protocol.py": "9c15c3ee71f4e5e9f5ca82c12e5d9acc943e3b8ef7c8c1399878d8d35b784705",
+    "wheels.py": "2d0e1206e7f9cbee2788724ff2737751ca0c0b51cfb282851e828fa2c5ba3b5f",
+    "requirements.lock": "fc2ddd17269a6e050b76aba2fe0a1d4a70ea99bf55db1433d6a2329f18ab5fb9",
+    "wheels.lock.json": "4a09d44bc1db86528aa7f7318cc91bb43effcdcbd772bb215e74b11afd324356",
+    "Dockerfile": "db42e8415bc7aeef49ae028e829961fd69ebdb6f196ce6da131ba2b4676c2333"
+  },
+  "cudaSyntheticProbe": {
+    "torch": "2.14.1+cu130",
+    "cuda": "13.0",
+    "device": "cuda:0",
+    "value": 1.0,
+    "peakAllocatedBytes": 512,
+    "peakReservedBytes": 2097152
+  },
+  "modelCompatibility": {
+    "grounding-dino-tiny-hf-v1": {
+      "status": "NOT_RUN_HOST_MEMORY_GATE",
+      "loadSeconds": null,
+      "inferenceSeconds": null,
+      "hostRssBytes": null,
+      "gpuPeakAllocatedBytes": null,
+      "gpuPeakReservedBytes": null,
+      "workerSha256": null
+    },
+    "sam21-small-hf-v1": {
+      "status": "NOT_RUN_HOST_MEMORY_GATE",
+      "loadSeconds": null,
+      "inferenceSeconds": null,
+      "hostRssBytes": null,
+      "gpuPeakAllocatedBytes": null,
+      "gpuPeakReservedBytes": null,
+      "workerSha256": null
+    }
+  },
+  "wholeModelSequence": {
+    "hostPeakBytes": null,
+    "gpuPeakBytes": null,
+    "reason": "No model sequence executed"
+  },
+  "productionChanged": false,
+  "customerImagesUsed": false
+}

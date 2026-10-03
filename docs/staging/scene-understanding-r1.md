@@ -6,6 +6,8 @@ R1.4A qualification is documented in [detection/segmentation candidates](./r1-mo
 
 ## 1. Scope and boundary
 
+R1.4B1 [runtime qualification](./r1-runtime-qualification.md) is a **blocked infrastructure checkpoint**, not a completed adapter phase. Exact model acquisition, a separate hash-locked Python image and synthetic isolation checks are available as operator-only development tooling. Host RAM failed the required 12 GiB admission gate, so real compatibility workers and the R1.3 registry generalization remain pending; no real model is enabled.
+
 R1 converts an authorized photograph into inspectable, immutable engine state. It identifies visible structure/objects, estimates relative geometry where supported, and records unknowns. It does not generate furnishings, remove objects, reconstruct hidden surfaces, select a production model, change customer behavior, or certify physical clearance. A schema-valid SceneMap is not a staging approval.
 
 Start offline under an explicit development command. No imports from `server/staging/production.ts`, `openaiClient`, billing, access or production storage clients. Do not modify `StagingRequest`, `StagingService`, `StagingProvider.render` or customer routes to add R1. Eventually a first-party provider can implement the existing provider contract and internally orchestrate scene -> policy -> plan -> style -> render -> QA. Internal CV adapters are separate interfaces; the application boundary remains intact.

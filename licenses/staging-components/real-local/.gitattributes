@@ -1,0 +1,4 @@
+# License snapshots are hashed evidence; preserve publisher bytes exactly.
+* -text whitespace=cr-at-eol
+# Upstream evidence is immutable, including its original trailing whitespace.
+*.txt whitespace=cr-at-eol,-blank-at-eol,-blank-at-eof

@@ -1,0 +1,2 @@
+# Runtime/lock digests bind exact bytes; do not rewrite line endings on checkout.
+* -text whitespace=cr-at-eol

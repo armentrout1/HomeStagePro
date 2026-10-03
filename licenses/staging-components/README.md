@@ -16,6 +16,8 @@ A later reviewed acquisition command must obtain a specifically approved artifac
 
 ## R1.4A research records are not runtime approvals
 
+R1.4B1 adds [operator-only real-local acquisition records](./real-local/records.json) and pinned code/model-card evidence for the two selected candidates. They remain evaluation-only, with production/redistribution false and training provenance unresolved. They do not enter or loosen `ComponentLicenseRegistry` or enable a SceneElement adapter. See the [blocked runtime qualification](../../docs/staging/r1-runtime-qualification.md) for actual-byte receipts and remaining execution gates.
+
 The [qualification packet](../../docs/staging/r1-model-candidates.md) records dated official metadata, checkpoint pins, actual small-file evidence hashes and proposed evaluation decisions. Publisher-reported weight hashes remain distinct from actual acquired-byte verification. The runtime registry is still synthetic-only; this document does not add an executable real record or a production approval.
 
 The future real-local record must separate adapter code, upstream model code, runtime/package lock, model repository revision, each weight/config/tokenizer file, conversion lineage and code/weight/training-data evidence. Add exact byte size, format, platform/runtime binding, dated snapshot hash, reviewer, evaluation/hosting/redistribution decisions and unresolved issues. Do not reuse one revision for all layers or infer weight rights from code rights. Model files require their own streamed, private cache: the scene artifact store's 64 MiB artifact ceiling must not be raised to hold weights. Generalization must retain explicit implementation allow-lists and fail-closed approvals.

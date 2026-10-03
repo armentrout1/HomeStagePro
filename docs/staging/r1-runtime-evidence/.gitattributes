@@ -1,0 +1,2 @@
+# Preserve the recorded byte manifests across platforms.
+* -text whitespace=cr-at-eol

@@ -1,0 +1,86 @@
+[
+  {
+    "recordId": "grounding-dino-tiny-hf-v1",
+    "revision": "a2bb814dd30d776dcf7e30523b00659f4f141c71",
+    "recordSha256": "b396fcf423bd7b9bbc762b1555439c00efaaab1af8d4454dd95a7927a47eeea7",
+    "files": [
+      {
+        "filename": "model.safetensors",
+        "bytes": 689359096,
+        "sha256": "1a2412ef99bd74bcd3c2a246fa1e48581f8889a1300c9051974741314fc042f3"
+      },
+      {
+        "filename": "README.md",
+        "bytes": 2580,
+        "sha256": "cf46f74c7b6850f1d5cbe406028324d8798148726016d46a69a365b4a2d3e89f"
+      },
+      {
+        "filename": "added_tokens.json",
+        "bytes": 82,
+        "sha256": "909e96cb32d92ce728a01bc99850cbba26196d74115c17ebeb019275412588f2"
+      },
+      {
+        "filename": "config.json",
+        "bytes": 1644,
+        "sha256": "eec82c5ab66e16df12a9a212e68ac011779927c2536cf9078658e35d85f0c67a"
+      },
+      {
+        "filename": "preprocessor_config.json",
+        "bytes": 457,
+        "sha256": "8454179ba95e2ad22947835aad7b45862a601fc0055ab88bf1ee70892d3aea60"
+      },
+      {
+        "filename": "special_tokens_map.json",
+        "bytes": 125,
+        "sha256": "b6d346be366a7d1d48332dbc9fdf3bf8960b5d879522b7799ddba59e76237ee3"
+      },
+      {
+        "filename": "tokenizer.json",
+        "bytes": 711396,
+        "sha256": "d241a60d5e8f04cc1b2b3e9ef7a4921b27bf526d9f6050ab90f9267a1f9e5c66"
+      },
+      {
+        "filename": "tokenizer_config.json",
+        "bytes": 1237,
+        "sha256": "d40ab645b68211910b9170d22433d43186a6ec8ee6fd10ba170524b25bf4fb56"
+      },
+      {
+        "filename": "vocab.txt",
+        "bytes": 231508,
+        "sha256": "07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3"
+      }
+    ]
+  },
+  {
+    "recordId": "sam21-small-hf-v1",
+    "revision": "ee5bba1d82bb8749febdf90f45e84b687142ba03",
+    "recordSha256": "f7124c202d5865f93a3b740aa02c21133ed746dc5d622fb06742cb93a0e7d657",
+    "files": [
+      {
+        "filename": "model.safetensors",
+        "bytes": 184305280,
+        "sha256": "0a4067b11ce1e23d5229203f11c718a823060d15a4b23fa2372a7d4b77cbbc60"
+      },
+      {
+        "filename": "README.md",
+        "bytes": 19974,
+        "sha256": "6ec2d54879e41ad876d8cded0d641e8bc6ab74d5e095a73afc3f8406372ee6e9"
+      },
+      {
+        "filename": "config.json",
+        "bytes": 5698,
+        "sha256": "97ff9f65b76d107acda4247885f0a5555d0048850ae3c5f97183df289aaecde9"
+      },
+      {
+        "filename": "preprocessor_config.json",
+        "bytes": 683,
+        "sha256": "6ebf229ee259368ce4a8d4f2fe893a72b053023710853e257253939e601f583d"
+      },
+      {
+        "filename": "processor_config.json",
+        "bytes": 95,
+        "sha256": "f8a68e865cfad115c1c2763f3d93eca7b1c622da06da2a9273eb437fb2389b6d"
+      }
+    ]
+  }
+]

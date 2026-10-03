@@ -1,0 +1,61 @@
+{
+  "image": "node@sha256:9a2ed90cd91b1f3412affe080b62e69b057ba8661d9844e143a6bbd76a23260f",
+  "isolation": {
+    "uid": 65534,
+    "rootDenied": true,
+    "cacheDenied": true,
+    "socketAbsent": true,
+    "dnsDenied": true,
+    "httpDenied": true,
+    "capEff": "0000000000000000",
+    "memoryMax": "8589934592",
+    "cpuMax": "200000 100000",
+    "tmpMount": "tmpfs /tmp tmpfs rw,nosuid,nodev,noexec,relatime,size=65536k 0 0",
+    "secretVariables": []
+  },
+  "pythonImage": "sha256:fa3d2775b699b548515cc11efb615102d46d642b463a2d513930b6e84fc99c29",
+  "pythonIsolation": {
+    "uid": 65534,
+    "rootDenied": true,
+    "cacheDenied": true,
+    "dnsDenied": true,
+    "httpDenied": true,
+    "socketAbsent": true,
+    "memoryMax": "8589934592",
+    "cpuMax": "200000 100000",
+    "secretVariables": []
+  },
+  "pythonTimeout": {
+    "status": "timed-out",
+    "exitCode": 137,
+    "stderrBytes": 0,
+    "containerRemoved": true
+  },
+  "pythonCancellation": {
+    "status": "cancelled",
+    "exitCode": 137,
+    "stderrBytes": 0,
+    "containerRemoved": true
+  },
+  "timeout": {
+    "status": "timed-out",
+    "exitCode": 137,
+    "stderrBytes": 0,
+    "containerRemoved": true
+  },
+  "cancellation": {
+    "status": "cancelled",
+    "exitCode": 137,
+    "stderrBytes": 0,
+    "containerRemoved": true
+  },
+  "outputLimit": {
+    "status": "output-limit",
+    "exitCode": 1,
+    "stderrBytes": 0,
+    "containerRemoved": true
+  },
+  "gpuProcessesBefore": "pid, process_name, used_gpu_memory [MiB]\n",
+  "gpuProcessesAfter": "pid, process_name, used_gpu_memory [MiB]\n",
+  "limitation": "Synthetic probe uses nvidia-smi only; no CUDA kernel/model or VRAM hard isolation proven."
+}

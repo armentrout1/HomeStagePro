@@ -4,6 +4,8 @@ Research date: **2026-10-02**. Baseline: `f6a1d451217654cece38f684f10b5e4b081238
 
 ## 1. Decision and scope
 
+R1.4B1 follow-up: [runtime qualification checkpoint](./r1-runtime-qualification.md) records actual acquired-byte hash matches, the pinned offline runtime build, synthetic isolation/CUDA checks and `BLOCKED_REAL_INFERENCE_HOST_MEMORY`. No real model compatibility or production approval is claimed; the R1.4A research below remains the original planning evidence.
+
 Evaluate **Grounding DINO Tiny → SAM 2.1 Hiera Small** first, on rights-cleared local fixtures. Keep **Microsoft Florence-2 Base** as a deferred comparator. This is an evaluation selection, not a claim that these models preserve architecture, segment room surfaces adequately, or are production-approved.
 
 | Candidate | Intended role | Qualification decision | Production decision |
